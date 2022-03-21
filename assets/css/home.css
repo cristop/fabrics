@@ -1,0 +1,61 @@
+section#principal-home {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  position: relative;
+}
+section#principal-home .container {
+}
+section#principal-home .title {
+  font-weight: 600;
+  padding-bottom: 20px;
+  text-align: left;
+}
+section#principal-home .title:before {
+  content: "";
+}
+section#principal-home .text {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  padding-bottom: 40px;
+}
+section#principal-home .action {
+  text-align: center;
+}
+section#principal-home .action .btn {
+}
+section#principal-home .container {
+  display: flex;
+  align-items: center;
+}
+section#principal-home .container > div {
+  width: 100%;
+}
+section#principal-home .image {
+  padding-bottom: 30px;
+}
+section#principal-home .image img {
+}
+@media screen and (max-width: 900px) {
+  section#principal-home {
+  }
+  section#principal-home .container {
+  }
+  section#principal-home .title {
+  }
+  section#principal-home .text {
+  }
+  section#principal-home .action {
+  }
+  section#principal-home .action .btn {
+  }
+  section#principal-home .container {
+    display: block;
+  }
+  section#principal-home .container > div {
+  }
+  section#principal-home .image {
+  }
+  section#principal-home .image img {
+  }
+}
