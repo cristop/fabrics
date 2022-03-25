@@ -11,6 +11,9 @@ section#principal-home .title {
   text-align: left;
   font-size: 72px;
 }
+section#principal-home .title span {
+  color: var(--c-secondary);
+}
 section#principal-home .title:before {
   content: "";
 }
@@ -71,18 +74,18 @@ section#compra-producto {
   position: relative;
 }
 section#compra-producto .container {
+  max-width: 1300px;
 }
 section#compra-producto .title {
-  font-weight: 600;
   padding-bottom: 20px;
-  text-align: center;
+  text-align: left;
+  font-size: 48px;
 }
 section#compra-producto .title:before {
   content: "";
 }
 section#compra-producto .container {
   display: flex;
-  align-items: center;
 }
 section#compra-producto .container > div {
   width: 100%;
@@ -107,9 +110,12 @@ section#compra-producto .items-compra-producto .icono_flex {
 }
 section#compra-producto .items-compra-producto .icono_flex img {
   height: 60px;
-  width: 67px;
+  width: 66px;
   object-fit: contain;
   background: rgba(66, 62, 175, 0.3);
+  /* -webkit-box-shadow: 0 0 10px 5px rgb(0 0 0 / 40%); */
+  /* box-shadow: 0 0 10px 5px rgb(0 0 0 / 40%); */
+  border-radius: 100%;
 }
 section#compra-producto .items-compra-producto .subtitulo_flex {
   font-size: 0.7rem;
@@ -149,5 +155,156 @@ section#compra-producto .items-compra-producto .texto_flex {
   section#compra-producto .items-compra-producto .subtitulo_flex {
   }
   section#compra-producto .items-compra-producto .texto_flex {
+  }
+}
+
+section#bg-jardin .bg-image img {
+  display: block;
+  width: 100%;
+  height: 700px;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  object-fit: cover;
+}
+section#bg-jardin .bg-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  z-index: 0;
+}
+section#bg-jardin {
+  padding-top: 50px;
+  padding-bottom: 500px;
+  position: relative;
+}
+section#bg-jardin .container {
+  /* width: 60%; */
+  margin-left: 10%;
+}
+section#bg-jardin .title {
+  font-weight: 400;
+  padding-bottom: 20px;
+  text-align: left;
+  font-size: 34px;
+  margin-bottom: 0;
+  line-height: 40px;
+}
+section#bg-jardin .title:before {
+  content: "";
+}
+section#bg-jardin .text {
+  max-width: 186px;
+  margin: 0 auto;
+  text-align: left;
+  padding-bottom: 40px;
+  font-weight: 400;
+  margin: 0;
+}
+section#bg-jardin .action {
+  text-align: left;
+}
+section#bg-jardin .action .btn {
+  text-decoration: underline;
+  background-color: transparent;
+  color: #262626;
+  padding: 0;
+}
+section#bg-jardin .flex.principal-col {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+section#bg-jardin .flex.principal-col > div {
+}
+section#bg-jardin .flex.principal-col > div:nth-child(1) {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 14px;
+  margin-right: 80%;
+  padding-left: 34px;
+}
+section#bg-jardin .flex.principal-col > div:nth-child(2) {
+}
+@media screen and (max-width: 900px) {
+  section#bg-jardin .bg-image {
+  }
+  section#bg-jardin .bg-image img {
+  }
+  section#bg-jardin {
+  }
+  section#bg-jardin .container {
+  }
+  section#bg-jardin .title {
+  }
+  section#bg-jardin .text {
+  }
+  section#bg-jardin .action {
+  }
+  section#bg-jardin .action .btn {
+  }
+  section#bg-jardin .flex.principal-col {
+  }
+  section#bg-jardin .flex.principal-col > div {
+  }
+  section#bg-jardin .flex.principal-col > div:nth-child(1) {
+  }
+  section#bg-jardin .flex.principal-col > div:nth-child(2) {
+  }
+}
+
+section#video-instrucciones {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  position: relative;
+}
+section#video-instrucciones .container {
+}
+section#video-instrucciones .title {
+  font-weight: 400;
+  padding-bottom: 20px;
+  text-align: center;
+  font-size: 48px;
+}
+section#video-instrucciones .title:before {
+  content: "";
+}
+section#video-instrucciones .text {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  padding-bottom: 40px;
+  font-weight: 300;
+}
+section#video-instrucciones .image {
+  text-align: center;
+  padding-bottom: 30px;
+}
+section#video-instrucciones .image img {
+  max-width: 600px;
+}
+section#video-instrucciones .image {
+  padding-bottom: 30px;
+}
+section#video-instrucciones .image img {
+  max-width: 600px;
+}
+@media screen and (max-width: 900px) {
+  section#video-instrucciones {
+  }
+  section#video-instrucciones .container {
+  }
+  section#video-instrucciones .title {
+  }
+  section#video-instrucciones .text {
+  }
+  section#video-instrucciones .image {
+  }
+  section#video-instrucciones .image img {
+  }
+  section#video-instrucciones .image {
+  }
+  section#video-instrucciones .image img {
   }
 }
