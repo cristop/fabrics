@@ -1,39 +1,87 @@
-footer#banner-footer {
+footer {
   padding-top: 50px;
   padding-bottom: 50px;
   position: relative;
   background-color: #423eaf;
+  color: #fff;
 }
-footer#banner-footer .container {
+footer .container {
 }
-footer#banner-footer .items-banner-footer {
-  text-align: center;
+footer .flex {
+  text-align: left;
 }
-footer#banner-footer .items-banner-footer .item {
+footer .flex .item {
 }
-footer#banner-footer .items-banner-footer .bg {
+footer .flex .item .icono {
+}
+footer .flex .item .icono ul {
+  list-style: none;
+  display: flex;
+  padding: 0;
+}
+footer .flex .item .icono li {
+  padding-right: 31px;
+}
+footer .flex .item .texto_flex li {
+}
+footer .flex .bg {
   background-color: ;
 }
-footer#banner-footer .items-banner-footer .titulo_flex {
-  padding-bottom: 10px;
+footer .flex .action {
+  text-align: left;
 }
-footer#banner-footer .items-banner-footer .texto_flex {
-  font-size: 0.7rem;
+footer .flex .action a {
+  background-color: #fff;
+
+  color: var(--c-primary);
+
+  text-decoration: none;
+}
+footer .flex .titulo_flex {
   padding-bottom: 10px;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 42px;
+  letter-spacing: 0.5px;
+}
+footer .flex .texto_flex {
+  /* font-size: 17px; */
+  padding-bottom: 10px;
+  mix-blend-mode: normal;
+  opacity: 0.5;
+}
+footer .flex .texto_flex ul {
+  list-style: none;
+
+  padding-left: 0;
+}
+footer .flex .item .logo {
+  display: flex;
+  filter: brightness(0);
+}
+footer .flex .item .logo > :first-child {
+}
+footer .flex .item .logo > :first-child .image {
+}
+footer .flex .item .logo > :first-child .image img {
+  object-fit: none;
+}
+footer .flex .item .logo > :last-child .image img {
+  filter: brightness(0);
 }
 @media screen and (max-width: 900px) {
-  footer#banner-footer {
+  footer {
   }
-  footer#banner-footer .container {
+  footer .container {
   }
-  footer#banner-footer .items-banner-footer {
+  footer .flex {
   }
-  footer#banner-footer .items-banner-footer .item {
+  footer .flex .item {
   }
-  footer#banner-footer .items-banner-footer .bg {
+  footer .flex .bg {
   }
-  footer#banner-footer .items-banner-footer .titulo_flex {
+  footer .flex .titulo_flex {
   }
-  footer#banner-footer .items-banner-footer .texto_flex {
+  footer .flex .texto_flex {
   }
 }
