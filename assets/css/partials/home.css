@@ -180,6 +180,7 @@ section#tejido .text {
   /* margin: 0 auto; */
   text-align: left;
   padding-bottom: 25px;
+  font-weight: 300;
 }
 section#tejido .action {
   text-align: left;
@@ -233,7 +234,7 @@ section#lona {
 section#lona .container {
 }
 section#lona .title {
-  font-weight: 600;
+  /* font-weight: 600; */
   padding-bottom: 20px;
   text-align: left;
 }
@@ -245,6 +246,7 @@ section#lona .text {
   margin: 0 auto;
   text-align: left;
   padding-bottom: 40px;
+  font-weight: 300;
 }
 section#lona .action {
   text-align: left;
