@@ -57,7 +57,7 @@ header nav.menu-right {
 header .logo {
   float: left;
   display: flex;
-  align-items: center;
+  align-items: end;
   justify-content: center;
 }
 header nav > ul {
@@ -105,11 +105,12 @@ header nav a {
   padding-top: 20px;
   padding-bottom: 20px;
   line-height: 50px;
-  color: #666666;
+  color: var(--c-primary);
   padding-left: 20px;
   padding-right: 20px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 400;
+  text-decoration: none;
 }
 header nav li:first-child a {
   padding-left: 0;
