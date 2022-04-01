@@ -261,14 +261,33 @@ section#lona .action img {
 }
 section#lona .container {
   display: flex;
-  align-items: center;
+  /* align-items: center; */
 }
 section#lona .container > div {
   margin-left: 50px;
   width: 100%;
+  position: relative;
+  z-index: 0;
+}
+section#lona .container > div:first-child > .text-center {
+  z-index: 1; /* padding-top: -456px; */
+  top: -155px;
+  position: relative;
+  box-shadow: 0 0 10px 5px rgb(0 0 0 / 40%);
+  -webkit-border-radius: 50%;
+  text-align: center;
+  height: 220px;
+  width: 220px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+section#lona .container > div:first-child > .text-center img {
 }
 section#lona .image {
-  padding-bottom: 30px;
+  position: relative;
+  z-index: 2;
 }
 section#lona .image img {
 }
@@ -448,5 +467,60 @@ section#video-instrucciones .image img {
   section#video-instrucciones .image {
   }
   section#video-instrucciones .image img {
+  }
+}
+
+section#solicitar {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  position: absolute;
+  z-index: auto;
+  top: auto;
+  right: 0;
+  background: #ffffff;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.13);
+  border-radius: 24px 0px 0px 24px;
+  /* max-width: 273px; */
+}
+section#solicitar .container-fluid {
+  width: auto;
+}
+section#solicitar .icon {
+  text-align: center;
+}
+section#solicitar .icon img {
+  height: 30px;
+  width: auto;
+  object-fit: contain;
+}
+section#solicitar .text {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  padding-bottom: 10px;
+  font-size: 14px;
+  line-height: 21px;
+}
+section#solicitar .action {
+  text-align: center;
+}
+section#solicitar .action .btn {
+  background-color: var(--c-secondary);
+  text-decoration: none;
+}
+@media screen and (max-width: 900px) {
+  section#solicitar {
+  }
+  section#solicitar .container-fluid {
+  }
+  section#solicitar .icon {
+  }
+  section#solicitar .icon img {
+  }
+  section#solicitar .text {
+  }
+  section#solicitar .action {
+  }
+  section#solicitar .action .btn {
   }
 }
