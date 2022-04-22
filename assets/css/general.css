@@ -380,6 +380,175 @@ section#planner .items-planner .subtitulo_flex {
   font-size: 0.7rem;
   padding-bottom: 10px;
 }
+
+section#experience {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  position: relative;
+}
+section#experience .container {
+}
+section#experience .title {
+  font-weight: 600;
+  padding-bottom: 20px;
+  text-align: center;
+}
+section#experience .title:before {
+  content: "";
+}
+section#experience .items-experience {
+  text-align: center;
+}
+section#experience .items-experience .item {
+}
+section#experience .items-experience .bg {
+  background-color: ;
+}
+section#experience .items-experience .icono_flex {
+  padding-bottom: 20px;
+  text-align: center;
+}
+section#experience .items-experience .icono_flex img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+section#experience .items-experience .texto_flex {
+  font-size: 0.7rem;
+  padding-bottom: 10px;
+}
+
+section#reviwes {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  position: relative;
+}
+section#reviwes .container {
+}
+section#reviwes .title {
+  font-weight: 600;
+  padding-bottom: 20px;
+  text-align: center;
+}
+section#reviwes .title:before {
+  content: "";
+}
+section#reviwes .items-reviwes {
+  text-align: center;
+}
+section#reviwes .items-reviwes .item {
+}
+section#reviwes .items-reviwes .bg {
+  background-color: ;
+}
+section#reviwes .items-reviwes .icono {
+  padding-bottom: 20px;
+  text-align: center;
+  display: grid;
+}
+section#reviwes .items-reviwes .icono img {
+  height: 60px;
+  /* width: auto; */
+  object-fit: contain;
+}
+
+section#Frecuently-questions {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  position: relative;
+}
+section#Frecuently-questions .container {
+}
+section#Frecuently-questions .title {
+  font-weight: 600;
+  padding-bottom: 20px;
+  text-align: center;
+}
+section#Frecuently-questions .title:before {
+  content: "";
+}
+section#Frecuently-questions .items-Frecuently-questions {
+  text-align: center;
+}
+section#Frecuently-questions .items-Frecuently-questions .item {
+}
+section#Frecuently-questions .items-Frecuently-questions .bg {
+  background-color: ;
+}
+section#Frecuently-questions .items-Frecuently-questions .icono_flex {
+  padding-bottom: 20px;
+  text-align: center;
+}
+section#Frecuently-questions .items-Frecuently-questions .icono_flex img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+section#Frecuently-questions .items-Frecuently-questions .texto_flex {
+  font-size: 0.7rem;
+  padding-bottom: 10px;
+}
+@media screen and (max-width: 900px) {
+  section#Frecuently-questions {
+  }
+  section#Frecuently-questions .container {
+  }
+  section#Frecuently-questions .title {
+  }
+  section#Frecuently-questions .items-Frecuently-questions {
+  }
+  section#Frecuently-questions .items-Frecuently-questions .item {
+  }
+  section#Frecuently-questions .items-Frecuently-questions .bg {
+  }
+  section#Frecuently-questions .items-Frecuently-questions .icono_flex {
+  }
+  section#Frecuently-questions .items-Frecuently-questions .icono_flex img {
+  }
+  section#Frecuently-questions .items-Frecuently-questions .texto_flex {
+  }
+}
+
+@media screen and (max-width: 900px) {
+  section#reviwes {
+  }
+  section#reviwes .container {
+  }
+  section#reviwes .title {
+  }
+  section#reviwes .items-reviwes {
+  }
+  section#reviwes .items-reviwes .item {
+  }
+  section#reviwes .items-reviwes .bg {
+  }
+  section#reviwes .items-reviwes .icono_flex {
+  }
+  section#reviwes .items-reviwes .icono_flex img {
+  }
+}
+
+@media screen and (max-width: 900px) {
+  section#experience {
+  }
+  section#experience .container {
+  }
+  section#experience .title {
+  }
+  section#experience .items-experience {
+  }
+  section#experience .items-experience .item {
+  }
+  section#experience .items-experience .bg {
+  }
+  section#experience .items-experience .icono_flex {
+  }
+  section#experience .items-experience .icono_flex img {
+  }
+  section#experience .items-experience .texto_flex {
+  }
+}
+
 @media screen and (max-width: 900px) {
   section#planner {
   }
@@ -404,7 +573,6 @@ section#planner .items-planner .subtitulo_flex {
   section#planner .items-planner .subtitulo_flex {
   }
 }
-
 
 @media screen and (max-width: 900px) {
   section#custom {
