@@ -305,3 +305,263 @@ section#team .image img {}
 
 	section#team .image img {}
 }
+
+section#testimonials {
+	padding-top: 50px;
+	padding-bottom: 50px;
+	position: relative;
+}
+
+section#testimonials .container {}
+
+section#testimonials .icon {
+	text-align: center
+}
+
+section#testimonials .icon img {
+	height: 60px;
+	width: auto;
+	object-fit: contain;
+}
+
+section#testimonials .sup_titulo {
+	font-size: 0.7rem;
+	padding-bottom: 10px;
+	text-align: center;
+}
+
+section#testimonials .text {
+	max-width: 600px;
+	margin: 0 auto;
+	text-align: center;
+	padding-bottom: 40px;
+}
+
+section#testimonials .container {
+	display: flex;
+	align-items: center;
+}
+
+section#testimonials .container>div {
+	width: 100%;
+}
+
+section#testimonials .image {
+	padding-bottom: 30px;
+}
+
+section#testimonials .image img {}
+
+@media screen and (max-width:900px) {
+	section#testimonials {}
+
+	section#testimonials .container {}
+
+	section#testimonials .icon {}
+
+	section#testimonials .icon img {}
+
+	section#testimonials .sup_titulo {}
+
+	section#testimonials .text {}
+
+	section#testimonials .container {
+		display: block;
+	}
+
+	section#testimonials .container>div {}
+
+	section#testimonials .image {}
+
+	section#testimonials .image img {}
+}
+
+section#logos {
+	padding-top: 50px;
+	padding-bottom: 50px;
+	position: relative;
+}
+
+section#logos .container {}
+
+section#logos .items-logos {
+	text-align: center;
+}
+
+section#logos .items-logos .item {}
+
+section#logos .items-logos .bg {
+	background-color:
+}
+
+section#logos .items-logos .imagen_flex {
+	height: 0;
+	overflow: hidden;
+	position: relative;
+	padding-bottom: 60%;
+}
+
+section#logos .items-logos .imagen_flex a {
+	display: block;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+
+section#logos .items-logos .imagen_flex a:hover {
+	filter: brightness(0.7)
+}
+
+section#logos .items-logos .imagen_flex img {
+	height: 100%;
+	object-fit: cover;
+	width: 100%;
+}
+
+@media screen and (max-width:900px) {
+	section#logos {}
+
+	section#logos .container {}
+
+	section#logos .items-logos {}
+
+	section#logos .items-logos .item {}
+
+	section#logos .items-logos .bg {}
+
+	section#logos .items-logos .imagen_flex {}
+
+	section#logos .items-logos .imagen_flex img {}
+}
+
+section#proposal-header .bg-image img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+	object-fit: cover;
+}
+
+section#proposal-header .bg-image {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	z-index: 0;
+}
+
+section#proposal-header {
+	padding-top: 50px;
+	padding-bottom: 50px;
+	position: relative;
+}
+
+section#proposal-header .container {}
+
+section#proposal-header .title {
+	font-weight: 600;
+	padding-bottom: 20px;
+	text-align: center;
+}
+
+section#proposal-header .title:before {
+	content: "";
+}
+
+section#proposal-header .flex.principal-col {
+	position: relative;
+	z-index: 1;
+}
+
+section#proposal-header .flex.principal-col>div {}
+
+section#proposal-header .flex.principal-col>div:nth-child(1) {}
+
+section#proposal-header .flex.principal-col>div:nth-child(2) {}
+
+@media screen and (max-width:900px) {
+	section#proposal-header .bg-image {}
+
+	section#proposal-header .bg-image img {}
+
+	section#proposal-header {}
+
+	section#proposal-header .container {}
+
+	section#proposal-header .title {}
+
+	section#proposal-header .flex.principal-col {}
+
+	section#proposal-header .flex.principal-col>div {}
+
+	section#proposal-header .flex.principal-col>div:nth-child(1) {}
+
+	section#proposal-header .flex.principal-col>div:nth-child(2) {}
+}
+
+section#proposal-scope {
+	padding-top: 50px;
+	padding-bottom: 50px;
+	position: relative;
+}
+
+section#proposal-scope .container {}
+
+section#proposal-scope .title {
+	font-weight: 600;
+	padding-bottom: 20px;
+	text-align: center;
+}
+
+section#proposal-scope .title:before {
+	content: "";
+}
+
+section#proposal-scope .items-proposal-scope {
+	text-align: center;
+}
+
+section#proposal-scope .items-proposal-scope .item {}
+
+section#proposal-scope .items-proposal-scope .bg {
+	background-color:
+}
+
+section#proposal-scope .items-proposal-scope .titulo_flex {
+	padding-bottom: 10px
+}
+
+section#proposal-scope .items-proposal-scope .subtitulo_flex {
+	font-size: 0.7rem;
+	padding-bottom: 10px
+}
+
+section#proposal-scope .items-proposal-scope .texto_flex {
+	font-size: 0.7rem;
+	padding-bottom: 10px
+}
+
+@media screen and (max-width:900px) {
+	section#proposal-scope {}
+
+	section#proposal-scope .container {}
+
+	section#proposal-scope .title {}
+
+	section#proposal-scope .items-proposal-scope {}
+
+	section#proposal-scope .items-proposal-scope .item {}
+
+	section#proposal-scope .items-proposal-scope .bg {}
+
+	section#proposal-scope .items-proposal-scope .titulo_flex {}
+
+	section#proposal-scope .items-proposal-scope .subtitulo_flex {}
+
+	section#proposal-scope .items-proposal-scope .texto_flex {}
+}
