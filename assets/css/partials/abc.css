@@ -1,8 +1,307 @@
-.home-spot{
-	background-position: left bottom;
-	background-repeat: no-repeat;
-	background-size: cover;
+section#header-proposal .bg-image img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+	object-fit: cover;
 }
-.home-spot .container{
-	height: 100vh;
+
+section#header-proposal .bg-image {
+	position: absolute;
+	width: 50%;
+	height: 100%;
+	left: 50%;
+	top: 0;
+	z-index: 0;
+}
+
+section#header-proposal {
+	padding-top: 50px;
+	padding-bottom: 50px;
+	position: relative;
+}
+
+section#header-proposal .container {}
+
+section#header-proposal .icon {
+	text-align: center
+}
+
+section#header-proposal .icon img {
+	height: 60px;
+	width: auto;
+	object-fit: contain;
+}
+
+section#header-proposal .title {
+	font-weight: 600;
+	padding-bottom: 20px;
+	text-align: center;
+}
+
+section#header-proposal .title:before {
+	content: "";
+}
+
+section#header-proposal .text {
+	max-width: 600px;
+	margin: 0 auto;
+	text-align: center;
+	padding-bottom: 40px;
+}
+
+section#header-proposal .flex.principal-col {
+	position: relative;
+	width: 50%;
+	z-index: 1;
+}
+
+section#header-proposal .flex.principal-col>div {}
+
+section#header-proposal .flex.principal-col>div:nth-child(1) {}
+
+section#header-proposal .flex.principal-col>div:nth-child(2) {}
+
+@media screen and (max-width:900px) {
+	section#header-proposal .bg-image {
+		left: 0;
+		width: 100%;
+	}
+
+	section#header-proposal .bg-image img {}
+
+	section#header-proposal {}
+
+	section#header-proposal .container {}
+
+	section#header-proposal .icon {}
+
+	section#header-proposal .icon img {}
+
+	section#header-proposal .title {}
+
+	section#header-proposal .text {}
+
+	section#header-proposal .flex.principal-col {
+		width: 100%;
+	}
+
+	section#header-proposal .flex.principal-col>div {}
+
+	section#header-proposal .flex.principal-col>div:nth-child(1) {}
+
+	section#header-proposal .flex.principal-col>div:nth-child(2) {}
+}
+
+section#about-founder {
+	padding-top: 50px;
+	padding-bottom: 50px;
+	position: relative;
+}
+
+section#about-founder .container {}
+
+section#about-founder .icon {
+	text-align: center
+}
+
+section#about-founder .icon img {
+	height: 60px;
+	width: auto;
+	object-fit: contain;
+}
+
+section#about-founder .sup_titulo {
+	font-size: 0.7rem;
+	padding-bottom: 10px;
+	text-align: center;
+}
+
+section#about-founder .text {
+	max-width: 600px;
+	margin: 0 auto;
+	text-align: center;
+	padding-bottom: 40px;
+}
+
+section#about-founder .container {
+	display: flex;
+	align-items: center;
+}
+
+section#about-founder .container>div {
+	width: 100%;
+}
+
+section#about-founder .image {
+	padding-bottom: 30px;
+}
+
+section#about-founder .image img {}
+
+@media screen and (max-width:900px) {
+	section#about-founder {}
+
+	section#about-founder .container {}
+
+	section#about-founder .icon {}
+
+	section#about-founder .icon img {}
+
+	section#about-founder .sup_titulo {}
+
+	section#about-founder .text {}
+
+	section#about-founder .container {
+		display: block;
+	}
+
+	section#about-founder .container>div {}
+
+	section#about-founder .image {}
+
+	section#about-founder .image img {}
+}
+
+
+section#about-us {
+	padding-top: 50px;
+	padding-bottom: 50px;
+	position: relative;
+}
+
+section#about-us .container {}
+
+section#about-us .icon {
+	text-align: center
+}
+
+section#about-us .icon img {
+	height: 60px;
+	width: auto;
+	object-fit: contain;
+}
+
+section#about-us .sup_titulo {
+	font-size: 0.7rem;
+	padding-bottom: 10px;
+	text-align: center;
+}
+
+section#about-us .text {
+	max-width: 600px;
+	margin: 0 auto;
+	text-align: center;
+	padding-bottom: 40px;
+}
+
+section#about-us .container {
+	display: flex;
+	align-items: center;
+}
+
+section#about-us .container>div {
+	width: 100%;
+}
+
+section#about-us .image {
+	padding-bottom: 30px;
+}
+
+section#about-us .image img {}
+
+@media screen and (max-width:900px) {
+	section#about-us {}
+
+	section#about-us .container {}
+
+	section#about-us .icon {}
+
+	section#about-us .icon img {}
+
+	section#about-us .sup_titulo {}
+
+	section#about-us .text {}
+
+	section#about-us .container {
+		display: block;
+	}
+
+	section#about-us .container>div {}
+
+	section#about-us .image {}
+
+	section#about-us .image img {}
+}
+
+section#team {
+	padding-top: 50px;
+	padding-bottom: 50px;
+	position: relative;
+}
+
+section#team .container {}
+
+section#team .icon {
+	text-align: center
+}
+
+section#team .icon img {
+	height: 60px;
+	width: auto;
+	object-fit: contain;
+}
+
+section#team .sup_titulo {
+	font-size: 0.7rem;
+	padding-bottom: 10px;
+	text-align: center;
+}
+
+section#team .text {
+	max-width: 600px;
+	margin: 0 auto;
+	text-align: center;
+	padding-bottom: 40px;
+}
+
+section#team .container {
+	display: flex;
+	align-items: center;
+}
+
+section#team .container>div {
+	width: 100%;
+}
+
+section#team .image {
+	padding-bottom: 30px;
+}
+
+section#team .image img {}
+
+@media screen and (max-width:900px) {
+	section#team {}
+
+	section#team .container {}
+
+	section#team .icon {}
+
+	section#team .icon img {}
+
+	section#team .sup_titulo {}
+
+	section#team .text {}
+
+	section#team .container {
+		display: block;
+	}
+
+	section#team .container>div {}
+
+	section#team .image {}
+
+	section#team .image img {}
 }
