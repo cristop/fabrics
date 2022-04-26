@@ -1,8 +1,55 @@
-footer{
-	padding-bottom: 20px;
-	padding-top: 50px;
-	font-size: 0.7rem;
-	line-height: 1.7;
-	border-top: 1px solid #eee;
-	background-color: #F7F7F7;
+#banner-footer {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  position: relative;
+  background-color: #280438;
+}
+#banner-footer .container-fluid {
+}
+#banner-footer .subtitle {
+  padding-bottom: 20px;
+  text-align: center;
+}
+#banner-footer .items-banner-footer {
+  text-align: center;
+}
+#banner-footer .items-banner-footer .item {
+}
+#banner-footer .items-banner-footer .bg {
+  background-color: ;
+}
+#banner-footer .items-banner-footer .icono_flex {
+  padding-bottom: 20px;
+  text-align: center;
+}
+#banner-footer .items-banner-footer .icono_flex img {
+  height: 126px;
+  width: auto;
+  object-fit: contain;
+}
+#banner-footer .items-banner-footer .texto_flex {
+  font-size: 0.7rem;
+  padding-bottom: 10px;
+  color: #fff;
+  text-decoration: underline;
+}
+@media screen and (max-width: 900px) {
+  #banner-footer {
+  }
+  #banner-footer .container-fluid {
+  }
+  #banner-footer .subtitle {
+  }
+  #banner-footer .items-banner-footer {
+  }
+  #banner-footer .items-banner-footer .item {
+  }
+  #banner-footer .items-banner-footer .bg {
+  }
+  #banner-footer .items-banner-footer .icono_flex {
+  }
+  #banner-footer .items-banner-footer .icono_flex img {
+  }
+  #banner-footer .items-banner-footer .texto_flex {
+  }
 }
