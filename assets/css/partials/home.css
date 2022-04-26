@@ -1,0 +1,317 @@
+section#home .bg-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    object-fit: cover;
+}
+
+section#home .bg-image {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    z-index: 0;
+}
+
+section#home {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    position: relative;
+}
+
+section#home .container {}
+
+section#home .title {
+    font-weight: 600;
+    padding-bottom: 20px;
+    text-align: center;
+}
+
+section#home .title:before {
+    content: "";
+}
+
+section#home .image {
+    text-align: center;
+    padding-bottom: 30px;
+}
+
+section#home .image img {
+    max-width: 600px;
+}
+
+section#home .flex.principal-col {
+    position: relative;
+    z-index: 1;
+}
+
+section#home .image {
+    padding-bottom: 30px;
+}
+
+section#home .image img {
+    max-width: 600px;
+}
+
+section#home .flex.principal-col>div {}
+
+section#home .flex.principal-col>div:nth-child(1) {}
+
+section#home .flex.principal-col>div:nth-child(2) {}
+
+@media screen and (max-width:900px) {
+    section#home .bg-image {}
+
+    section#home .bg-image img {}
+
+    section#home {}
+
+    section#home .container {}
+
+    section#home .title {}
+
+    section#home .image {}
+
+    section#home .image img {}
+
+    section#home .flex.principal-col {}
+
+    section#home .image {}
+
+    section#home .image img {}
+
+    section#home .flex.principal-col>div {}
+
+    section#home .flex.principal-col>div:nth-child(1) {}
+
+    section#home .flex.principal-col>div:nth-child(2) {}
+}
+
+section#team-thumbs {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    position: relative;
+}
+
+section#team-thumbs .container {}
+
+section#team-thumbs .items-team-thumbs {
+    text-align: center;
+}
+
+section#team-thumbs .items-team-thumbs .item {}
+
+section#team-thumbs .items-team-thumbs .bg {
+    background-color:
+}
+
+section#team-thumbs .items-team-thumbs .imagen_flex {
+    height: 0;
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 60%;
+}
+
+section#team-thumbs .items-team-thumbs .imagen_flex img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+section#team-thumbs .items-team-thumbs .titulo_flex {
+    padding-bottom: 10px
+}
+
+section#team-thumbs .items-team-thumbs .texto_flex {
+    font-size: 0.7rem;
+    padding-bottom: 10px
+}
+
+@media screen and (max-width:900px) {
+    section#team-thumbs {}
+
+    section#team-thumbs .container {}
+
+    section#team-thumbs .items-team-thumbs {}
+
+    section#team-thumbs .items-team-thumbs .item {}
+
+    section#team-thumbs .items-team-thumbs .bg {}
+
+    section#team-thumbs .items-team-thumbs .imagen_flex {}
+
+    section#team-thumbs .items-team-thumbs .imagen_flex img {}
+
+    section#team-thumbs .items-team-thumbs .titulo_flex {}
+
+    section#team-thumbs .items-team-thumbs .texto_flex {}
+}
+
+section#title-header {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    position: relative;
+}
+
+section#title-header .container {}
+
+section#title-header .title {
+    font-weight: 600;
+    padding-bottom: 20px;
+    text-align: center;
+}
+
+section#title-header .title:before {
+    content: "";
+}
+
+@media screen and (max-width:900px) {
+    section#title-header {}
+
+    section#title-header .container {}
+
+    section#title-header .title {}
+}
+
+section#about .bg-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    object-fit: cover;
+}
+
+section#about .bg-image {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    left: 50%;
+    top: 0;
+    z-index: 0;
+}
+
+section#about {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    position: relative;
+}
+
+section#about .container {}
+
+section#about .text {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    padding-bottom: 40px;
+}
+
+section#about .flex.principal-col {
+    position: relative;
+    width: 50%;
+    z-index: 1;
+}
+
+section#about .flex.principal-col>div {}
+
+section#about .flex.principal-col>div:nth-child(1) {}
+
+section#about .flex.principal-col>div:nth-child(2) {}
+
+@media screen and (max-width:900px) {
+    section#about .bg-image {
+        left: 0;
+        width: 100%;
+    }
+
+    section#about .bg-image img {}
+
+    section#about {}
+
+    section#about .container {}
+
+    section#about .text {}
+
+    section#about .flex.principal-col {
+        width: 100%;
+    }
+
+    section#about .flex.principal-col>div {}
+
+    section#about .flex.principal-col>div:nth-child(1) {}
+
+    section#about .flex.principal-col>div:nth-child(2) {}
+}
+
+section#Testimonials {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    position: relative;
+}
+
+section#Testimonials .container {}
+
+section#Testimonials .sup_titulo {
+    font-size: 0.7rem;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+section#Testimonials .items-Testimonials {
+    text-align: center;
+}
+
+section#Testimonials .items-Testimonials .item {}
+
+section#Testimonials .items-Testimonials .bg {
+    background-color:
+}
+
+section#Testimonials .items-Testimonials .imagen_flex {
+    height: 0;
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 60%;
+}
+
+section#Testimonials .items-Testimonials .imagen_flex img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+section#Testimonials .items-Testimonials .texto_flex {
+    font-size: 0.7rem;
+    padding-bottom: 10px
+}
+
+@media screen and (max-width:900px) {
+    section#Testimonials {}
+
+    section#Testimonials .container {}
+
+    section#Testimonials .sup_titulo {}
+
+    section#Testimonials .items-Testimonials {}
+
+    section#Testimonials .items-Testimonials .item {}
+
+    section#Testimonials .items-Testimonials .bg {}
+
+    section#Testimonials .items-Testimonials .imagen_flex {}
+
+    section#Testimonials .items-Testimonials .imagen_flex img {}
+
+    section#Testimonials .items-Testimonials .texto_flex {}
+}
