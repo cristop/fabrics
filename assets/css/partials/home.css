@@ -887,6 +887,10 @@ section#Testimonials .testimonial-slider .bg-testimonial i {
   section#Testimonials .container {
   }
 
+  section#Testimonials .testimonial-slider .bg-testimonial {
+    padding: 30px;
+  }
+
   section#Testimonials .sup_titulo {
   }
 
@@ -990,7 +994,55 @@ section#proposal .items-proposal .texto_flex {
   }
 }
 
-
+section#galeria {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  position: relative;
+}
+section#galeria .container-fluid {
+  padding: 0;
+  width: 100%;
+}
+section#galeria .items-galeria {
+  text-align: center;
+}
+section#galeria .items-galeria .item {
+  padding: 0;
+}
+section#galeria .items-galeria .bg {
+  background-color: ;
+}
+section#galeria .items-galeria .imagen_flex {
+  height: 0;
+  overflow: hidden;
+  position: relative;
+  padding-bottom: 60%;
+}
+section#galeria .items-galeria .imagen_flex img {
+  height: 60%;
+  object-fit: cover;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+@media screen and (max-width: 900px) {
+  section#galeria {
+  }
+  section#galeria .container-fluid {
+  }
+  section#galeria .items-galeria {
+  }
+  section#galeria .items-galeria .item {
+    max-height: 100px;
+  }
+  section#galeria .items-galeria .bg {
+  }
+  section#galeria .items-galeria .imagen_flex {
+  }
+  section#galeria .items-galeria .imagen_flex img {
+  }
+}
 
 footer {
   padding-bottom: 50px;
