@@ -867,7 +867,7 @@ section#Testimonials .testimonial-slider {
   max-width: 950px;
   margin: 0 auto;
   position: relative;
-}
+width: calc(100% - 60px);}
 
 section#Testimonials .testimonial-slider .bg-testimonial {
   background-color: #f2f2f2;
@@ -941,7 +941,7 @@ section#proposal .items-proposal .titulo_flex {
   font-weight: 700;
   font-size: 1.2em;
   position: relative;
-}
+margin-bottom: 10px;}
 
 section#proposal .items-proposal .titulo_flex:before {
   content: "";

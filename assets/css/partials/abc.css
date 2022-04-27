@@ -136,7 +136,7 @@ header nav a {
   color: #666666;
   padding-left: 10px;
   padding-right: 10px;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 500;
 }
 
@@ -359,7 +359,7 @@ section#header-proposal .icon {
 }
 
 section#header-proposal .icon img {
-  /* height: 60px; */
+  height: 180px;
   width: auto;
   object-fit: contain;
 }
@@ -368,7 +368,7 @@ section#header-proposal .title {
   padding-bottom: 20px;
   text-align: center;
   padding-top: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 70px;
   margin-top: 30px;
 
 
@@ -423,7 +423,10 @@ section#header-proposal .flex.principal-col>div:nth-child(2) {}
   section#header-proposal .bg-image {
     left: 0;
     width: 100%;
-  }
+  height: 50%;}
+
+  section#header-proposal .flex a{
+    /* color: #fff; */}
 
   section#header-proposal .bg-image img {}
 
@@ -433,11 +436,11 @@ section#header-proposal .flex.principal-col>div:nth-child(2) {}
 
   section#header-proposal .icon {}
 
-  section#header-proposal .icon img {}
+  section#header-proposal .icon img {height: 166px;}
 
-  section#header-proposal .title {}
+  section#header-proposal .title {font-size: 30px;}
 
-  section#header-proposal .text {}
+  section#header-proposal .text {/* color: white; */}
 
   section#header-proposal .flex.principal-col {
     width: 100%;
@@ -489,13 +492,13 @@ section#about-founder .icon img {
 }
 
 section#about-founder .text {
-  max-width: 600px;
+  max-width: 750px;
   margin: 0 auto;
   text-align: left;
   font-weight: 400;
   /* padding-bottom: 40px; */
   font-size: 18px;
-  min-width: 739px;
+  
 }
 
 section#about-founder .container {
@@ -504,11 +507,11 @@ section#about-founder .container {
 }
 
 section#about-founder .container>div {
-  width: 100%;
+  /* width: 100%; */
 }
 
 section#about-founder .container> :first-child {
-  margin-right: 100px;
+  /* margin-right: 100px; */
 }
 
 section#about-founder .container> :last-child {
@@ -520,13 +523,17 @@ section#about-founder .image {
   padding-bottom: 30px;
   z-index: 1;
   position: relative;
-}
+text-align: right;}
 
-section#about-founder .image img {}
+section#about-founder .image img {max-width: 300px;}
 
 img {}
 
 @media screen and (max-width: 900px) {
+  .sup_titulo{
+    max-width: 100%;
+  }
+  
   section#about-founder {}
 
   section#about-founder .container {}
@@ -535,7 +542,7 @@ img {}
 
   section#about-founder .icon img {}
 
-  section#about-founder .sup_titulo {}
+  section#about-founder .sup_titulo {max-width: 100%;margin-bottom: 30px;}
 
   section#about-founder .text {}
 
@@ -548,6 +555,11 @@ img {}
   section#about-founder .image {}
 
   section#about-founder .image img {}
+
+  section#about-founder .container> :last-child{
+    margin-left: 0;
+    margin-top: 50px
+  }
 }
 
 section#about-us {
@@ -578,7 +590,7 @@ section#about-us .text {
   text-align: left;
   padding-bottom: 40px;
   padding-left: 50px;
-  min-width: 739px;
+  /* min-width: 739px; */
   font-size: 18px;
   padding-right: 50px;
 }
@@ -630,7 +642,7 @@ section#about-us .image img {
 
   section#about-us .sup_titulo {}
 
-  section#about-us .text {}
+  section#about-us .text {padding-left: 20px;padding-right: 20px;}
 
   section#about-us .container {
     display: block;
@@ -734,23 +746,27 @@ section#team .items-team .texto_flex {
 }
 
 @media screen and (max-width: 900px) {
+  section#team .items-team .imagen_flex{
+    padding-bottom: 100%;
+  }
+  
   section#team {}
 
   section#team .container {}
 
-  section#team .icon {}
+  section#team .icon {margin-bottom: 12px;}
 
   section#team .icon img {}
 
   section#team .sup_titulo {}
 
-  section#team .text {}
+  section#team .text {padding-left: 0;}
 
   section#team .container {
     display: block;
   }
 
-  section#team .container>div {}
+  section#team .principal-team {display: block;text-align: center;}
 
   section#team .image {}
 
@@ -818,7 +834,7 @@ section#testimonials .testimonial-slider .item{display: flex;align-items: center
 
   section#testimonials .sup_titulo {}
 
-  section#testimonials .text {}
+  section#testimonials .text {margin-left: 0;margin-top: 25px;}
 
   section#testimonials .container {
     display: block;
@@ -832,7 +848,7 @@ section#testimonials .testimonial-slider .item{display: flex;align-items: center
 
   section#testimonials .testimonial-slider{}
 
-  section#testimonials .testimonial-slider .item{}
+  section#testimonials .testimonial-slider .item{flex-direction: column;align-items: center;justify-content: center;}
 }
 
 section#logos {
@@ -943,7 +959,7 @@ section#proposal-header .bg-image img {
   top: 0;
   pointer-events: none;
   object-fit: cover;
-}
+filter: brightness(0.8);}
 
 section#proposal-header .bg-image {
   position: absolute;
@@ -1007,13 +1023,13 @@ section#proposal-header .items-proposal-header.flex .subtitulo_flex {
 
   section#proposal-header .container {}
 
-  section#proposal-header .title {}
+  section#proposal-header .title {font-size: 40px;}
 
   section#proposal-header .flex.principal-col {}
 
   section#proposal-header .flex.principal-col>div {}
 
-  section#proposal-header .flex.principal-col>div:nth-child(1) {}
+  section#proposal-header .flex.principal-col>div:nth-child(1) {padding: 0;}
 
   section#proposal-header .flex.principal-col>div:nth-child(2) {}
 }
@@ -1135,7 +1151,7 @@ section#proposal-scope .items-proposal-scope .texto_flex {
 }
 
 @media screen and (max-width: 900px) {
-  #banner-footer {}
+  #banner-footer {text-align: center;}
 
   #banner-footer .container-fluid {}
 
