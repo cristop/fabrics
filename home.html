@@ -527,15 +527,37 @@
             </div>
 
             <div class="testimonial-slider">
-                <div class="bg-testimonial">
-                    “I bought my house about 9 months ago and with the rain I
-                    have recently have to replace my roof. Although I spoken to
-                    a few companies about it and was skeptical about people just
-                    trying to sell me something - I spoke to Yanni and he was
-                    extremely helpful. I would recommend the to any homeowner
-                    and would invite them to do more work on my homes. ” <br><br>
+                <div class="owl-carousel owl-theme">
+                    <div class="bg-testimonial item">
+                        “I bought my house about 9 months ago and with the rain I
+                        have recently have to replace my roof. Although I spoken to
+                        a few companies about it and was skeptical about people just
+                        trying to sell me something - I spoke to Yanni and he was
+                        extremely helpful. I would recommend the to any homeowner
+                        and would invite them to do more work on my homes. ” <br><br>
 
-                    <i>- Cherlyn Long - Roof</i>
+                        <i>- Cherlyn Long - Roof</i>
+                    </div>
+                    <div class="bg-testimonial item">
+                        “I bought my house about 9 months ago and with the rain I
+                        have recently have to replace my roof. Although I spoken to
+                        a few companies about it and was skeptical about people just
+                        trying to sell me something - I spoke to Yanni and he was
+                        extremely helpful. I would recommend the to any homeowner
+                        and would invite them to do more work on my homes. ” <br><br>
+
+                        <i>- Cherlyn Long - Roof</i>
+                    </div>
+                    <div class="bg-testimonial item">
+                        “I bought my house about 9 months ago and with the rain I
+                        have recently have to replace my roof. Although I spoken to
+                        a few companies about it and was skeptical about people just
+                        trying to sell me something - I spoke to Yanni and he was
+                        extremely helpful. I would recommend the to any homeowner
+                        and would invite them to do more work on my homes. ” <br><br>
+
+                        <i>- Cherlyn Long - Roof</i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -639,6 +661,9 @@
         href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,800;1,900&display=swap"
         rel="stylesheet">
 
+    <link rel="stylesheet" href="assets/library/OwlCarousel2-2.3.4/dist/assets/owl.carousel.min.css" />
+    <link rel="stylesheet" href="assets/library/OwlCarousel2-2.3.4/dist/assets/owl.theme.default.css">
+
     <!-- libreria WOW animaciones CSS -->
     <link href="assets/library/wow/animate-reduce.css" type="text/css" rel="stylesheet" media="screen,projection"
         async />
@@ -646,7 +671,6 @@
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/booster.min.css" media="all" async>
 
-    <link rel="stylesheet" href="assets/css/header.css" async>
     <link rel="stylesheet" href="assets/css/partials/home.css" async>
 
     <!-- jQuery -->
@@ -671,6 +695,28 @@
 
     <!-- Main -->
     <script src="assets/js/main.js"></script>
+
+
+    <script src="assets/library/OwlCarousel2-2.3.4/dist/owl.carousel.min.js"></script>
+
+    <script>
+        $('.owl-carousel').owlCarousel({
+            loop: true,
+            margin: 10,
+            nav: true,
+            responsive: {
+                0: {
+                    items: 1
+                },
+                600: {
+                    items: 1
+                },
+                1000: {
+                    items: 1
+                }
+            }
+        })
+    </script>
 </body>
 
 </html>
