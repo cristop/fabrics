@@ -1055,6 +1055,9 @@ footer {
   color: white;
 }
 
+footer .flex.text a{
+
+}
 footer a:hover {
   opacity: 0.7;
 }
