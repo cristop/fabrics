@@ -1,13 +1,3 @@
-footer {
-  padding-bottom: 50px;
-  padding-top: 50px;
-  font-size: 0.7rem;
-  line-height: 1.7;
-  border-top: 1px solid #eee;
-  background-color: var(--c-terciary);
-  color: white;
-}
-
 #banner-footer {
   padding-top: 50px;
   padding-bottom: 50px;
