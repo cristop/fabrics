@@ -1025,6 +1025,7 @@ section#galeria .items-galeria .imagen_flex img {
   position: absolute;
   left: 0;
   top: 0;
+  opacity: 0.7;
 }
 @media screen and (max-width: 900px) {
   section#galeria {
