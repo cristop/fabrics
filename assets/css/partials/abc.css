@@ -676,7 +676,7 @@ section#team .principal-team {
   justify-content: center;
   padding-top: 20px;
   padding-bottom: 20px;
-  margin-top: 20px;
+  margin-top: 30px;
   margin-bottom: 20px;
 }
 
@@ -777,7 +777,7 @@ section#testimonials .text {
 
 section#testimonials .container {
   background-color: white;
-  padding: 30px;
+  padding: 50px 30px;
 }
 
 section#testimonials .container>div {
@@ -786,10 +786,10 @@ section#testimonials .container>div {
 
 section#testimonials .testimonial-slider .image {
   /* padding-bottom: 30px; */
-width: 270px;}
+width: 250px;padding-right: 20px;}
 
 section#testimonials .image img {
-  width: auto;
+  
 }
 
 section#testimonials .testimonial-slider{}
@@ -1142,4 +1142,14 @@ section#proposal-scope .items-proposal-scope .texto_flex {
   #banner-footer .items-banner-footer .icono_flex img {}
 
   #banner-footer .items-banner-footer .texto_flex {}
+}
+
+.owl-nav {display: none;}
+
+.owl-theme .owl-dots {position: absolute;width: 100%;bottom: -90px;}
+
+.owl-theme .owl-dots .owl-dot span {
+  width: 20px;
+  height: 20px;
+  margin: 0 3px;
 }

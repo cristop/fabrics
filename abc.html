@@ -238,7 +238,7 @@
       TESTIMONIALS
     </div>
     <div class="container">
-      <div class="testimonial-slider">
+      <div class="testimonial-slider owl-carousel owl-theme">
         <div class="item">
           <div class="wow fadeInLeft image">
             <picture>
@@ -491,6 +491,27 @@
 
   <!-- Main -->
   <script src="assets/js/main.js"></script>
+
+  <script src="assets/library/OwlCarousel2-2.3.4/dist/owl.carousel.min.js"></script>
+
+  <script>
+    $('.owl-carousel').owlCarousel({
+      loop: true,
+      margin: 10,
+      nav: true,
+      responsive: {
+        0: {
+          items: 1
+        },
+        600: {
+          items: 1
+        },
+        1000: {
+          items: 1
+        }
+      }
+    })
+  </script>
 </body>
 
 </html>
