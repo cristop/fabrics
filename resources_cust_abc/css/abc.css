@@ -816,7 +816,7 @@ width: 250px;padding-right: 20px;}
 
 section#testimonials .image img {
   
-}
+/* filter: brightness(0.1); */}
 
 section#testimonials .testimonial-slider{}
 
