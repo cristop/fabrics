@@ -100,14 +100,6 @@ header nav>ul>li {
   transition: all 0.2s ease;
 }
 
-/*Mobile*/
-@media screen and (min-width:900px){
-	header:not(.sticky) nav>ul>li.download-btn{
-        display: block;
-		position: absolute;
-        right: 0;
-	}
-}
 
 header nav>ul>li.download-btn a {
   background-color: #eee;
