@@ -66,7 +66,7 @@ header .container-fluid {
 
 header nav.menu-main {
   float: left;
-}
+position: relative;}
 
 @media screen and (max-width: 900px) {
   .headerInternal {
@@ -93,7 +93,29 @@ header nav>ul>li {
   padding: 0;
   margin: 0;
   position: relative;
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  -ms-transition: all 0.2s ease;
+  -o-transition: all 0.2s ease;
+  transition: all 0.2s ease;
 }
+
+/*Mobile*/
+@media screen and (min-width:900px){
+	header:not(.sticky) nav>ul>li.download-btn{
+        display: block;
+		position: absolute;
+        right: 0;
+	}
+}
+
+header nav>ul>li.download-btn a {
+  background-color: #eee;
+  padding-right: 12px;
+  padding-left: 12px;
+  text-decoration: none;
+  border-radius: 5px;
+padding-top: 13px;padding-bottom: 13px;}
 
 header nav>ul>li>ul {
   position: absolute;
