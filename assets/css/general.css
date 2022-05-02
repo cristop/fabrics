@@ -123,14 +123,17 @@ select {
 }
 
 .title {
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: #484848;
+  
+  
+  color: #212121;
   margin-top: 0;
   margin-bottom: 20px;
   display: block;
   line-height: 40px;
   text-align: center;
+font-weight: 600;
+font-size: 33px;
+line-height: 40px;
 }
 
 .titulo_flex {
@@ -141,12 +144,17 @@ select {
 }
 
 .subtitle {
-  font-weight: 600;
-  font-size: 20px;
-  line-height: 24px;
-  text-align: center;
-  color: var(--c-secondary);
-}
+  
+  
+  
+  
+  color: #5F6261;
+font-weight: 500;
+font-size: 18px;
+line-height: 22px;
+/* identical to box height */
+
+text-align: center;}
 
 .texto_flex {
   font-weight: 400;
@@ -480,7 +488,7 @@ section#Frecuently-questions .items-Frecuently-questions .icono_flex {
   text-align: center;
 }
 section#Frecuently-questions .items-Frecuently-questions .icono_flex img {
-  height: 60px;
+  height: 30px;
   width: auto;
   object-fit: contain;
 }
@@ -674,5 +682,67 @@ section#Frecuently-questions .items-Frecuently-questions .texto_flex {
 
   .subtitle {
     font-size: 0.8rem;
+  }
+}
+
+section#adu-planner {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  position: relative;
+}
+section#adu-planner .container {
+}
+section#adu-planner .title {
+  font-weight: 600;
+  padding-bottom: 20px;
+  text-align: center;
+}
+section#adu-planner .title:before {
+  content: "";
+}
+section#adu-planner .subtitle {
+  padding-bottom: 80px;
+  text-align: center;
+}
+section#adu-planner .items-adu-planner {
+  text-align: center;
+}
+section#adu-planner .items-adu-planner .item {
+}
+section#adu-planner .items-adu-planner .bg {
+  background-color: ;
+}
+section#adu-planner .items-adu-planner .imagen_flex {
+  height: 0;
+  overflow: hidden;
+  position: relative;
+  padding-bottom: 60%;
+}
+section#adu-planner .items-adu-planner .imagen_flex img {
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+@media screen and (max-width: 900px) {
+  section#adu-planner {
+  }
+  section#adu-planner .container {
+  }
+  section#adu-planner .title {
+  }
+  section#adu-planner .subtitle {
+  }
+  section#adu-planner .items-adu-planner {
+  }
+  section#adu-planner .items-adu-planner .item {
+  }
+  section#adu-planner .items-adu-planner .bg {
+  }
+  section#adu-planner .items-adu-planner .imagen_flex {
+  }
+  section#adu-planner .items-adu-planner .imagen_flex img {
   }
 }
