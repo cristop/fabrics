@@ -123,17 +123,15 @@ select {
 }
 
 .title {
-  
-  
   color: #212121;
   margin-top: 0;
   margin-bottom: 20px;
   display: block;
   line-height: 40px;
   text-align: center;
-font-weight: 600;
-font-size: 33px;
-line-height: 40px;
+  font-weight: 600;
+  font-size: 33px;
+  line-height: 40px;
 }
 
 .titulo_flex {
@@ -144,17 +142,14 @@ line-height: 40px;
 }
 
 .subtitle {
-  
-  
-  
-  
-  color: #5F6261;
-font-weight: 500;
-font-size: 18px;
-line-height: 22px;
-/* identical to box height */
+  color: #5f6261;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 22px;
+  /* identical to box height */
 
-text-align: center;}
+  text-align: center;
+}
 
 .texto_flex {
   font-weight: 400;
@@ -744,5 +739,161 @@ section#adu-planner .items-adu-planner .imagen_flex img {
   section#adu-planner .items-adu-planner .imagen_flex {
   }
   section#adu-planner .items-adu-planner .imagen_flex img {
+  }
+}
+
+section#code {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  position: relative;
+}
+section#code .container {
+}
+section#code .text {
+  text-align: center;
+  padding-bottom: 40px;
+  margin-right: 97px;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 20px;
+}
+section#code .form {
+}
+section#code .form .flex {
+}
+section#code .form .flex > div {
+}
+section#code .form .flex > :first-child {
+  text-align: right;
+}
+section#code .form .flex > :last-child {
+}
+section#code .form .flex label {
+  padding-bottom: 10px;
+}
+section#code .form .flex input {
+  max-width: 270px;
+  border: 0.5px solid #bfbfbf;
+  box-sizing: border-box;
+  border-radius: 5px;
+}
+section#code .form .flex .action {
+}
+section#code .form .flex .action a {
+  background: #4d58e2;
+  border-radius: 5px;
+  text-decoration: none;
+}
+@media screen and (max-width: 900px) {
+  section#code {
+  }
+  section#code .container {
+  }
+  section#code .text {
+  }
+  section#code .form {
+  }
+  section#code .form .flex {
+  }
+  section#code .form .flex > div {
+    width: 100%;
+  }
+  section#code .form .flex label {
+  }
+  section#code .form .flex input {
+  }
+  section#code .form .flex .btn {
+  }
+}
+
+section#contact {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  position: relative;
+}
+section#contact .container {
+}
+section#contact .title {
+  font-weight: 600;
+  padding-bottom: 20px;
+  text-align: center;
+}
+section#contact .title:before {
+  content: "";
+}
+section#contact .subtitle {
+  padding-bottom: 20px;
+  text-align: center;
+}
+section#contact .form {
+}
+section#contact .form .flex {
+}
+section#contact .form .flex > div {
+}
+section#contact .form .flex label {
+  padding-bottom: 10px;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 27px;
+}
+section#contact .form .flex input {
+}
+section#contact .form .flex .btn {
+  background: #4d58e2;
+  border: 1px solid #c4c4c4;
+  box-sizing: border-box;
+  border-radius: 4px;
+}
+section#contact .form .flex textarea {
+}
+section#contact .items-contact {
+  display: grid;
+}
+section#contact .items-contact .item {
+}
+section#contact .items-contact .bg {
+  background-color: ;
+}
+section#contact .items-contact .icono_flex {
+  padding-bottom: 20px;
+  text-align: center;
+}
+section#contact .items-contact .icono_flex img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+section#contact .items-contact .texto_flex {
+  font-size: 0.7rem;
+  padding-bottom: 10px;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 22px;
+}
+section#contact .items-contact .item .flex{}
+@media screen and (max-width: 900px) {
+  section#contact {
+  }
+  section#contact .container {
+  }
+  section#contact .title {
+  }
+  section#contact .subtitle {
+  }
+  section#contact .form {
+  }
+  section#contact .form .flex {
+  }
+  section#contact .form .flex > div {
+    width: 100%;
+  }
+  section#contact .form .flex label {
+  }
+  section#contact .form .flex input {
+  }
+  section#contact .form .flex .btn {
+  }
+  section#contact .form .flex textarea {
   }
 }
