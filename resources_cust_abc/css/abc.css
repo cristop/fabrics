@@ -1197,3 +1197,14 @@ section#proposal-scope .items-proposal-scope .texto_flex {
   height: 20px;
   margin: 0 3px;
 }
+
+
+.price {
+  background-color: var(--c-secondary);
+  color: var(--c-primary);
+  font-weight: bold;
+  width: fit-content;
+  padding: 18px 30px;
+  margin-left: -25px;
+  font-size: 1.2em;
+}

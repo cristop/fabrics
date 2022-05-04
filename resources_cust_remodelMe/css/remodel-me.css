@@ -1102,3 +1102,14 @@ footer u {
   height: 20px;
   margin: 0 3px;
 }
+
+.price {
+  background-color: var(--c-primary);
+  width: fit-content;
+  color: #fff;
+  font-weight: 900;
+  text-transform: uppercase;
+  padding: 20px 40px;
+  border-radius: 50px;
+  font-size: 0.9em;
+}
