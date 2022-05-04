@@ -361,7 +361,7 @@ section#planner .subtitle {
 }
 section#planner .items-planner {
   text-align: center;
-}
+align-items: center;}
 section#planner .items-planner .item {
 }
 section#planner .items-planner .bg {
@@ -372,13 +372,15 @@ section#planner .items-planner .icono_flex {
   text-align: center;
 }
 section#planner .items-planner .icono_flex img {
-  height: 60px;
+  height: 40px;
   width: auto;
   object-fit: contain;
 }
 section#planner .items-planner .titulo_flex {
   padding-bottom: 10px;
-}
+font-weight: 700;
+font-size: 20px;
+line-height: 24px;color: #4D58E2;}
 section#planner .items-planner .subtitulo_flex {
   font-size: 0.7rem;
   padding-bottom: 10px;
@@ -392,9 +394,10 @@ section#experience {
 section#experience .container {
 }
 section#experience .title {
-  font-weight: 600;
-  padding-bottom: 20px;
-  text-align: center;
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 37px;
+  padding-bottom: 50px;
 }
 section#experience .title:before {
   content: "";
@@ -406,6 +409,11 @@ section#experience .items-experience .item {
 }
 section#experience .items-experience .bg {
   background-color: ;
+  background: #ffffff;
+  border: 1px solid #4d58e2;
+  box-sizing: border-box;
+  border-radius: 4px;
+  padding: 10px;
 }
 section#experience .items-experience .icono_flex {
   padding-bottom: 20px;
@@ -429,8 +437,7 @@ section#reviwes {
 section#reviwes .container {
 }
 section#reviwes .title {
-  font-weight: 600;
-  padding-bottom: 20px;
+  padding-bottom: 88px;
   text-align: center;
 }
 section#reviwes .title:before {
@@ -450,9 +457,13 @@ section#reviwes .items-reviwes .icono {
   display: grid;
 }
 section#reviwes .items-reviwes .icono img {
-  height: 60px;
+  height: 105px;
   /* width: auto; */
   object-fit: contain;
+}
+
+section#reviwes .items-reviwes .image {
+  height: 32px;
 }
 
 section#Frecuently-questions {
@@ -474,6 +485,10 @@ section#Frecuently-questions .items-Frecuently-questions {
   text-align: center;
 }
 section#Frecuently-questions .items-Frecuently-questions .item {
+  background: #ffffff;
+  border: 1px solid #4d58e2;
+  box-sizing: border-box;
+  border-radius: 4px;
 }
 section#Frecuently-questions .items-Frecuently-questions .bg {
   background-color: ;
@@ -489,7 +504,9 @@ section#Frecuently-questions .items-Frecuently-questions .icono_flex img {
 }
 section#Frecuently-questions .items-Frecuently-questions .texto_flex {
   font-size: 0.7rem;
-  padding-bottom: 10px;
+  padding-bottom: 31px;
+  padding-left: 100px;
+  text-align: left;
 }
 @media screen and (max-width: 900px) {
   section#Frecuently-questions {
@@ -721,6 +738,11 @@ section#adu-planner .items-adu-planner .imagen_flex img {
   left: 0;
   top: 0;
 }
+section#planner .items-planner .item .text{font-weight: 600;
+font-size: 20px;
+line-height: 24px;
+
+color: #636363;text-align: left;}
 @media screen and (max-width: 900px) {
   section#adu-planner {
   }
@@ -822,7 +844,7 @@ section#contact .title:before {
   content: "";
 }
 section#contact .subtitle {
-  padding-bottom: 20px;
+  padding-bottom: 50px;
   text-align: center;
 }
 section#contact .form {
@@ -846,11 +868,13 @@ section#contact .form .flex .btn {
   border-radius: 4px;
 }
 section#contact .form .flex textarea {
+  height: 211px;
 }
 section#contact .items-contact {
   display: grid;
 }
 section#contact .items-contact .item {
+  width: 100%;
 }
 section#contact .items-contact .bg {
   background-color: ;
@@ -858,6 +882,7 @@ section#contact .items-contact .bg {
 section#contact .items-contact .icono_flex {
   padding-bottom: 20px;
   text-align: center;
+  max-width: 62px;
 }
 section#contact .items-contact .icono_flex img {
   height: 32px;
@@ -869,9 +894,12 @@ section#contact .items-contact .texto_flex {
   padding-bottom: 10px;
   font-weight: 500;
   font-size: 18px;
+  text-align: left;
   line-height: 22px;
 }
-section#contact .items-contact .item .flex{}
+section#contact .items-contact .item .flex {
+  max-width: 460px;
+}
 @media screen and (max-width: 900px) {
   section#contact {
   }
