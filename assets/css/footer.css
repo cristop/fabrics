@@ -1,0 +1,113 @@
+footer {
+  padding-top: 50px;
+  /* padding-bottom: 50px; */
+  position: relative;
+  background-color: #e4001e;
+  color: #fff;
+}
+footer .container {
+}
+footer .items-banner-footer.flex.t-col-3 {
+}
+footer .items-banner-footer {
+  text-align: center;
+}
+footer .items-banner-footer .item {
+}
+footer .items-banner-footer .bg {
+  background-color: ;
+}
+footer .items-banner-footer .icono_flex {
+  padding-bottom: 20px;
+  text-align: left;
+}
+footer .items-banner-footer .icono_flex img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+footer .items-banner-footer .titulo_flex {
+  /* padding-bottom: 10px; */
+  text-align: left;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 18px;
+}
+footer .titulo_flex > ::after {
+  content: "";
+  display: block;
+  width: 70px;
+  height: 2px;
+  background: #ffffff;
+  margin-top: 12px;
+}
+footer .items-banner-footer .texto_flex {
+  font-size: 0.7rem;
+  padding-bottom: 10px;
+}
+footer .items-banner-footer .texto_flex ul {
+  /* list-style: none; */
+  text-align: left;
+}
+footer .items-banner-footer .texto_flex li {
+  /* list-style-type: none; */
+  /* color: #ebc8c8; */
+  padding: 6px 0;
+}
+footer .items-banner-footer .item li a {
+  /* padding-bottom: 10px; */
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
+  text-decoration: none;
+  color: #fff;
+}
+footer .items-banner-footer .item li {
+  text-align: left;
+}
+footer .items-banner-footer.flex.t-col-3 > :first-child li {
+  list-style-type: none;
+  color: #ebc8c8;
+  padding: 6px 0;
+}
+footer .items-banner-footer .texto_flex li img {
+  padding-right: 10px;
+}
+@media screen and (max-width: 900px) {
+  footer {
+  }
+  footer .container-fluid {
+  }
+  footer .items-banner-footer {
+  }
+  footer .items-banner-footer .item {
+  }
+  footer .items-banner-footer .bg {
+  }
+  footer .items-banner-footer .icono_flex {
+  }
+  footer .items-banner-footer .icono_flex img {
+  }
+  footer .items-banner-footer .titulo_flex {
+  }
+  footer .items-banner-footer .texto_flex {
+  }
+}
+
+footer .footer-logo {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-top: 50px;
+  text-align: center;
+  background: #191919;
+  color: #939393;
+}
+
+footer .footer-logo img {
+  object-fit: contain;
+  height: 60px;
+}
+footer .footer-logo p {
+  font-size: 14px;
+  font-weight: 400; /* line-height: 24px; */
+}
