@@ -76,16 +76,15 @@
       <div class="prepared">
         <div>
           Prepared by: <br>
-          <b>{entity.opportunity.salesAgent.nameOrId}</b> - {salesAgentJobPosition} <br>
-          <a href="mailto:{entity.opportunity.salesAgent.mail}">{entity.opportunity.salesAgent.mail} </a><br>
-          <a href="https://wa.me/{entity.opportunity.salesAgent.phone}"
-            target="_blank">{entity.opportunity.salesAgent.phone}</a>
+          <b>LEONARDO GOMEZ</b> - General Sales Manager<br>
+          <a href="mailto:leonardo.gomez@greenbay.com">leonardo.gomez@greenbay.com</a><br>
+          <a href="https://wa.me/#" target="_blank">(xxx) xxx-xxxx</a>
         </div>
         <div>
           Prepared for: <br>
-          <b>{entity.opportunity.customer.nameAlternative}</b><br>
-          {entity.opportunity.location.address}, {entity.opportunity.location.city.name}<br>
-          {entity.opportunity.location.state.id} {entity.opportunity.location.zipCode}, United States.
+          <b>JEAN SMITH</b><br>
+          xxxxx St, Los Angeles<br>
+          CA, United States.
         </div>
       </div>
     </section>
@@ -162,11 +161,11 @@
           </div>
           <div>
             <div class="text">
-              <b>{entity.opportunity.salesAgent.nameOrId}</b> <br>
-              {salesAgentJobPosition} <br>
-              <a href="mailto:{entity.opportunity.salesAgent.mail}">{entity.opportunity.salesAgent.mail}</a>
+              <b>JOHN BENNET</b> <br>
+              Project Manager<br>
+              <a href="mailto:{entity.opportunity.salesAgent.mail}">john@greenbay.com</a>
               <br>
-              <a href="https://wa.me/{entity.opportunity.salesAgent.phone}">{entity.opportunity.salesAgent.phone}</a>
+              <a href="https://wa.me/{entity.opportunity.salesAgent.phone}">(xxx) xxx-xxxx</a>
             </div>
           </div>
         </div>
@@ -557,13 +556,16 @@
       </div>
     </section>
 
-    <section id="title-proposal" class="section wow fadeIn">
+    <section id="title-proposal" class="section wow fadeIn  ">
+      <div class="bg-image">
+        <img src="resources_cust_greenBayRemodeling/img/images/greenbay/proposal.jpg" loading="lazy" width="100%" height="100%" alt="" />
+      </div>
       <div class="container">
-        <div class="wow fadeIn">
-          <img src="resources_cust_greenBayRemodeling/img/images/greenbay/proposal.jpg" loading="lazy" width="100%"
-            height="100%" alt="" />
-          <div class="title">
-            PROPOSAL
+        <div class="flex principal-col">
+          <div class="wow fadeIn">
+            <div class="title">
+              proposal
+            </div>
           </div>
         </div>
       </div>
@@ -585,13 +587,10 @@
           <br>
 
           <div class="titulo_flex">
-            {name}
+            Kitchen
           </div>
           {sections:repeater}
           <br>
-          <div class="price" style="display: {proposal.showPartialTotals:if:inline-block:none}">
-            PRICE: <big>{amountText}</big>
-          </div>
           <br>
         </div>
       </div>
@@ -615,6 +614,10 @@
   </mojito2:repeater>
 
   <mojito2:html replace="{true}">
+
+    <div class="price" style="display: {proposal.showPartialTotals:if:inline-block:none}">
+      PRICE: <big>{amountText}</big>
+    </div>
 
     <br>
     <div class="amount">
