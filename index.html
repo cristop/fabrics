@@ -75,16 +75,15 @@
       </div>
       <div class="prepared">
         <div>
-          Prepared by: <br>
-          <b>LEONARDO GOMEZ</b> - General Sales Manager<br>
-          <a href="mailto:leonardo.gomez@greenbay.com">leonardo.gomez@greenbay.com</a><br>
-          <a href="https://wa.me/#" target="_blank">(xxx) xxx-xxxx</a>
+          <b>{entity.opportunity.salesAgent.nameOrId}</b> - {salesAgentJobPosition} <br>
+          <a href="mailto:{entity.opportunity.salesAgent.mail}">{entity.opportunity.salesAgent.mail} </a><br>
+          <a href="https://wa.me/{entity.opportunity.salesAgent.phone}"
+            target="_blank">{entity.opportunity.salesAgent.phone}</a>
         </div>
         <div>
-          Prepared for: <br>
-          <b>JEAN SMITH</b><br>
-          xxxxx St, Los Angeles<br>
-          CA, United States.
+          <b>{entity.opportunity.customer.nameAlternative}</b><br>
+          {entity.opportunity.location.address}, {entity.opportunity.location.city.name}<br>
+          {entity.opportunity.location.state.id} {entity.opportunity.location.zipCode}, United States.
         </div>
       </div>
     </section>
@@ -161,11 +160,10 @@
           </div>
           <div>
             <div class="text">
-              <b>JOHN BENNET</b> <br>
-              Project Manager<br>
-              <a href="mailto:{entity.opportunity.salesAgent.mail}">john@greenbay.com</a>
-              <br>
-              <a href="https://wa.me/{entity.opportunity.salesAgent.phone}">(xxx) xxx-xxxx</a>
+              <b>{entity.opportunity.salesAgent.nameOrId}</b> <br>
+              {salesAgentJobPosition} <br>
+              <a href="mailto:{entity.opportunity.salesAgent.mail}">{entity.opportunity.salesAgent.mail}</a>
+              <a href="https://wa.me/{entity.opportunity.salesAgent.phone}">{entity.opportunity.salesAgent.phone}</a>
             </div>
           </div>
         </div>
@@ -587,7 +585,7 @@
           <br>
 
           <div class="titulo_flex">
-            Kitchen
+            {name}
           </div>
           {sections:repeater}
           <br>
