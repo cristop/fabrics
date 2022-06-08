@@ -75,12 +75,14 @@
       </div>
       <div class="prepared">
         <div>
+          Prepared by: <br>
           <b>{entity.opportunity.salesAgent.nameOrId}</b> - {salesAgentJobPosition} <br>
           <a href="mailto:{entity.opportunity.salesAgent.mail}">{entity.opportunity.salesAgent.mail} </a><br>
           <a href="https://wa.me/{entity.opportunity.salesAgent.phone}"
             target="_blank">{entity.opportunity.salesAgent.phone}</a>
         </div>
         <div>
+          Prepared for: <br>
           <b>{entity.opportunity.customer.nameAlternative}</b><br>
           {entity.opportunity.location.address}, {entity.opportunity.location.city.name}<br>
           {entity.opportunity.location.state.id} {entity.opportunity.location.zipCode}, United States.
@@ -172,7 +174,7 @@
 
     <section id="team-thumbs" class="section wow fadeIn  ">
       <div class="container">
-        <div class="items-team-thumbs flex t-col-5">
+        <div class="items-team-thumbs flex t-col-5 owl-carousel owl-theme">
           <div class="item">
             <div class="bg">
               <div class="imagen_flex">
@@ -554,15 +556,16 @@
       </div>
     </section>
 
-    <section id="title-proposal" class="section wow fadeIn  ">
+    <section id="title-proposal" class="section wow fadeIn">
       <div class="bg-image">
-        <img src="resources_cust_greenBayRemodeling/img/images/greenbay/proposal.jpg" loading="lazy" width="100%" height="100%" alt="" />
+        <img src="resources_cust_greenBayRemodeling/img/images/greenbay/proposal.jpg" loading="lazy" width="100%"
+          height="100%" alt="" />
       </div>
       <div class="container">
         <div class="flex principal-col">
           <div class="wow fadeIn">
             <div class="title">
-              proposal
+              PROPOSAL
             </div>
           </div>
         </div>
@@ -589,6 +592,9 @@
           </div>
           {sections:repeater}
           <br>
+          <div class="price" style="display: {proposal.showPartialTotals:if:inline-block:none}">
+            PRICE: <big>{amountText}</big>
+          </div>
           <br>
         </div>
       </div>
@@ -706,7 +712,7 @@
     <script src="resources_cust_greenBayRemodeling/library/OwlCarousel2-2.3.4/dist/owl.carousel.min.js"></script>
 
     <script>
-      $('.owl-carousel').owlCarousel({
+      $('.testimonial-slider .owl-carousel').owlCarousel({
         loop: true,
         margin: 10,
         nav: true,
@@ -721,7 +727,58 @@
             items: 1
           }
         }
-      })
+      });
+
+
+      $(document).ready(function () {
+        if ($(window).width() < 500) {
+          startCarousel();
+        } else {
+          $('.items-team-thumbs').addClass('off');
+        }
+      });
+
+      $(window).resize(function () {
+        if ($(window).width() < 500) {
+          startCarousel();
+        } else {
+          stopCarousel();
+        }
+      });
+
+      function startCarousel() {
+        $(".items-team-thumbs").owlCarousel({
+          navigation: true, // Show next and prev buttons
+          slideSpeed: 500,
+          margin: 0,
+          paginationSpeed: 600,
+          autoplay: true,
+          items: 2,
+          itemsDesktop: false,
+          itemsDesktopSmall: false,
+          itemsTablet: false,
+          itemsMobile: 2,
+          loop: true,
+          dots: false,
+          nav: true,
+          responsive: {
+            380: {
+              items: 2
+            },
+            500: {
+              items: 3
+            },
+            1000: {
+              items: 3
+            }
+          }
+        });
+      }
+      function stopCarousel() {
+        var owl = $('.items-team-thumbs');
+        owl.trigger('destroy.owl.carousel');
+        owl.addClass('off');
+      }
     </script>
 </body>
 
