@@ -719,9 +719,9 @@
   <style>
     :root {
       /*--c-primary: #63ae6f; */
-      --c-primary: #f7c325;
+      --c-primary: #293845;
       /*Verde*/
-      --c-secondary: #007388;
+      --c-secondary: #70809021;
       /* Azul */
       --c-terciary: #F4F7F6;
       /* Gris de fondo principal */
@@ -821,6 +821,19 @@
       width: 100%;
     }
 
+    .title {
+      color: var(--c-primary);
+      font-weight: 600;
+      z-index: 1;
+      position: relative;
+      line-height: 1.5;
+      font-size: 40px;
+      /* width: 56%; */
+      text-align: center;
+      margin-left: auto;
+      padding: 30px 0;
+    }
+
 
     .btn {
       display: inline-block;
@@ -840,282 +853,282 @@
     }
 
 
+    section#home-bg .bg-image img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      object-fit: cover;
+    }
 
-    section#forma1 {
+    section#home-bg .bg-image {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      z-index: 0;
+    }
+
+    section#home-bg {
       padding-top: 50px;
       padding-bottom: 50px;
       position: relative;
-      background-color: #c3cfd9;
     }
 
-    section#forma1 .title {
-      font-weight: 500;
-      z-index: 1;
-      position: relative;
-      line-height: 1.5;
-      font-size: 1.6rem;
-      width: 56%;
-      margin-left: auto;
-      padding: 30px 0;
-    }
+    section#home-bg .container {}
 
-    section#forma1 .title:after {
-      content: "";
-      display: block;
-      width: 100px;
-      height: 2px;
-      background-color: #fff;
-      margin-top: 18px;
-    }
-
-    section#forma1 .action {
+    section#home-bg .sup_titulo {
+      font-size: 0.7rem;
+      padding-bottom: 10px;
       text-align: center;
     }
 
-    section#forma1 .container {
-      display: flex;
-      /* align-items: center; */
-      gap: 30px;
+    section#home-bg .title {}
+
+    section#home-bg .title:before {
+      content: "";
     }
 
-    section#forma1 .container>div {
-      width: 100%;
+    section#home-bg .subtitle {
+      padding-bottom: 20px;
+      text-align: center;
+    }
+
+    section#home-bg .flex.principal-col {
       position: relative;
-      display: flex;
+      z-index: 1;
+    }
+
+    section#home-bg .flex.principal-col>div {}
+
+    section#home-bg .flex.principal-col>div:nth-child(1) {}
+
+    section#home-bg .flex.principal-col>div:nth-child(2) {}
+
+    section#home-bg .items-home-bg {
+      text-align: center;
+      align-items: center;
       justify-content: center;
-      align-items: center;
     }
 
-    section#forma1 .image {
-      /* padding-bottom: 30px; */
+    section#home-bg .items-home-bg::after {
+      content: "";
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      display: inline-block;
+      padding: 8px;
+      transform: translateX(-50%) rotate(45deg);
+      -webkit-transform: translateX(-50%) rotate(45deg);
       position: absolute;
-      width: 80%;
-      z-index: 0;
-      height: 100%;
-      left: 0;
-      pointer-events: none;
+      left: 50%;
+      bottom: 20px;
     }
 
-    section#forma1 .image img {
-      object-fit: cover;
-      width: 100%;
-      height: 100%;
+    section#home-bg .items-home-bg .item {}
+
+    section#home-bg .items-home-bg .bg {
+      background-color:
+    }
+
+    section#home-bg .items-home-bg .btn {
+      font-size: 0.7rem;
+      padding-bottom: 10px
     }
 
     @media screen and (max-width:900px) {
+      section#home-bg .bg-image {}
 
-      section#forma1 .title {
-        width: 100%;
-        padding-left: 30px;
-        padding-right: 30px;
-        font-size: 1.1rem;
-        padding-bottom: 40px;
-      }
+      section#home-bg .bg-image img {}
 
-      section#forma1 .container {
-        flex-direction: column;
-        padding-left: 25px;
-        padding-right: 25px;
-      }
+      section#home-bg {}
 
-      section#forma1 .image {
-        width: 100%;
-      }
+      section#home-bg .container {}
+
+      section#home-bg .sup_titulo {}
+
+      section#home-bg .title {}
+
+      section#home-bg .subtitle {}
+
+      section#home-bg .flex.principal-col {}
+
+      section#home-bg .flex.principal-col>div {}
+
+      section#home-bg .flex.principal-col>div:nth-child(1) {}
+
+      section#home-bg .flex.principal-col>div:nth-child(2) {}
+
+      section#home-bg .items-home-bg {}
+
+      section#home-bg .items-home-bg .item {}
+
+      section#home-bg .items-home-bg .bg {}
+
+      section#home-bg .items-home-bg .btn {}
     }
 
-    section#forma2 {
+    section#agenda {
+      padding-top: 50px;
+      padding-bottom: 50px;
       position: relative;
     }
 
-    section#forma2 .title {
-      font-weight: 500;
-      padding-bottom: 30px;
-      font-size: 1.4rem;
-      line-height: 1.5;
-    }
+    section#agenda .container {}
 
-    section#forma2 .title:before {
+    section#agenda .title {}
+
+    section#agenda .title:before {
       content: "";
     }
 
-    section#forma2 .text {
-      margin: 0 auto;
-      padding-bottom: 40px;
-      line-height: 1.3;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    section#forma2 .action {
-      text-align: center;
-    }
-
-    section#forma2 .action .btn {
-      width: 100%;
-    }
-
-    section#forma2 .container {
-      display: flex;
-      gap: 30px;
-    }
-
-    section#forma2 .container>div {
-      width: 100%;
-      position: relative;
-    }
-
-    section#forma2 .cuadro {
+    section#agenda .subtitle {
+      padding-bottom: 20px;
       text-align: left;
-      border: 1px solid #c3cfd9;
-      padding: 50px;
-      max-width: 445px;
-      margin-top: 50px;
-      margin-bottom: 60px;
-      background-color: #fff;
     }
 
-    section#forma2 .image {
-      font-size: 0;
-      position: absolute;
-      top: 0;
-      height: 100%;
-      width: 100%;
+    section#agenda .item-agenda {
+      padding-bottom: 80px;
     }
 
-    section#forma2 .image img {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    section#agenda .item-agenda .bg {
+      border: 1px solid var(--c-primary);
+      padding: 10px;
+      background-color: #f5f5f5;
     }
+
+    section#agenda .item-agenda .title-item {
+      font-size: 34px;
+      font-weight: 500;
+      text-align: left;
+      padding-bottom: 20px;
+    }
+
+    section#agenda .item-agenda .title-item>ul {
+      list-style: none;
+      display: inline-flex;
+      padding-left: 0;
+      padding-right: 10px;
+    }
+
+    section#agenda .item-agenda .title-item>ul>li {
+      font-size: 20px;
+    }
+
+    section#agenda .item-agenda .title-item>ul>li>.bg {
+      border: 1px solid var(--c-primary);
+      padding: 9px;
+    }
+
+    section#agenda .item-agenda .texto-item {
+      font-size: 25px;
+      padding-bottom: 20px;
+    }
+
+    section#agenda .titulo_flex p {
+      margin-top: 5px;
+    }
+
+    section#agenda .item-agenda .item-agenda.flex.t-col-3 {}
+
+    section#agenda .item {}
+
+    section#agenda .item .bg {
+      display: inline-flex;
+    }
+
+    section#agenda .icono_flex {}
+
+    section#agenda .icono_flex img {
+      width: auto;
+      height: 100px;
+      object-fit: contain;
+    }
+
+    section#agenda .titulo_flex {
+      padding-left: 10px;
+    }
+
+    section#agenda .texto_flex {}
+
 
     @media screen and (max-width:900px) {
-      section#forma2 .title {
-        font-size: 1.1rem;
-      }
+      section#agenda {}
 
-      section#forma2 .cuadro {
-        padding: 30px;
-        z-index: 22;
-        position: relative;
-        background-color: transparent;
-        border-color: #222;
-      }
+      section#agenda .container {}
 
-      section#forma2 .container {
-        display: block;
-        position: initial;
-      }
+      section#agenda .title {}
 
-      section#forma2 .container>div {
-        position: initial;
-      }
+      section#agenda .subtitle {}
 
-      section#forma2 .image {
-        left: 0;
-        top: -50px;
-        height: calc(100% + 110px);
-      }
+      section#agenda .items-agenda {}
 
+      section#agenda .items-agenda .item {}
+
+      section#agenda .items-agenda .bg {}
+
+      section#agenda .items-agenda .icono_flex {}
+
+      section#agenda .items-agenda .icono_flex img {}
+
+      section#agenda .items-agenda .titulo_flex {}
+
+      section#agenda .items-agenda .texto_flex {}
     }
 
-
-    section#forma3 .bg-image img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      top: 0;
-      pointer-events: none;
-      object-fit: cover;
-    }
-
-    section#forma3 .bg-image {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      top: 0;
-      z-index: 0;
-    }
-
-    section#forma3 {
+    section#form-invite {
+      padding-top: 50px;
+      padding-bottom: 50px;
       position: relative;
+      background-color: var(--c-secondary);
     }
 
+    section#form-invite .container {}
 
-    section#forma3 .title {
-      font-weight: 500;
-      padding-bottom: 30px;
-      font-size: 1.4rem;
-      line-height: 1.5;
-    }
+    section#form-invite .title {}
 
-    section#forma3 .title:before {
+    section#form-invite .title:before {
       content: "";
     }
 
-    section#forma3 .text {
-      margin: 0 auto;
-      padding-bottom: 40px;
-      line-height: 1.3;
-      font-size: 0.75rem;
-      font-weight: 500;
+    section#form-invite .items-form-invite {}
+
+    section#form-invite .items-form-invite .item {}
+
+    section#form-invite .items-form-invite .bg {
+      background-color:
     }
 
-    section#forma3 .action {
-      text-align: center;
+    section#form-invite .items-form-invite .titulo_flex {
+      padding-bottom: 20px;
+      max-width: 504px;
+      font-size: 27px;
     }
 
-    section#forma3 .action .btn {
-      width: 100%;
-    }
-
-    section#forma3 .flex.principal-col {
-      position: relative;
-      z-index: 1;
-    }
-
-    section#forma3 .container {
-      display: flex;
-      align-items: center;
-    }
-
-    section#forma3 .container>div {
-      width: 100%;
-    }
-
-    section#forma3 .image {
-      padding-bottom: 30px;
-    }
-
-    section#forma3 .cuadro {
+    section#form-invite .items-form-invite .texto_flex {
+      font-size: 0.7rem;
+      padding-bottom: 10px;
       text-align: left;
-      border: 1px solid #c3cfd9;
-      padding: 50px;
-      max-width: 445px;
-      margin-top: 50px;
-      margin-bottom: 60px;
-      background-color: #fff;
     }
 
     @media screen and (max-width:900px) {
-      section#forma3 .title {
-        font-size: 1.1rem;
-      }
+      section#form-invite {}
 
+      section#form-invite .container {}
 
-      section#forma3 .container {
-        display: block;
-        padding-left: 0;
-        padding-right: 0;
-      }
+      section#form-invite .title {}
 
-      section#forma3 .cuadro {
-        padding: 30px;
-        z-index: 22;
-        position: relative;
-      }
+      section#form-invite .items-form-invite {}
+
+      section#form-invite .items-form-invite .item {}
+
+      section#form-invite .items-form-invite .bg {}
+
+      section#form-invite .items-form-invite .titulo_flex {}
+
+      section#form-invite .items-form-invite .texto_flex {}
     }
   </style>
 
@@ -1526,44 +1539,37 @@
   </header>
 
   <!-- SECTIONS AQUI -->
-  <section id="forma1" class="section c-white">
-    <div class="container">
-      <div class="Left">
-        <div class="image">
-          <img src="https://picsum.photos/1800/1000?random=1" loading="lazy" width="100%" height="100%" alt="" />
-        </div>
-        <div class="title">
-          Ponam in culpa idiota aliis pravitatis.
-          Principium ponere culpam in se justum praeceptum. Neque improperes et aliis qui non perfecte ipse docuit.
-        </div>
-      </div>
-      <div class="formulario">
-        <!-- Espacio para formulario -->
-      </div>
+
+  <section id="home-bg" class="section wow fadeIn  ">
+    <div class="bg-image">
+      <img src="https://picsum.photos/1800/1000?random=6" loading="lazy" width="100%" height="100%" alt="" />
     </div>
-  </section>
-
-
-
-  <section id="forma2" class="section   ">
     <div class="container">
-      <div class="Left">
-        <div class="image">
-          <img src="https://picsum.photos/1800/1000?random=2" loading="lazy" width="100%" height="100%" alt="" />
+      <div class="flex principal-col">
+        <div class="wow fadeIn">
+          <div class="sup_titulo">
+            HYBRID EVENT
+          </div>
+          <div class="title">
+            Clear statement about <br> our event
+          </div>
+          <div class="subtitle">
+            Secondary heading providing additional imformation
+          </div>
         </div>
       </div>
-      <div class="Right">
-        <div class="cuadro">
-          <div class="title">
-            Post votum promissa memini cuius adeptione cupis; quem pollicitus est
+      <div class="items-home-bg flex">
+        <div class="item w30">
+          <div class="bg">
+            <a href="#" class="btn btn-primary" style="color: #fff;">
+              Know the important
+            </a>
           </div>
-          <div class="text">
-            Si ergo ilia tantum fastidium compesce contra naturatem usum habili, quem habetis vestra potestate, non
-            aliud quam aversantur incurrere. Sed si ipse aversaris, ad languorem: et mors, paupertas et to miseros fore.
-          </div>
-          <div class="action">
-            <a href="#" class="btn btn-primary">
-              Button
+        </div>
+        <div class="item w30">
+          <div class="bg">
+            <a href="#" class="btn btn-primary" style="color: #fff;">
+              Grab your seat
             </a>
           </div>
         </div>
@@ -1571,34 +1577,279 @@
     </div>
   </section>
 
-
-  <section id="forma3" class="section   ">
-    <div class="bg-image">
-      <img src="https://picsum.photos/1800/1000?random=3" loading="lazy" width="100%" height="100%" alt="" />
-    </div>
+  <section id="agenda" class="section wow fadeIn  ">
     <div class="container">
-      <div class="flex principal-col">
-        <div class="Left">
-          <div class="cuadro">
-            <div class="title">
-              Post votum promissa memini cuius adeptione cupis; quem pollicitus est
+      <div class="wow fadeIn">
+        <div class="title">
+          Agenda
+        </div>
+        <div class="subtitle">
+          WED Jun 02
+        </div>
+      </div>
+      <div class="item-agenda">
+        <div class="bg">
+          <div class="title-item">
+            <ul>
+              <li>
+                <div class="bg">13:20</div>
+              </li>
+              <li>
+                <div class="bg">13:40</div>
+              </li>
+              <li>
+                <div class="bg">gmt +2</div>
+              </li>
+            </ul>
+            Título de la ponencia
+          </div>
+          <div class="texto-item">
+            Sollicitant homines non sunt nisi quam formae rerum principiis opiniones. Mors enim est terribilis ut
+            Socrati aliud esse apparet. Sed timor mortis est notio terribile. Cum igitur impediantur turbentur aut
+            dolere videamus aliis non tribuunt nisi nobis hoc est, in principiis nostra.
+          </div>
+
+          <div class="item-agenda flex t-col-3">
+            <div class="item">
+              <div class="bg">
+                <div class="icono_flex">
+                  <img src="https://picsum.photos/1800/1000?random=2" loading="lazy" width="100%" height="100%"
+                    alt="" />
+                </div>
+                <div class="titulo_flex">
+                  Nombre
+
+                  <p>Posición <br>
+                    Compañía</p>
+                </div>
+              </div>
             </div>
-            <div class="text">
-              Si ergo ilia tantum fastidium compesce contra naturatem usum habili, quem habetis vestra potestate, non
-              aliud quam aversantur incurrere. Sed si ipse aversaris, ad languorem: et mors, paupertas et to miseros
-              fore.
+            <div class="item">
+              <div class="bg">
+                <div class="icono_flex">
+                  <img src="https://picsum.photos/1800/1000?random=3" loading="lazy" width="100%" height="100%"
+                    alt="" />
+                </div>
+                <div class="titulo_flex">
+                  Nombre
+
+                  <p>Posición <br>
+                    Compañía</p>
+                </div>
+              </div>
             </div>
-            <div class="action">
-              <a href="#" class="btn btn-primary">
-                Button
-              </a>
+            <div class="item">
+              <div class="bg">
+                <div class="icono_flex">
+                  <img src="https://picsum.photos/1800/1000?random=4" loading="lazy" width="100%" height="100%"
+                    alt="" />
+                </div>
+                <div class="titulo_flex">
+                  Nombre
+
+                  <p>Posición <br>
+                    Compañía</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="Right"></div>
+      </div>
+
+      <div class="item-agenda">
+        <div class="bg">
+          <div class="title-item">
+            <ul>
+              <li>
+                <div class="bg">13:20</div>
+              </li>
+              <li>
+                <div class="bg">13:40</div>
+              </li>
+              <li>
+                <div class="bg">gmt +2</div>
+              </li>
+            </ul>
+            Título de la ponencia
+          </div>
+          <div class="texto-item">
+            Sollicitant homines non sunt nisi quam formae rerum principiis opiniones. Mors enim est terribilis ut
+            Socrati aliud esse apparet. Sed timor mortis est notio terribile. Cum igitur impediantur turbentur aut
+            dolere videamus aliis non tribuunt nisi nobis hoc est, in principiis nostra.
+          </div>
+
+          <div class="item-agenda flex t-col-3">
+            <div class="item">
+              <div class="bg">
+                <div class="icono_flex">
+                  <img src="https://picsum.photos/1800/1000?random=2" loading="lazy" width="100%" height="100%"
+                    alt="" />
+                </div>
+                <div class="titulo_flex">
+                  Nombre
+
+                  <p>Posición <br>
+                    Compañía</p>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div class="bg">
+                <div class="icono_flex">
+                  <img src="https://picsum.photos/1800/1000?random=3" loading="lazy" width="100%" height="100%"
+                    alt="" />
+                </div>
+                <div class="titulo_flex">
+                  Nombre
+
+                  <p>Posición <br>
+                    Compañía</p>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div class="bg">
+                <div class="icono_flex">
+                  <img src="https://picsum.photos/1800/1000?random=4" loading="lazy" width="100%" height="100%"
+                    alt="" />
+                </div>
+                <div class="titulo_flex">
+                  Nombre
+
+                  <p>Posición <br>
+                    Compañía</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="item-agenda">
+        <div class="bg">
+          <div class="title-item">
+            <ul>
+              <li>
+                <div class="bg">13:20</div>
+              </li>
+              <li>
+                <div class="bg">13:40</div>
+              </li>
+              <li>
+                <div class="bg">gmt +2</div>
+              </li>
+            </ul>
+            Título de la ponencia
+          </div>
+          <div class="texto-item">
+            Sollicitant homines non sunt nisi quam formae rerum principiis opiniones. Mors enim est terribilis ut
+            Socrati aliud esse apparet. Sed timor mortis est notio terribile. Cum igitur impediantur turbentur aut
+            dolere videamus aliis non tribuunt nisi nobis hoc est, in principiis nostra.
+          </div>
+
+          <div class="item-agenda flex t-col-3">
+            <div class="item">
+              <div class="bg">
+                <div class="icono_flex">
+                  <img src="https://picsum.photos/1800/1000?random=2" loading="lazy" width="100%" height="100%"
+                    alt="" />
+                </div>
+                <div class="titulo_flex">
+                  Nombre
+
+                  <p>Posición <br>
+                    Compañía</p>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div class="bg">
+                <div class="icono_flex">
+                  <img src="https://picsum.photos/1800/1000?random=3" loading="lazy" width="100%" height="100%"
+                    alt="" />
+                </div>
+                <div class="titulo_flex">
+                  Nombre
+
+                  <p>Posición <br>
+                    Compañía</p>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div class="bg">
+                <div class="icono_flex">
+                  <img src="https://picsum.photos/1800/1000?random=4" loading="lazy" width="100%" height="100%"
+                    alt="" />
+                </div>
+                <div class="titulo_flex">
+                  Nombre
+                  <p>Posición <br>
+                    Compañía</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
+
+  <section id="form-invite" class="section wow fadeIn  ">
+    <div class="container">
+      <div class="wow fadeIn">
+        <div class="title">
+          I’m in !
+        </div>
+      </div>
+      <div class="items-form-invite flex">
+        <div class="item">
+          <div class="bg">
+            <div class="titulo_flex">
+              Clear call-to-action sentence to invite to join us
+            </div>
+            <div class="texto_flex">
+              Tollere odium autem in nostra potestate sint, ab omnibus et contra naturam transferre in nobis. Sed
+              interim toto desiderio supprimunt: si vis aliqua quae in manu tua tibi necesse confundentur et quae, quod
+              laudabile esset, nihil tamen possides.
+
+              <br><br>
+
+              Oportet uti solum de actibus prosequtionem et fugam, haec leniter et blandus et reservato.
+
+              <br><br>
+
+              Quae tibi placent quicunq prosunt aut diligebat multum, quod memor sis ad communia sunt ab initio minima.
+              Quod si, exempli gratia, cupidum rerum in propria sunt ceramic calicem, admonere te solum Ceramic, quod
+              sit generalis poculis, in cuius es tu cupidum. Deinde, si erumpit, non turbarentur.
+
+              <br><br>
+
+
+              Si osculantur puer tuus aut uxorem tuam, osculum, non dico quod omnia quae sunt hominis, et sic non
+              tangetur, si aut ex eis moriatur.
+
+              <br><br>
+
+              Quando ambulabat agendis admonere te qualis actio. Si ad corpus, quae
+
+            </div>
+          </div>
+        </div>
+        <div class="form">
+          <!-- <div class="bg">
+            <div class="titulo_flex">
+              _TITULO_
+            </div>
+            <div class="texto_flex">
+              _TEXTO_
+            </div>
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </section>
+
 
   <!-- SECTIONS AQUI -->
 
