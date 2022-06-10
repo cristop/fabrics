@@ -1,0 +1,2987 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+    <!-- <meta name="theme-color" content="#417286"/> -->
+
+    <title></title>
+
+    <link rel="icon" type="image/png" href="assets/img/favicon.png" />
+
+    <script src="https://kit.fontawesome.com/47766e22df.js" crossorigin="anonymous"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;800&family=Roboto+Condensed:wght@300;400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Booster -->
+    <style>
+        /*! Developed by Cristo | v 1.0.11  | With Normalize | normalize.css v8.0.1 */
+        html {
+            line-height: 1.15;
+            -webkit-text-size-adjust: 100%
+        }
+
+        body {
+            margin: 0
+        }
+
+        main {
+            display: block
+        }
+
+        h1 {
+            font-size: 2em;
+            margin: .67em 0
+        }
+
+        hr {
+            box-sizing: content-box;
+            height: 0;
+            overflow: visible
+        }
+
+        pre {
+            font-family: monospace, monospace;
+            font-size: 1em
+        }
+
+        a {
+            background-color: transparent
+        }
+
+        abbr[title] {
+            border-bottom: 0;
+            text-decoration: underline;
+            text-decoration: underline dotted
+        }
+
+        b,
+        strong {
+            font-weight: bolder
+        }
+
+        code,
+        kbd,
+        samp {
+            font-family: monospace, monospace;
+            font-size: 1em
+        }
+
+        small {
+            font-size: 80%
+        }
+
+        sub,
+        sup {
+            font-size: 75%;
+            line-height: 0;
+            position: relative;
+            vertical-align: baseline
+        }
+
+        sub {
+            bottom: -0.25em
+        }
+
+        sup {
+            top: -0.5em
+        }
+
+        img {
+            border-style: none
+        }
+
+        button,
+        input,
+        optgroup,
+        select,
+        textarea {
+            font-family: inherit;
+            font-size: 100%;
+            line-height: 1.15;
+            margin: 0
+        }
+
+        button,
+        input {
+            overflow: visible
+        }
+
+        button,
+        select {
+            text-transform: none
+        }
+
+        button,
+        [type="button"],
+        [type="reset"],
+        [type="submit"] {
+            -webkit-appearance: button
+        }
+
+        button::-moz-focus-inner,
+        [type="button"]::-moz-focus-inner,
+        [type="reset"]::-moz-focus-inner,
+        [type="submit"]::-moz-focus-inner {
+            border-style: none;
+            padding: 0
+        }
+
+        button:-moz-focusring,
+        [type="button"]:-moz-focusring,
+        [type="reset"]:-moz-focusring,
+        [type="submit"]:-moz-focusring {
+            outline: 1px dotted ButtonText
+        }
+
+        fieldset {
+            padding: .35em .75em .625em
+        }
+
+        legend {
+            box-sizing: border-box;
+            color: inherit;
+            display: table;
+            max-width: 100%;
+            padding: 0;
+            white-space: normal
+        }
+
+        progress {
+            vertical-align: baseline
+        }
+
+        textarea {
+            overflow: auto
+        }
+
+        [type="checkbox"],
+        [type="radio"] {
+            box-sizing: border-box;
+            padding: 0
+        }
+
+        [type="number"]::-webkit-inner-spin-button,
+        [type="number"]::-webkit-outer-spin-button {
+            height: auto
+        }
+
+        [type="search"] {
+            -webkit-appearance: textfield;
+            outline-offset: -2px
+        }
+
+        [type="search"]::-webkit-search-decoration {
+            -webkit-appearance: none
+        }
+
+        ::-webkit-file-upload-button {
+            -webkit-appearance: button;
+            font: inherit
+        }
+
+        details {
+            display: block
+        }
+
+        summary {
+            display: list-item
+        }
+
+        template {
+            display: none
+        }
+
+        [hidden] {
+            display: none
+        }
+
+        * {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1230px;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box
+        }
+
+        .container-fluid {
+            width: calc(100% - 30px);
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto
+        }
+
+        a,
+        .btn,
+        button,
+        input {
+            -webkit-transition: all .2s ease;
+            -moz-transition: all .2s ease;
+            -ms-transition: all .2s ease;
+            -o-transition: all .2s ease;
+            transition: all .2s ease
+        }
+
+        img {
+            max-width: 100%
+        }
+
+        .btn {
+            font-size: .6rem;
+            padding: 10px 14px;
+            display: inline-block;
+            background-color: #c8c8c8;
+            color: #222;
+            text-align: center
+        }
+
+        .btn:hover {
+            filter: brightness(1.5)
+        }
+
+        .btn.btn-primary {
+            background-color: var(--c-primary);
+            border-color: var(--c-primary);
+            color: white
+        }
+
+        .btn.btn-secondary {
+            background-color: var(--c-secondary);
+            border-color: var(--c-secondary);
+            color: white
+        }
+
+        .btn.btn-terciary {
+            background-color: var(--c-terciary);
+            border-color: var(--c-terciary);
+            color: white
+        }
+
+        .btn.btn-primary-border {
+            background-color: transparent;
+            border: 2px solid var(--c-primary);
+            color: var(--c-primary)
+        }
+
+        .btn.btn-secondary-border {
+            background-color: transparent;
+            border: 2px solid var(--c-secondary);
+            color: var(--c-secondary)
+        }
+
+        .btn.btn-terciary-border {
+            background-color: transparent;
+            border: 2px solid var(--c-terciary);
+            color: var(--c-terciary)
+        }
+
+        .btn.btn-black {
+            background-color: #000;
+            border-color: #000;
+            color: white
+        }
+
+        .btn.btn-black-border {
+            background-color: transparent;
+            border: 2px solid black;
+            color: black
+        }
+
+        .c-primary {
+            color: var(--c-primary)
+        }
+
+        .c-secondary {
+            color: var(--c-secondary)
+        }
+
+        .c-terciary {
+            color: var(--c-terciary)
+        }
+
+        .c-white {
+            color: white
+        }
+
+        .c-black {
+            color: black
+        }
+
+        .bg-primary {
+            background-color: var(--c-primary)
+        }
+
+        .bg-secondary {
+            background-color: var(--c-secondary)
+        }
+
+        .bg-terciary {
+            background-color: var(--c-terciary)
+        }
+
+        .bg-black {
+            background-color: black
+        }
+
+        .bg-white {
+            background-color: white
+        }
+
+        .flex {
+            display: -webkit-flex;
+            display: -moz-flex;
+            display: -ms-flex;
+            display: -o-flex;
+            display: flex;
+            width: 100%
+        }
+
+        .flex.flex-vcenter {
+            align-items: center
+        }
+
+        .flex.flex-center {
+            justify-content: center
+        }
+
+        .flex>* {
+            padding: 10px;
+            width: 100%;
+            display: inline-block;
+            position: relative
+        }
+
+        .flex>.auto {
+            width: auto
+        }
+
+        @media(max-width:768px) {
+            .flex {
+                display: block
+            }
+        }
+
+        @media screen and (min-width:768px) and (max-width:1250px) {
+            .flex>* {
+                width: calc(50%+-25px);
+                display: inline-block;
+                vertical-align: middle
+            }
+        }
+
+        .flex[class*="t-col-"] {
+            flex-wrap: wrap
+        }
+
+        .flex.t-col-2>* {
+            width: calc(100% /2)
+        }
+
+        .flex.t-col-3>* {
+            width: calc(100% /3)
+        }
+
+        .flex.t-col-4>* {
+            width: calc(100% /4)
+        }
+
+        .flex.t-col-5>* {
+            width: calc(100% /5)
+        }
+
+        .flex.t-col-6>* {
+            width: calc(100% / 6)
+        }
+
+        .flex.t-col-7>* {
+            width: calc(100% / 7)
+        }
+
+        .flex.t-col-8>* {
+            width: calc(100% / 8)
+        }
+
+        .flex.t-col-9>* {
+            width: calc(100% / 9)
+        }
+
+        .flex.t-col-10>* {
+            width: calc(100% / 10)
+        }
+
+        .flex.t-col-11>* {
+            width: calc(100% / 11)
+        }
+
+        .flex.t-col-12>* {
+            width: calc(100% / 12)
+        }
+
+        @media screen and (min-width:900px) {
+            .flex .w10 {
+                width: 10%
+            }
+
+            .flex .w15 {
+                width: 15%
+            }
+
+            .flex .w20 {
+                width: 20%
+            }
+
+            .flex .w25 {
+                width: 25%
+            }
+
+            .flex .w30 {
+                width: 30%
+            }
+
+            .flex .w35 {
+                width: 35%
+            }
+
+            .flex .w40 {
+                width: 40%
+            }
+
+            .flex .w45 {
+                width: 45%
+            }
+
+            .flex .w50 {
+                width: 50%
+            }
+
+            .flex .w55 {
+                width: 55%
+            }
+
+            .flex .w60 {
+                width: 60%
+            }
+
+            .flex .w65 {
+                width: 65%
+            }
+
+            .flex .w70 {
+                width: 70%
+            }
+
+            .flex .w75 {
+                width: 75%
+            }
+
+            .flex .w80 {
+                width: 80%
+            }
+
+            .flex .w85 {
+                width: 85%
+            }
+
+            .flex .w90 {
+                width: 90%
+            }
+
+            .flex .w95 {
+                width: 95%
+            }
+
+            .flex .w100 {
+                width: 100%
+            }
+        }
+
+        @media screen and (max-width:900px) {
+            .flex.t-col-2>* {
+                width: calc(100% /1)
+            }
+
+            .flex.t-col-3>* {
+                width: calc(100% /1)
+            }
+
+            .flex.t-col-4>* {
+                width: calc(100% /2)
+            }
+
+            .flex.t-col-5>* {
+                width: calc(100% /2)
+            }
+
+            .flex.t-col-6>* {
+                width: calc(100% / 3)
+            }
+
+            .flex.t-col-7>* {
+                width: calc(100% / 3)
+            }
+
+            .flex.t-col-8>* {
+                width: calc(100% / 4)
+            }
+
+            .flex.t-col-9>* {
+                width: calc(100% / 4)
+            }
+
+            .flex.t-col-10>* {
+                width: calc(100% / 4)
+            }
+
+            .flex.t-col-11>* {
+                width: calc(100% / 4)
+            }
+
+            .flex.t-col-12>* {
+                width: calc(100% / 4)
+            }
+
+            .flex[class*="t-col-"] {
+                display: flex
+            }
+
+            .flex.m-col-2>* {
+                width: calc(100% /2)
+            }
+
+            .flex.m-col-3>* {
+                width: calc(100% /3)
+            }
+
+            .flex.m-col-4>* {
+                width: calc(100% /4)
+            }
+
+            .flex.m-col-5>* {
+                width: calc(100% /5)
+            }
+
+            .flex.m-col-6>* {
+                width: calc(100% / 6)
+            }
+
+            .flex.m-col-7>* {
+                width: calc(100% / 7)
+            }
+
+            .flex.m-col-8>* {
+                width: calc(100% / 8)
+            }
+
+            .flex.m-col-9>* {
+                width: calc(100% / 9)
+            }
+
+            .flex.m-col-10>* {
+                width: calc(100% / 10)
+            }
+
+            .flex.m-col-11>* {
+                width: calc(100% / 11)
+            }
+
+            .flex.m-col-12>* {
+                width: calc(100% / 12)
+            }
+        }
+
+        @media screen and (min-width:900px) {
+            .show-mobile {
+                display: none !important
+            }
+
+            .text-center {
+                text-align: center
+            }
+
+            .text-right {
+                text-align: right
+            }
+
+            .flex-form {
+                display: flex;
+                flex-wrap: wrap;
+                margin-left: -20px
+            }
+
+            form label {
+                display: block;
+                padding-bottom: 10px
+            }
+        }
+
+        @media screen and (max-width:900px) {
+            .hide-mobile {
+                display: none !important
+            }
+        }
+
+        .animated-label label {
+            position: absolute;
+            top: 13px;
+            padding-bottom: 0 !important;
+            padding-left: 15px;
+            -webkit-transition: all .2s ease;
+            -moz-transition: all .2s ease;
+            -ms-transition: all .2s ease;
+            -o-transition: all .2s ease;
+            transition: all .2s ease;
+            pointer-events: none
+        }
+
+        .animated-label input:focus+label,
+        .animated-label input:not(:placeholder-shown)+label,
+        .animated-label textarea:focus+label,
+        .animated-label textarea:not(:placeholder-shown)+label,
+        .animated-label label.active {
+            transform: translateY(-30px);
+            padding-left: 3px;
+            font-size: 10px
+        }
+
+        .youtube {
+            position: relative;
+            padding-bottom: 56.25%;
+            padding-top: 25px;
+            height: 0
+        }
+
+        .youtube iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%
+        }
+
+        label.custom-radio,
+        label.custom-checkbox {
+            position: initial;
+            pointer-events: initial;
+            display: inline-block;
+            vertical-align: middle
+        }
+
+        label.custom-checkbox input[type="checkbox"],
+        label.custom-radio input[type="radio"] {
+            display: none
+        }
+
+        label.custom-checkbox input[type="checkbox"]+span,
+        label.custom-radio input[type="radio"]+span {
+            display: inline-flex;
+            vertical-align: middle;
+            border: 1px solid #666;
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            -moz-transition: all .2s ease;
+            -ms-transition: all .2s ease;
+            -o-transition: all .2s ease;
+            transition: all .2s ease;
+            background: url("data:image/svg+xml,%3csvg%20aria-hidden='true'%20focusable='false'%20data-prefix='fas'%20data-icon='check'%20class='svg-inline--fa%20fa-check%20fa-w-16'%20role='img'%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20512%20512'%3e%3cpath%20fill='%23fff'%20d='M173.898%20439.404l-166.4-166.4c-9.997-9.997-9.997-26.206%200-36.204l36.203-36.204c9.997-9.998%2026.207-9.998%2036.204%200L192%20312.69%20432.095%2072.596c9.997-9.997%2026.207-9.997%2036.204%200l36.203%2036.204c9.997%209.997%209.997%2026.206%200%2036.204l-294.4%20294.401c-9.998%209.997-26.207%209.997-36.204-.001z'%3e%3c/path%3e%3c/svg%3e") no-repeat center center/10px 15px #fff
+        }
+
+        label.custom-radio input[type="radio"]+span {
+            border-radius: 50%
+        }
+
+        label.custom-checkbox input[type="checkbox"]:checked+span,
+        label.custom-radio input[type="radio"]:checked+span {
+            border: 1px solid var(--c-primary);
+            background-color: var(--c-primary);
+            -webkit-transition: all .2s ease
+        }
+    </style>
+
+    <!-- General -->
+    <style>
+        :root {
+            /*--c-primary: #63ae6f; */
+            --c-primary: #293845;
+            /*Verde*/
+            --c-secondary: #70809021;
+            /* Azul */
+            --c-terciary: #F4F7F6;
+            /* Gris de fondo principal */
+            --c-hover: #222;
+
+            --r-facebook: #3C5A99;
+            --r-twitter: #00A9FF;
+            --r-homea: #F7941E;
+            --r-houzz: #77BC42;
+            --r-yelp: #D32323;
+            --r-google: #DD4B39;
+        }
+
+        * {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            /* Firefox */
+            -webkit-box-sizing: border-box;
+            /* Safari */
+        }
+
+        html {
+            font-size: 20px;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #fff;
+            color: #000;
+            margin: 0;
+            color: #293845;
+        }
+
+
+        a:hover {
+            color: var(--c-hover);
+        }
+
+
+
+        /* Inputs */
+        input[type="text"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="email"],
+        input[type="password"],
+        input[type="search"],
+        select,
+        textarea {
+            display: inline-block;
+            width: 100%;
+            border: 1px solid #ebebeb;
+            background-color: #fff;
+            padding: 0 10px;
+            margin-bottom: 0px;
+            font-size: 0.65rem;
+            height: 34px;
+            outline: none;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            /* Firefox */
+            -webkit-box-sizing: border-box;
+            /* Safari */
+        }
+
+        input[type="text"]::placeholder,
+        input[type="number"]::placeholder,
+        input[type="tel"]::placeholder,
+        input[type="email"]::placeholder,
+        input[type="password"]::placeholder,
+        input[type="search"]::placeholder,
+        select::placeholder,
+        textarea::placeholder {
+            opacity: 0.8;
+            color: #666666;
+        }
+
+        input[type="number"],
+        input[type="tel"] {
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+
+
+
+        select {
+            vertical-align: middle;
+            background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3e%3cpath fill='%23343a40' d='M12 21l-12-18h24z'/%3e%3c/svg%3e") no-repeat right .75rem center/8px 10px;
+            /* background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") no-repeat right .75rem center/8px 10px; */
+            /*background: url("data:image/svg+xml,%3csvg aria-hidden='true' focusable='false' data-prefix='fas' data-icon='sort-down' class='svg-inline--fa fa-sort-down fa-w-10' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'%3e%3cpath fill='%23333' d='M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z'%3e%3c/path%3e%3c/svg%3e") no-repeat right .8rem center/10px 12px;*/
+            /* background: url("data:image/svg+xml,%3csvg aria-hidden='true' focusable='false' data-prefix='fas' data-icon='chevron-down' class='svg-inline--fa fa-chevron-down fa-w-14' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3e%3cpath fill='%23000' d='M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z'%3e%3c/path%3e%3c/svg%3e") no-repeat right .75rem center/8px 10px; */
+            background-repeat: no-repeat;
+            background-position: calc(100% + -10px) center;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 100%;
+        }
+
+        .title {
+            color: var(--c-primary);
+            font-weight: 700;
+            z-index: 1;
+            position: relative;
+            line-height: 1.9;
+            font-size: 50px;
+            /* width: 56%; */
+            text-align: center;
+            margin-left: auto;
+            padding: 30px 0;
+        }
+
+
+        .btn {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 16px 34px;
+            font-weight: 400;
+            display: inline-block;
+            border: 0;
+            background-color: #c8c8c8;
+            color: #000;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .btn.btn-primary {
+            color: #000;
+        }
+
+
+        /* SECCIONES */
+
+
+        section#home-bg .bg-image img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            pointer-events: none;
+            object-fit: cover;
+            /* background-color: #000; */
+        }
+
+        section#home-bg .btn.text-center {
+
+            position: relative;
+            background-color: transparent;
+            display: block;
+
+        }
+
+        section#home-bg .btn i {
+            font-size: 71px;
+            color: var(--c-primary);
+        }
+
+        section#home-bg .bg-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            z-index: 0;
+        }
+
+        section#home-bg {
+            padding-top: 50px;
+            padding-bottom: 50px;
+            position: relative;
+        }
+
+        section#home-bg .container {}
+
+        section#home-bg .sup_titulo {
+            font-size: 0.7rem;
+            /* padding-bottom: 10px; */
+            text-align: center;
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 700;
+        }
+
+        section#home-bg .title {
+            padding-top: 10px;
+        }
+
+        section#home-bg .title:before {
+            content: "";
+        }
+
+        section#home-bg .subtitle {
+            padding-bottom: 100px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 34px;
+        }
+
+        section#home-bg .flex.principal-col {
+            position: relative;
+            z-index: 1;
+        }
+
+        section#home-bg .flex.principal-col>div {}
+
+        section#home-bg .flex.principal-col>div:nth-child(1) {}
+
+        section#home-bg .flex.principal-col>div:nth-child(2) {}
+
+        section#home-bg .items-home-bg {
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            padding-top: 30px;
+        }
+
+     
+
+        section#home-bg .items-home-bg .item {}
+
+        section#home-bg .items-home-bg .bg {
+            background-color:
+        }
+
+        section#home-bg .items-home-bg .btn {
+            font-size: 0.7rem;
+            font-weight: 700;
+            /* padding-bottom: 10px; */
+        }
+       
+
+        i.fa-light.fa-angles-down {}
+
+        @media screen and (max-width:900px) {
+            section#home-bg .bg-image {}
+
+            section#home-bg .bg-image img {}
+
+            section#home-bg {}
+
+            section#home-bg .container {}
+
+            section#home-bg .sup_titulo {}
+
+            section#home-bg .title {}
+
+            section#home-bg .subtitle {}
+
+            section#home-bg .flex.principal-col {}
+
+            section#home-bg .flex.principal-col>div {}
+
+            section#home-bg .flex.principal-col>div:nth-child(1) {}
+
+            section#home-bg .flex.principal-col>div:nth-child(2) {}
+
+            section#home-bg .items-home-bg {}
+
+            section#home-bg .items-home-bg .item {}
+
+            section#home-bg .items-home-bg .bg {}
+
+            section#home-bg .items-home-bg .btn {}
+        }
+
+        section#agenda {
+            padding-top: 50px;
+            padding-bottom: 50px;
+            position: relative;
+        }
+
+        section#agenda .container {}
+
+        section#agenda .title {}
+
+        section#agenda .title:before {
+            content: "";
+        }
+
+        section#agenda .subtitle {
+            padding-bottom: 20px;
+            font-size: 33px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        section#agenda .item-agenda {
+            padding-bottom: 50px;
+            max-width: 1119px;
+            margin-left: auto;
+        }
+
+        section#agenda .item-agenda .bg {
+            border: 2px solid #c8c8c8;
+            padding: 10px;
+            background-color: #f5f5f5;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        section#agenda .item-agenda .title-item {
+            font-size: 34px;
+            font-weight: 700;
+            text-align: left;
+            /* padding-bottom: 20px; */
+            padding: 10px;
+            padding-bottom: 0;
+            padding-top: 0;
+        }
+
+        section#agenda .item-agenda .title-item>ul {
+            list-style: none;
+            display: inline-flex;
+            padding-left: 0;
+            padding-right: 10px;
+        }
+
+        section#agenda .item-agenda .title-item>ul>li {
+            font-size: 15px;
+        }
+
+        section#agenda .item-agenda .title-item>ul>li>.bg {
+            border: 1px solid #c8c8c8;
+            background-color: #fff;
+            padding: 9px;
+        }
+
+        section#agenda .item-agenda .texto-item {
+            font-size: 23px;
+            padding: 10px;
+            font-weight: 500;
+            padding-top: 0;
+        }
+
+        section#agenda .titulo_flex p {
+            margin-top: 5px;
+            font-weight: 400;
+        }
+
+        section#agenda .item-agenda .item-agenda.flex.t-col-3 {}
+
+        section#agenda .item {}
+
+        section#agenda .item .bg {
+            display: inline-flex;
+            width: 100%;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        section#agenda .icono_flex {
+            width: 50%;
+        }
+
+        section#agenda .icono_flex img {
+            height: 100%;
+            object-fit: contain;
+        }
+
+        section#agenda .titulo_flex {
+            padding-left: 10px;
+            font-weight: 700;
+        }
+
+        section#agenda .texto_flex {}
+
+        section#agenda .icono_flex::after {
+            content: "";
+            display: block;
+        }
+
+
+        @media screen and (max-width:900px) {
+            section#agenda {}
+
+            section#agenda .container {}
+
+            section#agenda .title {}
+
+            section#agenda .subtitle {}
+
+            section#agenda .items-agenda {}
+
+            section#agenda .items-agenda .item {}
+
+            section#agenda .items-agenda .bg {}
+
+            section#agenda .items-agenda .icono_flex {}
+
+            section#agenda .items-agenda .icono_flex img {}
+
+            section#agenda .items-agenda .titulo_flex {}
+
+            section#agenda .items-agenda .texto_flex {}
+        }
+
+        section#form-invite {
+            padding-top: 50px;
+            padding-bottom: 50px;
+            position: relative;
+            background-color: var(--c-secondary);
+        }
+
+        section#form-invite .container {}
+
+        section#form-invite .title {}
+
+        section#form-invite .title:before {
+            content: "";
+        }
+
+        section#form-invite .items-form-invite {}
+
+        section#form-invite .items-form-invite .item {}
+
+        section#form-invite .items-form-invite .bg {
+            background-color:
+        }
+
+        section#form-invite .items-form-invite .titulo_flex {
+            padding-bottom: 20px;
+            /* max-width: 504px; */
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        section#form-invite .items-form-invite .texto_flex {
+            font-size: 0.9rem;
+            padding-bottom: 10px;
+            font-weight: 500;
+            line-height: 1.3;
+            text-align: left;
+        }
+
+        @media screen and (max-width:900px) {
+            section#form-invite {}
+
+            section#form-invite .container {}
+
+            section#form-invite .title {}
+
+            section#form-invite .items-form-invite {}
+
+            section#form-invite .items-form-invite .item {}
+
+            section#form-invite .items-form-invite .bg {}
+
+            section#form-invite .items-form-invite .titulo_flex {}
+
+            section#form-invite .items-form-invite .texto_flex {}
+        }
+
+
+        /* FIN SECCIONES */
+    </style>
+
+    <!-- Header -->
+    <style>
+        .showResponsive {
+            display: none;
+        }
+
+        header {
+            display: block;
+            text-align: center;
+            padding-top: 30px;
+            padding-bottom: 30px;
+            /* position: absolute; */
+            width: 100%;
+            top: 0;
+            z-index: 2;
+            /*position: -webkit-sticky;
+        position: sticky;
+        */
+            -webkit-transition: all 0.2s ease;
+            -moz-transition: all 0.2s ease;
+            -ms-transition: all 0.2s ease;
+            -o-transition: all 0.2s ease;
+            transition: all 0.2s ease;
+            background-color: #dfe6ed;
+            border-bottom: 2px solid #788896;
+        }
+
+        header.sticky {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #fff;
+            border-bottom: 1px solid #E6EAEA;
+            visibility: visible !important;
+        }
+
+        header.sticky.headerInternal {
+            background-color: #fff !important;
+            position: absolute !important;
+            top: 0 !important;
+            border: 0 !important;
+        }
+
+        header:after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+
+        header .container-fluid {
+            position: relative;
+        }
+
+        header nav.menu-main {
+            float: right;
+        }
+
+        @media screen and (max-width:900px) {
+            .headerInternal {
+                display: none !important;
+            }
+        }
+
+        header nav.menu-right {
+            float: right;
+        }
+
+        header .logo {
+            float: left;
+        }
+
+        header nav>ul {
+            display: block;
+            padding: 0;
+            margin: 0
+        }
+
+        header nav>ul>li {
+            display: inline-block;
+            padding: 0;
+            margin: 0;
+            position: relative;
+        }
+
+        header nav>ul>li>ul {
+            position: absolute;
+            display: block;
+            padding-left: 0;
+            border: 1px solid #eee;
+            overflow: hidden;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 0;
+            opacity: 0;
+            -webkit-transition: all 0.2s ease;
+            -moz-transition: all 0.2s ease;
+            -ms-transition: all 0.2s ease;
+            -o-transition: all 0.2s ease;
+            transition: all 0.2s ease;
+        }
+
+        header nav>ul>li:hover ul {
+            height: initial;
+            opacity: 1;
+        }
+
+        header nav>ul>li>ul li {
+            display: block;
+        }
+
+        header nav>ul>li>ul li a {
+            display: block;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        header nav a {
+            padding-top: 20px;
+            padding-bottom: 20px;
+            line-height: 50px;
+            color: #666666;
+            padding-left: 20px;
+            padding-right: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        header nav li:first-child a {
+            padding-left: 0;
+        }
+
+        header nav li:last-child a {
+            padding-right: 0;
+        }
+
+        header nav a:hover,
+        header nav a.active {
+            color: var(--c-primary);
+        }
+
+        header nav a.big-number {
+            font-size: 1.3rem;
+            color: #333333;
+            border-left: 1px solid #CCC;
+            font-weight: 700;
+        }
+
+        header .logo img {
+            -webkit-transition: all 0.27s ease;
+            -moz-transition: all 0.27s ease;
+            -ms-transition: all 0.27s ease;
+            -o-transition: all 0.27s ease;
+            transition: all 0.27s ease;
+            max-width: 100%;
+            height: 35px;
+        }
+
+        /*Mobile*/
+        @media screen and (max-width:550px) {
+            header .logo img {
+                max-width: 100%;
+                height: 20px;
+            }
+        }
+
+        /*Mobile*/
+        @media screen and (max-width:900px) {
+            body:not(.comienzo) header.headerInternal .logo img {
+                -webkit-filter: opacity(0.6) brightness(0);
+                filter: opacity(0.6) brightness(0);
+            }
+        }
+
+        header .logo-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .iniciar-sesion {
+            color: var(--c-primary);
+        }
+
+
+        /*Mobile*/
+        @media screen and (max-width:800px) {
+            header nav.menu-main {
+                display: block;
+                position: fixed;
+                left: -100vw;
+                background-color: #111;
+                z-index: 2;
+                overflow-y: auto;
+                height: 100vh;
+                top: 0;
+                min-width: 70%;
+                padding-top: 10px;
+
+                -webkit-transition: all 0.2s ease;
+                -moz-transition: all 0.2s ease;
+                -ms-transition: all 0.2s ease;
+                -o-transition: all 0.2s ease;
+                transition: all 0.2s ease;
+            }
+
+            header nav.menu-main.open {
+                left: 0;
+            }
+
+            header nav.menu-main a,
+            header nav.menu-main a.showResponsive {
+                display: block;
+                padding-top: 0;
+                padding-bottom: 0;
+                text-align: left;
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            header nav.menu-main a:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            header nav.menu-right {
+                display: none;
+            }
+
+            header .logo-center {
+                position: inherit;
+                left: auto;
+                transform: none;
+            }
+        }
+
+        /*Tablet*/
+        @media screen and (min-width:750px) and (max-width:1250px) and (orientation:landscape) {
+            header nav.menu-main a {
+                padding-left: 7px;
+                padding-right: 7px;
+                font-size: 0.7rem;
+            }
+        }
+
+        .responsiveMenu {
+            display: none;
+        }
+
+        /*Mobile*/
+        @media screen and (max-width:800px) {
+            .responsiveMenu {
+                display: block;
+                position: absolute;
+                right: 10px;
+                background-color: transparent;
+                border: 0;
+                width: 35px;
+                top: calc(50% + -8px);
+                transform: translateY(-50%);
+
+                -webkit-transition: all 0.0s ease;
+                -moz-transition: all 0.0s ease;
+                -ms-transition: all 0.0s ease;
+                -o-transition: all 0.0s ease;
+                transition: all 0.0s ease;
+            }
+
+            .responsiveMenu>div {
+                height: 4px;
+                background-color: black;
+                margin: 3px 0;
+                -webkit-border-radius: 3px;
+                border-radius: 3px;
+            }
+
+            .responsiveMenu.open {
+                width: calc(100vw + -10px);
+                height: 100vh;
+                position: fixed;
+            }
+
+            .responsiveMenu.open>div {
+                background-color: transparent;
+            }
+        }
+
+        #form-request .close {
+            position: relative;
+            z-index: 2;
+        }
+
+        /*Mobile*/
+        @media screen and (max-width:750px) {
+            #form-request .close a {
+                position: absolute;
+                display: block;
+                right: 0;
+                top: -70px;
+            }
+        }
+    </style>
+
+    <!-- Footer -->
+    <style>
+        footer {
+            padding-bottom: 50px;
+            padding-top: 50px;
+            /* font-size: 0.85rem; */
+            line-height: 1.7;
+            background-color: #c3cfd9;
+            border-top: 2px solid #788896;
+            font-family: 'Roboto Condensed', sans-serif;
+        }
+
+        footer ul.menu-footer {
+            display: flex;
+            padding: 0;
+            gap: 30px;
+            margin: 0;
+            margin-bottom: 20px;
+        }
+
+        footer ul.menu-footer li {
+            display: block;
+        }
+
+        footer ul.social {
+            display: flex;
+            gap: 22px;
+            padding: 0;
+            margin: 0;
+        }
+
+        footer ul.social li {
+            display: block;
+        }
+
+        footer ul.social li a {
+            display: block;
+            filter: brightness(0) invert(0.1);
+            opacity: 0.75;
+            font-size: 0;
+        }
+
+        footer ul.social li a img {
+            height: 25px !important;
+        }
+
+        footer ul.social li a:hover {
+            opacity: 1;
+        }
+
+        footer ul.social li a img {
+            height: 26px;
+        }
+
+        footer .flex>div:nth-child(2) {
+            display: flex;
+            justify-content: end;
+            gap: 40px;
+        }
+
+        footer a {
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            display: flex;
+            gap: 10px;
+            line-height: 1;
+        }
+
+        footer a.top img {
+            height: 20px;
+        }
+
+        footer a:hover {
+            opacity: 0.7;
+        }
+
+        /*Mobile*/
+        @media screen and (max-width:900px) {
+            footer {
+                font-size: 0.8rem;
+            }
+
+            footer ul.menu-footer {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <!-- Header -->
+    <header id="navHeader">
+        <div class="container">
+            <a href="/" class="logo js-scroll">
+                <img src="assets/img/logo.svg" alt="" class="full-logo" />
+            </a>
+        </div>
+    </header>
+
+    <!-- SECTIONS AQUI -->
+
+    <section id="home-bg" class="section wow fadeIn  ">
+        <div class="bg-image">
+            <img src="https://picsum.photos/1800/1000?random=6" loading="lazy" width="100%" height="100%" alt="" />
+        </div>
+        <div class="container">
+            <div class="flex principal-col">
+                <div class="wow fadeIn">
+                    <div class="sup_titulo">
+                        HYBRID EVENT
+                    </div>
+                    <div class="title">
+                        Clear statement about <br> our event
+                    </div>
+                    <div class="subtitle">
+                        Secondary heading providing additional imformation
+                    </div>
+                </div>
+            </div>
+            <div class="items-home-bg flex">
+                <div class="item w25">
+                    <div class="bg">
+                        <a href="#" class="btn btn-primary" style="color: #fff;">
+                            Know the important
+                        </a>
+                    </div>
+                </div>
+                <div class="item w25">
+                    <div class="bg">
+                        <a href="#" class="btn btn-primary" style="color: #fff;">
+                            Grab your seat
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="btn text-center">
+                <i class="fa-solid fa-angles-down"></i>
+            </div>
+        </div>
+    </section>
+
+    <section id="agenda" class="section wow fadeIn  ">
+        <div class="container">
+            <div class="wow fadeIn">
+                <div class="title">
+                    Agenda
+                </div>
+                <div class="subtitle">
+                    WED Jun 02
+                </div>
+            </div>
+            <div class="item-agenda">
+                <div class="bg">
+                    <div class="title-item">
+                        <ul>
+                            <li>
+                                <div class="bg">13:20</div>
+                            </li>
+                            <li>
+                                <div class="bg">13:40</div>
+                            </li>
+                            <li>
+                                <div class="bg">gmt +2</div>
+                            </li>
+                        </ul>
+                        Título de la ponencia
+                    </div>
+                    <div class="texto-item">
+                        Sollicitant homines non sunt nisi quam formae rerum principiis opiniones. Mors enim est
+                        terribilis ut
+                        Socrati aliud esse apparet. Sed timor mortis est notio terribile. Cum igitur impediantur
+                        turbentur aut
+                        dolere videamus aliis non tribuunt nisi nobis hoc est, in principiis nostra.
+                    </div>
+
+                    <div class="item-agenda flex t-col-3">
+                        <div class="item">
+                            <div class="bg">
+                                <div class="icono_flex">
+                                    <img src="https://picsum.photos/1800/1000?random=2" loading="lazy" width="100%"
+                                        height="100%" alt="" />
+
+                                </div>
+                                <div class="titulo_flex">
+                                    Nombre
+
+                                    <p>Posición <br>
+                                        Compañía</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="bg">
+                                <div class="icono_flex">
+                                    <img src="https://picsum.photos/1800/1000?random=3" loading="lazy" width="100%"
+                                        height="100%" alt="" />
+                                </div>
+                                <div class="titulo_flex">
+                                    Nombre
+
+                                    <p>Posición <br>
+                                        Compañía</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="bg">
+                                <div class="icono_flex">
+                                    <img src="https://picsum.photos/1800/1000?random=4" loading="lazy" width="100%"
+                                        height="100%" alt="" />
+                                </div>
+                                <div class="titulo_flex">
+                                    Nombre
+
+                                    <p>Posición <br>
+                                        Compañía</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="item-agenda">
+                <div class="bg">
+                    <div class="title-item">
+                        <ul>
+                            <li>
+                                <div class="bg">13:20</div>
+                            </li>
+                            <li>
+                                <div class="bg">13:40</div>
+                            </li>
+                            <li>
+                                <div class="bg">gmt +2</div>
+                            </li>
+                        </ul>
+                        Título de la ponencia
+                    </div>
+                    <div class="texto-item">
+                        Sollicitant homines non sunt nisi quam formae rerum principiis opiniones. Mors enim est
+                        terribilis ut
+                        Socrati aliud esse apparet. Sed timor mortis est notio terribile. Cum igitur impediantur
+                        turbentur aut
+                        dolere videamus aliis non tribuunt nisi nobis hoc est, in principiis nostra.
+                    </div>
+
+                    <div class="item-agenda flex t-col-3">
+                        <div class="item">
+                            <div class="bg">
+                                <div class="icono_flex">
+                                    <img src="https://picsum.photos/1800/1000?random=2" loading="lazy" width="100%"
+                                        height="100%" alt="" />
+                                </div>
+                                <div class="titulo_flex">
+                                    Nombre
+
+                                    <p>Posición <br>
+                                        Compañía</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="bg">
+                                <div class="icono_flex">
+                                    <img src="https://picsum.photos/1800/1000?random=3" loading="lazy" width="100%"
+                                        height="100%" alt="" />
+                                </div>
+                                <div class="titulo_flex">
+                                    Nombre
+
+                                    <p>Posición <br>
+                                        Compañía</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="bg">
+                                <div class="icono_flex">
+                                    <img src="https://picsum.photos/1800/1000?random=4" loading="lazy" width="100%"
+                                        height="100%" alt="" />
+                                </div>
+                                <div class="titulo_flex">
+                                    Nombre
+
+                                    <p>Posición <br>
+                                        Compañía</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subtitle">
+                THU Jun 02
+            </div>
+
+            <div class="item-agenda">
+                <div class="bg">
+                    <div class="title-item">
+                        <ul>
+                            <li>
+                                <div class="bg">13:20</div>
+                            </li>
+                            <li>
+                                <div class="bg">13:40</div>
+                            </li>
+                            <li>
+                                <div class="bg">gmt +2</div>
+                            </li>
+                        </ul>
+                        Título de la ponencia
+                    </div>
+                    <div class="texto-item">
+                        Sollicitant homines non sunt nisi quam formae rerum principiis opiniones. Mors enim est
+                        terribilis ut
+                        Socrati aliud esse apparet. Sed timor mortis est notio terribile. Cum igitur impediantur
+                        turbentur aut
+                        dolere videamus aliis non tribuunt nisi nobis hoc est, in principiis nostra.
+                    </div>
+
+
+
+                    <div class="item-agenda flex t-col-3">
+                        <div class="item">
+                            <div class="bg">
+                                <div class="icono_flex">
+                                    <img src="https://picsum.photos/1800/1000?random=2" loading="lazy" width="100%"
+                                        height="100%" alt="" />
+                                </div>
+                                <div class="titulo_flex">
+                                    Nombre
+
+                                    <p>Posición <br>
+                                        Compañía</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="bg">
+                                <div class="icono_flex">
+                                    <img src="https://picsum.photos/1800/1000?random=3" loading="lazy" width="100%"
+                                        height="100%" alt="" />
+                                </div>
+                                <div class="titulo_flex">
+                                    Nombre
+
+                                    <p>Posición <br>
+                                        Compañía</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="bg">
+                                <div class="icono_flex">
+                                    <img src="https://picsum.photos/1800/1000?random=4" loading="lazy" width="100%"
+                                        height="100%" alt="" />
+                                </div>
+                                <div class="titulo_flex">
+                                    Nombre
+                                    <p>Posición <br>
+                                        Compañía</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="form-invite" class="section wow fadeIn  ">
+        <div class="container">
+            <div class="wow fadeIn">
+                <div class="title">
+                    I’m in !
+                </div>
+            </div>
+            <div class="items-form-invite flex">
+                <div class="item">
+                    <div class="bg">
+                        <div class="titulo_flex">
+                            Clear call-to-action sentence to invite to join us
+                        </div>
+                        <div class="texto_flex">
+                            Tollere odium autem in nostra potestate sint, ab omnibus et contra naturam transferre in
+                            nobis. Sed
+                            interim toto desiderio supprimunt: si vis aliqua quae in manu tua tibi necesse confundentur
+                            et quae, quod
+                            laudabile esset, nihil tamen possides.
+
+                            <br><br>
+
+                            Oportet uti solum de actibus prosequtionem et fugam, haec leniter et blandus et reservato.
+
+                            <br><br>
+
+                            Quae tibi placent quicunq prosunt aut diligebat multum, quod memor sis ad communia sunt ab
+                            initio minima.
+                            Quod si, exempli gratia, cupidum rerum in propria sunt ceramic calicem, admonere te solum
+                            Ceramic, quod
+                            sit generalis poculis, in cuius es tu cupidum. Deinde, si erumpit, non turbarentur.
+
+                            <br><br>
+
+
+                            Si osculantur puer tuus aut uxorem tuam, osculum, non dico quod omnia quae sunt hominis, et
+                            sic non
+                            tangetur, si aut ex eis moriatur.
+
+                            <br><br>
+
+                            Quando ambulabat agendis admonere te qualis actio. Si ad corpus, quae
+
+                        </div>
+                    </div>
+                </div>
+                <div class="form">
+                    <!-- <div class="bg">
+            <div class="titulo_flex">
+              _TITULO_
+            </div>
+            <div class="texto_flex">
+              _TEXTO_
+            </div>
+          </div> -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- SECTIONS AQUI -->
+
+
+
+
+    <footer>
+        <div class="container">
+            <div class="flex">
+                <div>
+                    <img src="assets/img/logo.svg" alt="" height="35" />
+                </div>
+            </div>
+            <div class="flex">
+                <div>
+                    <ul class="menu-footer">
+                        <li><a href="#">Legal notice</a></li>
+                        <li><a href="#">Privacy policy</a></li>
+                        <li><a href="#">Cookies policy</a></li>
+                    </ul>
+                    <div class="copy">Copyright 2021 NTT DATA Spain and Affiliates</div>
+                </div>
+                <div>
+                    <ul class="social">
+                        <li>
+                            <a href="#">
+                                <img src="assets/img/icons/redes/linkedin-in-brands.svg" alt="" height="32" />
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <img src="assets/img/icons/redes/facebook-f-brands.svg" alt="" height="32" />
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <img src="assets/img/icons/redes/twitter-brands.svg" alt="" height="32" />
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <img src="assets/img/icons/redes/youtube-brands.svg" alt="" height="32" />
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <img src="assets/img/icons/redes/instagram-brands.svg" alt="" height="32" />
+                            </a>
+                        </li>
+                    </ul>
+                    <a href="#" class="top">
+                        <img src="assets/img/icons/bi_arrow-up.svg" alt="" height="32" />
+                        Back to top
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+
+
+    <!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script>
+    <!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script><!-- Code injected by live-server -->
+    <script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+	// ]]>
+    </script>
+</body>
+
+</html>
