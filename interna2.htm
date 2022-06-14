@@ -243,12 +243,12 @@
         }
 
         .btn {
-            font-size: .6rem;
+            /* font-size: .6rem;
             padding: 10px 14px;
             display: inline-block;
             background-color: #c8c8c8;
             color: #222;
-            text-align: center
+            text-align: center */
         }
 
         .btn:hover {
@@ -721,11 +721,11 @@
     <style>
         :root {
             /*--c-primary: #63ae6f; */
-            --c-primary: #293845;
+            --c-primary: #1B326E;
             /*Verde*/
-            --c-secondary: #70809021;
+            --c-secondary: #E73A3A;
             /* Azul */
-            --c-terciary: #F4F7F6;
+            --c-terciary: #D1D1D1;
             /* Gris de fondo principal */
             --c-hover: #222;
 
@@ -824,7 +824,7 @@
         }
 
         .title {
-            color: var(--c-primary);
+            color: #fff;
             font-weight: 700;
             z-index: 1;
             position: relative;
@@ -855,10 +855,9 @@
         }
 
 
-        /* SECCIONES */
+        /* STYLES */
 
-
-        section#home-bg .bg-image img {
+        section#form-principal .bg-image img {
             display: block;
             width: 100%;
             height: 100%;
@@ -866,20 +865,9 @@
             top: 0;
             pointer-events: none;
             object-fit: cover;
-            /* background-color: #000; */
         }
 
-        section#home-bg .btn.text-center {
-            position: relative;
-            background-color: transparent;
-            display: block;
-        }
-
-        section#home-bg .btn img {
-            filter: brightness(0) invert(0.2);
-        }
-
-        section#home-bg .bg-image {
+        section#form-principal .bg-image {
             position: absolute;
             width: 100%;
             height: 100%;
@@ -888,316 +876,212 @@
             z-index: 0;
         }
 
-        section#home-bg {
-            padding-top: 50px;
-            position: relative;
-        }
-
-        section#home-bg .container {}
-
-        section#home-bg .sup_titulo {
-            font-size: 1rem;
-            /* padding-bottom: 10px; */
-            text-align: center;
-            font-family: 'Roboto Condensed', sans-serif;
-            font-weight: 500;
-        }
-
-        section#home-bg .title {
-            padding-top: 10px;
-        }
-
-        section#home-bg .title:before {
-            content: "";
-        }
-
-        section#home-bg .subtitle {
-            padding-bottom: 60px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 34px;
-            line-height: 1.3;
-        }
-
-        section#home-bg .flex.principal-col {
-            position: relative;
-            z-index: 1;
-        }
-
-        section#home-bg .flex.principal-col>div {}
-
-        section#home-bg .flex.principal-col>div:nth-child(1) {}
-
-        section#home-bg .flex.principal-col>div:nth-child(2) {}
-
-        section#home-bg .items-home-bg {
-            text-align: center;
-            align-items: center;
-            justify-content: center;
-            padding-top: 30px;
-        }
-
-
-
-        section#home-bg .items-home-bg .item {}
-
-        section#home-bg .items-home-bg .bg {
-            background-color:
-        }
-
-        section#home-bg .items-home-bg .btn {
-            font-size: 0.7rem;
-            font-weight: 700;
-            /* padding-bottom: 10px; */
-        }
-
-
-        i.fa-light.fa-angles-down {}
-
-        @media screen and (max-width:900px) {
-            section#home-bg .bg-image {}
-
-            section#home-bg .bg-image img {}
-
-            section#home-bg {}
-
-            section#home-bg .container {}
-
-            section#home-bg .sup_titulo {}
-
-            section#home-bg .title {
-    font-size: 35px;
-    line-height: 1.2;
-}
-
-            section#home-bg .subtitle {
-    font-size: 24px;
-}
-
-            section#home-bg .flex.principal-col {}
-
-            section#home-bg .flex.principal-col>div {}
-
-            section#home-bg .flex.principal-col>div:nth-child(1) {}
-
-            section#home-bg .flex.principal-col>div:nth-child(2) {}
-
-            section#home-bg .items-home-bg {}
-
-            section#home-bg .items-home-bg .item {}
-
-            section#home-bg .items-home-bg .bg {}
-
-            section#home-bg .items-home-bg .btn {}
-        }
-
-        section#agenda {
-            padding-top: 50px;
+        section#form-principal {
+            padding-top: 150px;
             padding-bottom: 50px;
             position: relative;
         }
 
-        section#agenda .container {}
+        section#form-principal .container {}
 
-        section#agenda .title {}
+        section#form-principal .title {
+            /* font-weight: 600; */
+            font-size: 62px;
+            padding-bottom: 20px;
+            text-align: left;
+            padding-top: 200px;
+        }
 
-        section#agenda .title:before {
+        section#form-principal .title:before {
             content: "";
         }
 
-        section#agenda .subtitle {
-            padding-bottom: 20px;
-            font-size: 33px;
+        section#form-principal .form {}
+
+        section#form-principal .form .flex {}
+
+        section#form-principal .form .flex>div {
             text-align: left;
-            font-weight: 600;
         }
 
-        section#agenda .item-agenda {
-            padding-bottom: 15px;
-            max-width: 1119px;
-            margin-left: auto;
-        }
-
-        section#agenda .item-agenda .bg {
-            border: 2px solid #c8c8c8;
-            padding: 10px;
-            background-color: #f5f5f5;
-            padding-top: 0;
-            padding-bottom: 0;
-        }
-
-        section#agenda .item-agenda .title-item {
-            font-size: 34px;
-            font-weight: 700;
-            text-align: left;
-            /* padding-bottom: 20px; */
-            padding: 10px;
-            padding-bottom: 20px;
-            padding-top: 20px;
-        }
-
-        section#agenda .item-agenda .title-item>ul {
-            list-style: none;
-            display: inline-flex;
-            padding-left: 0;
-            padding-right: 10px;
-            vertical-align: middle;
-            margin-top: 0;
-            margin-bottom: 0;
-        }
-
-        section#agenda .item-agenda .title-item>ul>li {
-            font-size: 15px;
-        }
-
-        section#agenda .item-agenda .title-item>ul>li>.bg {
-            border: 1px solid #c8c8c8;
-            background-color: #fff;
-            padding: 9px;
-        }
-
-        section#agenda .item-agenda .texto-item {
-            font-size: 18px;
-            padding: 10px;
-            font-weight: 500;
-            padding-top: 0;
-            line-height: 1.4;
-        }
-
-        section#agenda .titulo_flex p {
-            margin-top: 5px;
-            font-weight: 400;
-        }
-
-        section#agenda .item-agenda .item-agenda.flex.t-col-3 {}
-
-        section#agenda .item {}
-
-        section#agenda .item .bg {
-            display: inline-flex;
-            width: 100%;
-            padding-top: 10px;
+        section#form-principal .form .flex label {
             padding-bottom: 10px;
         }
 
-        section#agenda .item .bg a {
-            position: absolute;
+        section#form-principal .form .flex input {
+            border-radius: 18px;
+            border: 2px solid var(--c-terciary);
+            padding-left: 24px;
+        }
+
+        section#form-principal .form .flex .btn {
+            width: 100%;
+            text-align: center;
+            background-color: var(--c-primary);
+            color: #fff;
+            padding: 10px;
+            border-color: #fff;
+        }
+
+        section#form-principal .flex.principal-col {
+            position: relative;
             z-index: 1;
-            left: calc(37% + -33px);
         }
 
-        section#agenda .icono_flex {
-            width: 36%;
+        section#form-principal .container {
+            display: flex;
+            align-items: center;
         }
 
-        section#agenda .icono_flex img {
-            height: 100%;
-            object-fit: cover;
+        section#form-principal .container>div {
+            width: 100%;
         }
 
-        section#agenda .titulo_flex {
-            padding-left: 10px;
+        section#form-principal .image {
+            padding-bottom: 30px;
+        }
+
+        section#form-principal .title-form {
+            font-size: 21px;
             font-weight: 700;
+            padding-bottom: 5px;
+            padding-left: 10px;
+            color: var(--c-primary);
         }
 
-        section#agenda .texto_flex {}
-
-        section#agenda .icono_flex::after {
-            content: "";
-            display: block;
+        section#form-principal .subtitle-form {
+            color: var(--c-terciary);
+            padding-top: 5px;
+            padding-left: 10px;
+            padding-bottom: 5px;
+            font-size: 18px;
         }
 
+        section#form-principal .image img {}
+
+        section#form-principal .flex.principal-col>div {}
+
+        section#form-principal .flex.principal-col>div:nth-child(1) {}
+
+        section#form-principal .flex.principal-col>div:nth-child(2) {
+            max-width: 426px;
+            padding: 36px;
+            /* padding-right: 0; */
+            background-color: #fff;
+            border-radius: 10px;
+        }
 
         @media screen and (max-width:900px) {
-            section#agenda {}
+            section#form-principal .bg-image {}
 
-            section#agenda .container {}
+            section#form-principal .bg-image img {}
 
-            section#agenda .title {}
+            section#form-principal {}
 
-            section#agenda .subtitle {
-                text-align: center;
+            section#form-principal .container {}
+
+            section#form-principal .title {}
+
+            section#form-principal .form {}
+
+            section#form-principal .form .flex {}
+
+            section#form-principal .form .flex>div {
+                width: 100%
             }
 
-            section#agenda .items-agenda {}
+            section#form-principal .form .flex label {}
 
-            section#agenda .items-agenda .item {}
+            section#form-principal .form .flex input {}
 
-            section#agenda .items-agenda .bg {}
+            section#form-principal .form .flex .btn {}
 
-            section#agenda .items-agenda .icono_flex {}
+            section#form-principal .flex.principal-col {}
 
-            section#agenda .items-agenda .icono_flex img {}
+            section#form-principal .container {
+                display: block;
+            }
 
-            section#agenda .items-agenda .titulo_flex {}
+            section#form-principal .container>div {}
 
-            section#agenda .items-agenda .texto_flex {}
+            section#form-principal .image {}
 
-            section#agenda .item-agenda .title-item>ul {
-    margin-bottom: 20px;
-}
+            section#form-principal .image img {}
+
+            section#form-principal .flex.principal-col>div {}
+
+            section#form-principal .flex.principal-col>div:nth-child(1) {}
+
+            section#form-principal .flex.principal-col>div:nth-child(2) {}
         }
 
-        section#form-invite {
+        section#servicios {
             padding-top: 50px;
             padding-bottom: 50px;
             position: relative;
-            background-color: var(--c-secondary);
         }
 
-        section#form-invite .container {}
+        section#servicios .container {}
 
-        section#form-invite .title {}
-
-        section#form-invite .title:before {
-            content: "";
+        section#servicios .items-servicios {
+            text-align: center;
         }
 
-        section#form-invite .items-form-invite {}
+        section#servicios .items-servicios .item {}
 
-        section#form-invite .items-form-invite .item {}
-
-        section#form-invite .items-form-invite .bg {
+        section#servicios .items-servicios .bg {
             background-color:
+
         }
 
-        section#form-invite .items-form-invite .titulo_flex {
+        section#servicios .items-servicios .icono_flex {
             padding-bottom: 20px;
-            /* max-width: 504px; */
-            font-size: 32px;
-            font-weight: 600;
+            text-align: center;
         }
 
-        section#form-invite .items-form-invite .texto_flex {
-            font-size: 0.8rem;
+        section#servicios .items-servicios .icono_flex img {
+            height: 88px;
+            width: 100px;
+            object-fit: contain
+        }
+
+        section#servicios .items-servicios .titulo_flex {
             padding-bottom: 10px;
-            font-weight: 500;
-            line-height: 1.4;
             text-align: left;
+            color: var(--c-primary);
+            font-weight: 700;
+        }
+
+        section#servicios .items-servicios .texto_flex {
+            font-size: 13px;
+            padding-bottom: 10px;
+            text-align: left;
+            color: var(--c-terciary);
+            line-height: 28px;
+
         }
 
         @media screen and (max-width:900px) {
-            section#form-invite {}
+            section#servicios {}
 
-            section#form-invite .container {}
+            section#servicios .container {}
 
-            section#form-invite .title {}
+            section#servicios .items-servicios {}
 
-            section#form-invite .items-form-invite {}
+            section#servicios .items-servicios .item {}
 
-            section#form-invite .items-form-invite .item {}
+            section#servicios .items-servicios .bg {}
 
-            section#form-invite .items-form-invite .bg {}
+            section#servicios .items-servicios .icono_flex {}
 
-            section#form-invite .items-form-invite .titulo_flex {
-    font-size: 26px;
-}
+            section#servicios .items-servicios .icono_flex img {}
 
-            section#form-invite .items-form-invite .texto_flex {}
+            section#servicios .items-servicios .titulo_flex {}
+
+            section#servicios .items-servicios .texto_flex {}
         }
 
-
-        /* FIN SECCIONES */
+        /* FIN STYLES */
     </style>
 
     <!-- Header -->
@@ -1211,21 +1095,19 @@
             text-align: center;
             padding-top: 30px;
             padding-bottom: 30px;
-            /* position: absolute; */
+            position: absolute;
             width: 100%;
             top: 0;
             z-index: 2;
-            /*position: -webkit-sticky;
-        position: sticky;
-        */
             -webkit-transition: all 0.2s ease;
             -moz-transition: all 0.2s ease;
             -ms-transition: all 0.2s ease;
             -o-transition: all 0.2s ease;
             transition: all 0.2s ease;
-            background-color: #dfe6ed;
-            border-bottom: 2px solid #788896;
+            background-color: transparent;
+            /* border-bottom: 2px solid #788896; */
         }
+
 
         header.sticky {
             position: fixed;
@@ -1356,7 +1238,7 @@
             -o-transition: all 0.27s ease;
             transition: all 0.27s ease;
             max-width: 100%;
-            height: 35px;
+            height: 60px;
         }
 
         /*Mobile*/
@@ -1506,13 +1388,11 @@
     <!-- Footer -->
     <style>
         footer {
-            padding-bottom: 50px;
             padding-top: 50px;
-            /* font-size: 0.85rem; */
-            line-height: 1.7;
-            background-color: #c3cfd9;
-            border-top: 2px solid #788896;
-            font-family: 'Roboto Condensed', sans-serif;
+            padding-bottom: 50px;
+            position: relative;
+            background-color: var(--c-primary);
+            color: #fff;
         }
 
         footer ul.menu-footer {
@@ -1557,11 +1437,19 @@
             height: 26px;
         }
 
-        footer .flex>div:nth-child(2) {
+        footer .flex>div:nth-child(3) {
             display: flex;
             justify-content: end;
             gap: 40px;
+            text-align: right;
         }
+
+        footer .items-footer .texto_flex ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        footer .items-footer .texto_flex ul>li {}
 
         footer a {
             text-decoration: none;
@@ -1569,7 +1457,7 @@
             position: relative;
             display: flex;
             gap: 10px;
-            line-height: 1;
+            line-height: 1.5;
         }
 
         footer a.top img {
@@ -1578,6 +1466,72 @@
 
         footer a:hover {
             opacity: 0.7;
+        }
+
+        footer .container {}
+
+        footer .items-footer {
+            text-align: center;
+        }
+
+        footer .items-footer .item {
+            text-align: left;
+        }
+
+        footer .items-footer .bg {
+            background-color:
+        }
+
+        footer .items-footer .icono_flex {
+            padding-bottom: 20px;
+            text-align: right;
+        }
+
+        footer .items-footer .icono_flex img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+            filter: brightness(15);
+        }
+
+        footer .items-footer .titulo_flex {
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+            font-size: 22px;
+        }
+
+        footer .items-footer .texto_flex {
+            font-size: 0.7rem;
+            padding-bottom: 10px
+        }
+
+        footer .items-footer .texto_flex ul.redes.sociales {
+            display: inline-flex;
+        }
+
+        footer .items-footer .texto_flex ul.redes.sociales>li {
+            padding-left: 10px;
+        }
+
+        @media screen and (max-width:900px) {
+            footer {}
+
+            footer .container {}
+
+            footer .items-footer {}
+
+            footer .items-footer .item {}
+
+            footer .items-footer .bg {}
+
+            footer .items-footer .icono_flex {}
+
+            footer .items-footer .icono_flex img {}
+
+            footer .items-footer .titulo_flex {}
+
+            footer .items-footer .texto_flex {}
         }
 
         /*Mobile*/
@@ -1601,285 +1555,66 @@
     <header id="navHeader">
         <div class="container">
             <a href="/" class="logo js-scroll">
-                <img src="assets/img/logo.svg" alt="" class="full-logo" />
+                <img src="assets/img/transfesa.png" alt="" class="full-logo" />
             </a>
         </div>
     </header>
 
     <!-- SECTIONS AQUI -->
 
-    <section id="home-bg" class="section wow fadeIn  ">
+    <section id="form-principal" class="section wow fadeIn  ">
         <div class="bg-image">
-            <img src="https://picsum.photos/1800/1000?random=6" loading="lazy" width="100%" height="100%" alt="" />
+            <img src="assets/img/bg-tren-riot.png" loading="lazy" width="100%" height="100%" alt="" />
         </div>
         <div class="container">
             <div class="flex principal-col">
-                <div class="wow fadeIn">
-                    <div class="sup_titulo">
-                        HYBRID EVENT
-                    </div>
+                <div class="wow fadeInLeft">
                     <div class="title">
-                        Clear statement about <br> our event
-                    </div>
-                    <div class="subtitle">
-                        Secondary heading providing additional imformation
+                        Lorem, ipsum <br>
+                        Lorem, ipsum
                     </div>
                 </div>
-            </div>
-            <div class="items-home-bg flex">
-                <div class="item w25">
-                    <div class="bg">
-                        <a href="#" class="btn btn-primary" style="color: #fff;">
-                            Know the important
-                        </a>
-                    </div>
-                </div>
-                <div class="item w25">
-                    <div class="bg">
-                        <a href="#" class="btn btn-primary" style="color: #fff;">
-                            Grab your seat
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="btn text-center">
-                <img src="assets/img/angles-down-solid.png" alt="" width="50">
-            </div>
-        </div>
-    </section>
-
-    <section id="agenda" class="section wow fadeIn  ">
-        <div class="container">
-            <div class="wow fadeIn">
-                <div class="title">
-                    Agenda
-                </div>
-                <div class="subtitle">
-                    WED Jun 02
-                </div>
-            </div>
-            <div class="item-agenda">
-                <div class="bg">
-                    <div class="title-item">
-                        <ul>
-                            <li>
-                                <div class="bg">13:20</div>
-                            </li>
-                            <li>
-                                <div class="bg">13:40</div>
-                            </li>
-                            <li>
-                                <div class="bg">gmt +2</div>
-                            </li>
-                        </ul>
-                        Título de la ponencia
-                    </div>
-                    <div class="texto-item">
-                        Sollicitant homines non sunt nisi quam formae rerum principiis opiniones. Mors enim est
-                        terribilis ut
-                        Socrati aliud esse apparet. Sed timor mortis est notio terribile. Cum igitur impediantur
-                        turbentur aut
-                        dolere videamus aliis non tribuunt nisi nobis hoc est, in principiis nostra.
-                    </div>
-
-                    <div class="item-agenda flex t-col-3">
-                        <div class="item">
-                            <div class="bg">
-                                <a href="#"><img src="assets/img/linkedin.png" alt=""></a>
-                                <div class="icono_flex">
-                                    <img src="https://picsum.photos/1800/1000?random=2" loading="lazy" width="100%"
-                                        height="100%" alt="" />
-
-                                </div>
-                                <div class="titulo_flex">
-                                    Nombre
-
-                                    <p>Posición <br>
-                                        Compañía</p>
-                                </div>
+                <div class="wow fadeInRight">
+                    <div class="form">
+                        <div class="title-form">
+                            Rellena el formulario
+                        </div>
+                        <div class="subtitle-form">
+                            Contacta con nosotros
+                        </div>
+                        <div class="flex">
+                            <div>
+                                <input type="text" name="nombre_campo_1" id="nombre_campo_1" placeholder="Nombre" />
                             </div>
                         </div>
-                        <div class="item">
-                            <div class="bg">
-                                <a href="#"><img src="assets/img/linkedin.png" alt=""></a>
-                                <div class="icono_flex">
-                                    <img src="https://picsum.photos/1800/1000?random=3" loading="lazy" width="100%"
-                                        height="100%" alt="" />
-                                </div>
-                                <div class="titulo_flex">
-                                    Nombre
-
-                                    <p>Posición <br>
-                                        Compañía</p>
-                                </div>
+                        <div class="flex">
+                            <div>
+                                <input type="text" name="nombre_campo_2" id="nombre_campo_2" placeholder="Apellidos" />
                             </div>
                         </div>
-                        <div class="item">
-                            <div class="bg">
-                                <a href="#"><img src="assets/img/linkedin.png" alt=""></a>
-                                <div class="icono_flex">
-                                    <img src="https://picsum.photos/1800/1000?random=4" loading="lazy" width="100%"
-                                        height="100%" alt="" />
-                                </div>
-                                <div class="titulo_flex">
-                                    Nombre
-
-                                    <p>Posición <br>
-                                        Compañía</p>
-                                </div>
+                        <div class="flex">
+                            <div>
+                                <input type="text" name="nombre_campo_3" id="nombre_campo_3" placeholder="Teléfonos" />
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="item-agenda">
-                <div class="bg">
-                    <div class="title-item">
-                        <ul>
-                            <li>
-                                <div class="bg">13:20</div>
-                            </li>
-                            <li>
-                                <div class="bg">13:40</div>
-                            </li>
-                            <li>
-                                <div class="bg">gmt +2</div>
-                            </li>
-                        </ul>
-                        Título de la ponencia
-                    </div>
-                    <div class="texto-item">
-                        Sollicitant homines non sunt nisi quam formae rerum principiis opiniones. Mors enim est
-                        terribilis ut
-                        Socrati aliud esse apparet. Sed timor mortis est notio terribile. Cum igitur impediantur
-                        turbentur aut
-                        dolere videamus aliis non tribuunt nisi nobis hoc est, in principiis nostra.
-                    </div>
-
-                    <div class="item-agenda flex t-col-3">
-                        <div class="item">
-                            <div class="bg">
-                                <a href="#"><img src="assets/img/linkedin.png" alt=""></a>
-                                <div class="icono_flex">
-                                    <img src="https://picsum.photos/1800/1000?random=2" loading="lazy" width="100%"
-                                        height="100%" alt="" />
-                                </div>
-                                <div class="titulo_flex">
-                                    Nombre
-
-                                    <p>Posición <br>
-                                        Compañía</p>
-                                </div>
+                        <div class="flex">
+                            <div>
+                                <input type="text" name="nombre_campo_4" id="nombre_campo_4" placeholder="Empresa" />
                             </div>
                         </div>
-                        <div class="item">
-                            <div class="bg">
-                                <a href="#"><img src="assets/img/linkedin.png" alt=""></a>
-                                <div class="icono_flex">
-                                    <img src="https://picsum.photos/1800/1000?random=3" loading="lazy" width="100%"
-                                        height="100%" alt="" />
-                                </div>
-                                <div class="titulo_flex">
-                                    Nombre
-
-                                    <p>Posición <br>
-                                        Compañía</p>
-                                </div>
+                        <div class="flex">
+                            <div>
+                                <input type="text" name="nombre_campo_5" id="nombre_campo_5" placeholder="Cargo" />
                             </div>
                         </div>
-                        <div class="item">
-                            <div class="bg">
-                                <a href="#"><img src="assets/img/linkedin.png" alt=""></a>
-                                <div class="icono_flex">
-                                    <img src="https://picsum.photos/1800/1000?random=4" loading="lazy" width="100%"
-                                        height="100%" alt="" />
-                                </div>
-                                <div class="titulo_flex">
-                                    Nombre
-
-                                    <p>Posición <br>
-                                        Compañía</p>
-                                </div>
+                        <div class="flex">
+                            <div>
+                                <input type="text" name="nombre_campo_6" id="nombre_campo_6" placeholder="Email" />
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="subtitle">
-                THU Jun 02
-            </div>
-
-            <div class="item-agenda">
-                <div class="bg">
-                    <div class="title-item">
-                        <ul>
-                            <li>
-                                <div class="bg">13:20</div>
-                            </li>
-                            <li>
-                                <div class="bg">13:40</div>
-                            </li>
-                            <li>
-                                <div class="bg">gmt +2</div>
-                            </li>
-                        </ul>
-                        Título de la ponencia
-                    </div>
-                    <div class="texto-item">
-                        Sollicitant homines non sunt nisi quam formae rerum principiis opiniones. Mors enim est
-                        terribilis ut
-                        Socrati aliud esse apparet. Sed timor mortis est notio terribile. Cum igitur impediantur
-                        turbentur aut
-                        dolere videamus aliis non tribuunt nisi nobis hoc est, in principiis nostra.
-                    </div>
-
-
-
-                    <div class="item-agenda flex t-col-3">
-                        <div class="item">
-                            <div class="bg">
-                                <a href="#"><img src="assets/img/linkedin.png" alt=""></a>
-                                <div class="icono_flex">
-                                    <img src="https://picsum.photos/1800/1000?random=2" loading="lazy" width="100%"
-                                        height="100%" alt="" />
-                                </div>
-                                <div class="titulo_flex">
-                                    Nombre
-
-                                    <p>Posición <br>
-                                        Compañía</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="item">
-                            <div class="bg">
-                                <a href="#"><img src="assets/img/linkedin.png" alt=""></a>
-                                <div class="icono_flex">
-                                    <img src="https://picsum.photos/1800/1000?random=3" loading="lazy" width="100%"
-                                        height="100%" alt="" />
-                                </div>
-                                <div class="titulo_flex">
-                                    Nombre
-
-                                    <p>Posición <br>
-                                        Compañía</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="item">
-                            <div class="bg">
-                                <a href="#"><img src="assets/img/linkedin.png" alt=""></a>
-                                <div class="icono_flex">
-                                    <img src="https://picsum.photos/1800/1000?random=4" loading="lazy" width="100%"
-                                        height="100%" alt="" />
-                                </div>
-                                <div class="titulo_flex">
-                                    Nombre
-                                    <p>Posición <br>
-                                        Compañía</p>
-                                </div>
+                        <div class="flex">
+                            <div class="text-center">
+                                <input type="submit" class="btn" value="Enviar">
                             </div>
                         </div>
                     </div>
@@ -1888,65 +1623,91 @@
         </div>
     </section>
 
-    <section id="form-invite" class="section wow fadeIn  ">
+
+    <section id="servicios" class="section wow fadeIn  ">
         <div class="container">
-            <div class="wow fadeIn">
-                <div class="title">
-                    I’m in !
-                </div>
-            </div>
-            <div class="items-form-invite flex">
+            <div class="items-servicios flex t-col-2">
                 <div class="item">
-                    <div class="bg">
-                        <div class="titulo_flex">
-                            Clear call-to-action sentence to invite to join us
+                    <div class="flex">
+                        <div class="icono_flex w20">
+                            <img src="assets/img/angles-down-solid.png" loading="lazy" width="100%" height="100%"
+                                alt="" />
                         </div>
-                        <div class="texto_flex">
-                            Tollere odium autem in nostra potestate sint, ab omnibus et contra naturam transferre in
-                            nobis. Sed
-                            interim toto desiderio supprimunt: si vis aliqua quae in manu tua tibi necesse confundentur
-                            et quae, quod
-                            laudabile esset, nihil tamen possides.
-
-                            <br><br>
-
-                            Oportet uti solum de actibus prosequtionem et fugam, haec leniter et blandus et reservato.
-
-                            <br><br>
-
-                            Quae tibi placent quicunq prosunt aut diligebat multum, quod memor sis ad communia sunt ab
-                            initio minima.
-                            Quod si, exempli gratia, cupidum rerum in propria sunt ceramic calicem, admonere te solum
-                            Ceramic, quod
-                            sit generalis poculis, in cuius es tu cupidum. Deinde, si erumpit, non turbarentur.
-
-                            <br><br>
-
-
-                            Si osculantur puer tuus aut uxorem tuam, osculum, non dico quod omnia quae sunt hominis, et
-                            sic non
-                            tangetur, si aut ex eis moriatur.
-
-                            <br><br>
-
-                            Quando ambulabat agendis admonere te qualis actio. Si ad corpus, quae
-
+                        <div>
+                            <div class="titulo_flex">
+                                TITULO
+                            </div>
+                            <div class="texto_flex">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit eligendi facere
+                                placeat quas tenetur, odit, sint nemo natus doloribus aut in consequatur maiores error
+                                alias
+                                vel rerum sunt autem libero?
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="form">
-                    <!-- <div class="bg">
-            <div class="titulo_flex">
-              _TITULO_
-            </div>
-            <div class="texto_flex">
-              _TEXTO_
-            </div>
-          </div> -->
+                <div class="item">
+                    <div class="flex">
+                        <div class="icono_flex w20">
+                            <img src="assets/img/angles-down-solid.png" loading="lazy" width="100%" height="100%"
+                                alt="" />
+                        </div>
+                        <div>
+                            <div class="titulo_flex">
+                                TITULO
+                            </div>
+                            <div class="texto_flex">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut quisquam, nihil eius
+                                impedit
+                                magni exercitationem facere, cupiditate repellendus quae enim possimus et iure natus
+                                consequuntur sed unde incidunt sit ducimus?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="flex">
+                        <div class="icono_flex w20">
+                            <img src="assets/img/angles-down-solid.png" loading="lazy" width="100%" height="100%"
+                                alt="" />
+                        </div>
+                        <div>
+                            <div class="titulo_flex">
+                                TITULO
+                            </div>
+                            <div class="texto_flex">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia itaque accusamus
+                                ipsa
+                                corrupti voluptatibus ex ducimus possimus voluptates, veniam aut libero? Vero
+                                perferendis
+                                corrupti, sed rem magnam ad accusantium in?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="flex">
+                        <div class="icono_flex w20">
+                            <img src="assets/img/angles-down-solid.png" loading="lazy" width="100%" height="100%"
+                                alt="" />
+                        </div>
+                        <div>
+                            <div class="titulo_flex">
+                                TITULO
+                            </div>
+                            <div class="texto_flex">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis nihil suscipit
+                                perspiciatis facilis dolor est odio, laboriosam, veniam asperiores id quaerat eaque
+                                sequi,
+                                amet doloribus deleniti quis illo eum alias.
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
+
 
 
     <!-- SECTIONS AQUI -->
@@ -1954,60 +1715,76 @@
 
 
 
+    <!-- FOOTER -->
+
+
+
     <footer>
         <div class="container">
-            <div class="flex">
-                <div>
-                    <img src="assets/img/logo.svg" alt="" height="35" />
+            <div class="items-footer flex t-col-3">
+                <div class="item">
+                    <div class="bg">
+                        <div class="titulo_flex">
+                            contáctanos
+                        </div>
+                        <div class="texto_flex">
+                            <p>Calle Musgo 1, 28023 Madrid</p>
+                            <p>Tel. +34 91.387.99.00 <br>
+                                © 2021 Transfesa Logistics S.A <br>
+                                www.transfesa.com
+                            </p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="flex">
-                <div>
-                    <ul class="menu-footer">
-                        <li><a href="#">Legal notice</a></li>
-                        <li><a href="#">Privacy policy</a></li>
-                        <li><a href="#">Cookies policy</a></li>
-                    </ul>
-                    <div class="copy">Copyright 2021 NTT DATA Spain and Affiliates</div>
+                <div class="item">
+                    <div class="bg">
+                        <div class="titulo_flex">
+                            enlaces de interés
+                        </div>
+                        <div class="texto_flex">
+                            <ul>
+                                <li><a href="#">Aviso Legal</a></li>
+                                <li><a href="#">Términos y condiciones</a></li>
+                                <li><a href="#">Política de cookies</a></li>
+                                <li><a href="#">Datos personales</a></li>
+                                <li><a href="#">Trabaja con nosotros</a></li>
+                                <li><a href="#">Accionistas e inversores</a></li>
+                                <li><a href="#">Compliance</a></li>
+                                <li><a href="#">Declaración sobre la red</a></li>
+                                <li><a href="#">Condiciones Generales</a></li>
+                                <li><a href="#">Manual de uso de la marca</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <ul class="social">
-                        <li>
-                            <a href="#">
-                                <img src="assets/img/icons/redes/linkedin-in-brands.svg" alt="" height="32" />
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <img src="assets/img/icons/redes/facebook-f-brands.svg" alt="" height="32" />
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <img src="assets/img/icons/redes/twitter-brands.svg" alt="" height="32" />
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <img src="assets/img/icons/redes/youtube-brands.svg" alt="" height="32" />
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <img src="assets/img/icons/redes/instagram-brands.svg" alt="" height="32" />
-                            </a>
-                        </li>
-                    </ul>
-                    <a href="#" class="top">
-                        <img src="assets/img/icons/bi_arrow-up.svg" alt="" height="32" />
-                        Back to top
-                    </a>
+                <div class="item">
+                    <div class="bg">
+                        <div class="icono_flex">
+                            <img src="assets/img/transfesa.png" loading="lazy" width="100%" height="100%" alt="" />
+                        </div>
+                        <div class="titulo_flex">
+                            Nos vemos en redes sociales
+                        </div>
+                        <div class="texto_flex">
+                            <ul class="redes sociales">
+                                <li><img src="assets/img/linkedin.svg" alt=""></li>
+                                <li><img src="assets/img/Vector.svg" alt=""></li>
+                                <li><img src="assets/img/yt.svg" alt=""></li>
+                            </ul>
+                        </div>
+                        <div class="titulo_flex">
+                            contáctanos
+                        </div>
+                        <div class="texto_flex">
+                            transfesa@transfesa.com
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
-
+    <!-- FIN FOOTER -->
 
 
 </body>
