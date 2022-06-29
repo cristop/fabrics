@@ -1,0 +1,538 @@
+/**
+ * Utilerías para controles Mojito o controles HTML en general.
+ * - Registración de eventos (onXxx).
+ * - Manejo de la sesión (sessionXxx).
+ * - Navegación (navXxx).
+ * - Reflection (llamado a funciones) (refXxx).
+ * -- CUIDADO: recordar que para manejo de variables existe object.js.
+ * - Tag (utilerías para tags) (tagXxx).
+ * - Multimedia (mmdXxx).
+ */
+class mMojitoClass {
+
+	mmdSoundNok() {
+		mMojito.mmdSoundPlay('jar/mojito/utils/web/sounds/nok.mp3');
+	}
+	
+	mmdSoundOk() {
+		mMojito.mmdSoundPlay('jar/mojito/utils/web/sounds/ok.mp3');
+	}
+	
+	mmdSoundPlay(soundUrl) {
+		var audio = new Audio(soundUrl);
+		audio.play();		
+	}
+	
+	navGetUrlAjax(url, ajax){
+		if((ajax == null || ajax == true) && stringUtilNotEmpty(url)) {
+			if(url.indexOf('_jx=1') < 0) {
+				if(url.indexOf('?') >= 0) {
+					url += '&';
+				} else {
+					url += '?';
+				}
+				url += '_jx=1';
+			}
+		}
+		
+		return url;
+	}
+	
+	navGetUrl() {
+		var result = window.location.href;
+		return result;
+	}
+	
+	navGetPage() {
+		var result = window.location.href.substring(window.location.origin.length);
+		return result;
+	}
+	
+	navGoTo(url) {
+		var urlAux = mString.isNotEmpty(url) ? url : mMojito.navGetUrl();
+		window.location.href = urlAux;
+	}
+	
+	/**
+	 * Agrega un parámetro a una URL dada y la devuelve. Si la url viene nula o vacía devuelve el parámetro sin modificarle nada.
+	 * El valor del parámetro debe venir tal cual se quiere mandar ya que esta función hace la codificación necesaria.
+	 * url: URL a la que se le agregará el parámetro.
+	 * name: nombre del parámetro a agregar.
+	 * value: valor del parámetro a agregar. Debe venir sin codificar.
+	 */
+	navAddParameter(url, name, value) {
+		var result = url;
+		if(mString.isNotEmpty(url)) {
+			if(url.indexOf(name + '=') < 0) {
+				if(result.indexOf('?') < 0) {
+					result += '?';
+				} else {
+					result += '&';
+				}
+				result += name + '=';
+				result += encodeURIComponent(value);
+			} else {
+				// Sobreescribir el parámetro.
+			}
+		}
+		return result;
+	}
+
+	onBlur(selector, func, parameters) {
+		var hash = mString.hash(func.toString());
+		
+		$(selector).each(function() {
+			if ($(this).prop('mMojitoBlurHash') == null) {
+				$(this).prop('mMojitoBlurHash', [ ]);
+			}
+			
+			var hashes = $(this).prop('mMojitoBlurHash');
+			if(hashes.indexOf(hash) < 0) {
+				$(this).on('blur', function() {
+					mMojito.refCall(func, this, parameters);
+					return false;
+				});
+				$(this).prop('mMojitoBlurHash').push(hash);
+			}
+		});
+		
+		/*
+		$(selector).each(function() {
+			if ($(this).prop('onBlurLoaded') == null) {
+				$(this).prop('onBlurLoaded', true);
+				$(this).on('blur', function() {
+					var caller = func.bind(this);
+					caller();
+					return false;
+				})
+			}
+		});
+		*/
+	}
+	
+	/**
+	 * Permite enlazar contra el evento onclick chequeando que no haya una carga previa.
+	 * Sirve para utilizar con los métodos que hacen el reload de Javascript de las
+	 * secciones Ajax.
+	 */ 
+	onClick(selector, func, parameters) {
+		$(selector).each(function() {
+			if ($(this).prop('onClickLoaded') == null) {
+				$(this).prop('onClickLoaded', true);
+				$(this).on('click', function() {
+					// ¿Vale la pena? Esto sirve para ejecutar el modo 4 del botón llamador de modales.
+					// Pero el modo 4 en principio no se usa en páginas no estándar y esto es para
+					// páginas no estándar.
+					// utilCaller = this; 
+					
+					// ¿Sirve? Sería ideal encontrar una estrategia cross que pueda usarse en el modo
+					// estándar y no-estándar. Pero si no se encuentra tal vez sea mejor que en
+					// no-estándar cada sistema maneje el bloqueo de botón como crea conveniente.
+					// Se agrega como potencial solución cross el método mMojito.tagDisabledOnClick.
+					// mMojito.tagDisabledOnClick(this);
+					
+					mMojito.refCall(func, this, parameters);
+					return false;
+				})
+			}
+		});
+	}
+	
+	onChange(selector, func, parameters) {
+		var hash = mString.hash(func.toString());
+		
+		$(selector).each(function() {
+			if ($(this).prop('mMojitoChangeHash') == null) {
+				$(this).prop('mMojitoChangeHash', [ ]);
+			}
+			
+			var hashes = $(this).prop('mMojitoChangeHash');
+			if(hashes.indexOf(hash) < 0) {
+				$(this).on('change', function() {
+					mMojito.refCall(func, this, parameters);
+					return false;
+				});
+				$(this).prop('mMojitoChangeHash').push(hash);
+			}
+		});
+	}
+	
+	/**
+	 * Registra un evento que se dispara luego que el usuario ingresa un valor en un input.
+	 * Solo puede agregarse un evento por control porque el timer para disparar el evento se registra en una propiedad única del input.
+	 * Las opciones disponibles son:
+	 * - millis: milisegundos de espera para disparar el evento luego de la última tecla presionada por el usuario. Por defecto este valor es 500.
+	 */
+	onKeyTimer(selector, func, parameters, options) {
+		var hash = mString.hash(func.toString());
+		
+		$(selector).each(function() {
+			var millis = (options != null && options.millis != null) ? options.millis : 500;
+			
+			if ($(this).prop('mMojitoKeyTimerHash') == null) {
+				$(this).prop('mMojitoKeyTimerHash', [ ]);
+			}
+			
+			var hashes = $(this).prop('mMojitoKeyTimerHash');
+			if(hashes.indexOf(hash) < 0) {
+				$(this).on('keyup', function() {
+					var timerId = $(this).prop('mOnKeyTimer');
+					if(timerId != null) {
+						clearInterval(timerId);
+					}
+					
+					var self = this;
+					timerId = setTimeout(function() {
+						mMojito.refCall(func, self, parameters);
+					}, millis);
+					$(this).prop('mOnKeyTimer', timerId);
+					
+					return false;
+				});
+				$(this).prop('mMojitoKeyTimerHash').push(hash);
+			}
+		});
+	}
+	
+	onKeyUp(selector, func, parameters) {
+		$(selector).each(function() {
+			if ($(this).prop('onKeyUpLoaded') == null) {
+				$(this).prop('onKeyUpLoaded', true);
+				$(this).on('keyup', function() {
+					mMojito.refCall(func, this, parameters);
+					return false;
+				})
+			}
+		});
+	}
+	
+	/**
+	 * Llama a una función pudiéndole bindear el contexto y pasarle parámetros.
+	 * funcParameter: puede ser un string o una función. Si es un string se buscará en window si existe la función.
+	 * bind: objeto a bindear como contexto de la función.
+	 * parameters: array de parámetros a enviarle a la función.
+	 */
+	refCall(funcParameter, bind, parameters) {
+		var result = null;
+		var funcParameterAux = funcParameter;
+		if(mString.isString(funcParameterAux)) {
+			if(window[funcParameterAux] != null) {
+				funcParameterAux = window[funcParameterAux];
+			} else {
+				funcParameterAux = null;
+			}
+		}
+		
+		if(funcParameterAux != null) {
+			var funcAux = funcParameterAux;
+			if(bind != null) {
+				funcAux = funcParameterAux.bind(bind);
+			}
+			
+			if(parameters != null && parameters.length > 0) {
+				if(parameters.length == 1) { result = funcAux(parameters[0]); }
+				if(parameters.length == 2) { result = funcAux(parameters[0], parameters[1]); }
+				if(parameters.length == 3) { result = funcAux(parameters[0], parameters[1], parameters[2]); }
+				if(parameters.length == 4) { result = funcAux(parameters[0], parameters[1], parameters[2], parameters[3]); }
+				if(parameters.length == 5) { result = funcAux(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]); }
+			} else {
+				result = funcAux();
+			}
+		}
+		
+		return result;
+	}
+	
+	sessionPut(name, value) {
+		var toSession = 'toSession.ajax?' + name + '=' + value;
+		mojiLog.log(mojiLogSession, log_Debug, 'mMojito.sessionPut starts', 'name: ' + name, 'value: ' + value, 'toSession: ' + toSession);
+		doAjax(toSession);
+		mojiLog.log(mojiLogSession, log_Debug, 'rendSessionPut ends (' + name + ')');
+	}
+	
+	/**
+	 * Chequea si tag es del tipo tagType y si es así lo devuelve. Si no devuelve null.
+	 * En el caso de los inputs se puede enviar "input.radio" por ejemplo en cuyo caso
+	 * chequea que el tipo del tag sea input y además que su atributo "type" sea radio.
+	 */
+	tagAs(tag, tagType) {
+		var result = null;
+		
+		if(!mObject.isArray(tagType)) {
+			var tagTypeArray = tagType.split('.');
+			
+			var tagLength = $(tag).length;
+			var resultArray = [ ];
+			for(var i = 0; i < tagLength; i++) {
+				var tagObj = $(tag).get(i);
+				
+				if(mString.equals(tagObj.tagName, tagTypeArray[0])) {
+					result = tag;
+					if(tagTypeArray.length > 1 && !mString.equals($(tag).attr('type'), tagTypeArray[1])) {
+						result = null;
+					}
+				}
+				
+				if(result != null) {
+					resultArray.push(result);
+				}
+			}
+			
+			if(resultArray.length > 1) {
+				result = resultArray;
+			}
+		} else {
+			for(var i = 0; i < tagType.length; i++) {
+				if(result == null) {
+					result = mMojito.tagAs(tag, tagType[i]);
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Inactiva un botón por 2 segundos para evitar un doble click de parte del usuario.
+	 */
+	tagDisabledByTime(tag, wait, callback) {
+		$(tag).each(function() {
+			$(this).attr('disabled', 'true');
+			if(wait != null && wait > 0) {
+				var self = this;
+				setTimeout(function() {
+					$(self).removeAttr('disabled');
+					mMojito.refCall(callback, self);
+				}, wait);
+			}
+		});
+	}
+	
+	/**
+	 * Activa o desactiva un tag. Se define como desactivar a que el usuario no pueda modificar el valor.
+	 */
+	tagEnabled(tag, enabled) {
+		$(tag).each(function() {
+			var select = mMojito.tagAs(this, 'select');
+			if(select == null) {
+				if(enabled) {
+					$(this).removeAttr('readonly');
+				} else {
+					$(this).attr('readonly', 'readonly');
+				}
+			} else {
+				if(enabled) {
+					$('option', this).show();
+				} else {
+					var self = this;
+					$('option', this).each(function() {
+						if(mString.equals($(self).val(), $(this).val())) {
+							$(this).show();
+						} else {
+							$(this).hide();
+						}
+					});
+				}
+			}
+		});
+	}
+	
+	/**
+	 * Devuelve todo tipo de controles (incluido el root de controles Mojito).
+	 * Si se quiere obtener el handler de un control Mojito usar tagM.
+	 */
+	tagGet(tagIdNameJqMojito, context, type) {
+		var result = null;
+		var innerInfo = null;
+		
+		// Si hay contexto el control debe pertenecer a ese contexto.
+		if(context != null) {
+			var contextObj = mMojito.tagGet(context);
+			innerInfo = utilGetInnerInfo(contextObj);
+		}
+		
+		// Si es un tag lo devuelvo.
+		if(result == null && (tagIdNameJqMojito instanceof Element || tagIdNameJqMojito instanceof HTMLDocument)) {
+			result = tagIdNameJqMojito;
+		}
+		if(mString.isString(tagIdNameJqMojito)) {
+			var idAux = innerInfo == null ? tagIdNameJqMojito : innerInfo.getId(tagIdNameJqMojito)
+			// Si hay uno o más controles con el id los devuelve.
+			if(result == null) {
+				result = document.getElementById(idAux);
+			}
+			// Si hay uno o más controles con el name los devuelve.
+			if(result == null) {
+				var results = document.getElementsByName(idAux);
+				if(results.length == 1) {
+					result = results[0];
+				}
+				if(results.length > 1) {
+					resut = results;
+				}
+			}
+		}
+		// Si el selector de jQuery devuelve algo lo devuelve.
+		if(result == null) {
+			try {
+				var jq = $(tagIdNameJqMojito);
+				if(jq.length == 1) {
+					result = jq.get(0);
+				}
+				if(jq.length > 1) {
+					result = [ ];
+					for(var i = 0; i < jq.length; i++) {
+						result.push(jq.get(i));
+					}
+				}
+			} catch(error) {
+				// La idea es que no explote si el String pasado
+				// no es un selector válido de jQuery.
+				// No encontré nada mejor para filtrarlo.
+				if(error.name != 'Error') {
+					throw error;
+				}
+			}
+		}
+		// Si hay un control mojito con el "id" o "id|type" lo devuelve. En este único caso se puede usar el contexto.
+		if(mString.isString(tagIdNameJqMojito)) {
+			if(result == null) {
+				var contextObj = mMojito.tagGet(context);
+				result = mMojito.tagM(tagIdNameJqMojito, contextObj, type);
+			}
+		}
+		if(result == null) {
+			if(tagIdNameJqMojito != null && tagIdNameJqMojito['id'] != null && (tagIdNameJqMojito['context'] != null || tagIdNameJqMojito['type'] != null)) {
+				var contextObj = mMojito.tagGet(tagIdNameJqMojito.context);
+				result = mMojito.tagM(tagIdNameJqMojito.id, contextObj, tagIdNameJqMojito.type);
+			}
+		}
+		
+		return result;
+	}
+
+	tagHasAttribute(tag, attribute) {
+		var result = false;
+		var attributeValue = $(tag).attr(attribute);
+		if (typeof attributeValue !== 'undefined' && attributeValue !== false) {
+			result = true;
+		}
+		return result;
+	}
+	
+	/**
+	 * Devuelve el handler de un control Mojito.
+	 * Si se quiere devolver un elemento (incluído el elemento root de un control Mojito) se debe usar tagGet.
+	 */
+	tagM(id, context, control) {
+		var result = null;
+		var idAux = context != null ? utilGetInnerInfo(context).getId(id) : id;
+		if(stringUtilNotEmpty(control)) {
+			result = $('#' + jqEscape(idAux) + '[data-control="' + control + '"]');
+		} else {
+			result = $('#' + jqEscape(idAux));
+		}
+		if(result != null) {
+			result = $(result).prop('mHandler');
+		}
+		return result;
+		
+		/*
+		var result = null;
+		if(mString.isNotEmpty(id)) {
+			result = document.getElementById(id);
+			if(result != null) {
+				result = $(result).prop('mHandler');
+			}
+		}
+		*/
+	}
+	
+	tagText(tag, text) {
+		var tags = mMojito.tagGet(tag);
+		$(tags).each(function() {
+			var texts = $(this).contents().filter(function() {
+				return this.nodeType == Node.TEXT_NODE;
+			});
+			if(texts.length > 0) {
+				var used = false;
+				for(var i = 0; i < texts.length && !used; i++) {
+					if(mString.isNotEmpty($(texts[i]).text())) {
+						$(texts[i]).get(0).textContent = text;
+						used = true;
+					}
+				}
+				if(!used) {
+					$(texts[0]).get(0).textContent = text;
+				}
+			} else {
+				$(this).text(text);
+			}
+		});
+	}
+	
+	/**
+	 * Devuelve el valor de un tag o lo setea. Además si el tag representa una colección
+	 * de valores y el valor seleccionado está inactivo entonces lo vuelve a activar.
+	 * Considera si el tag es input:radio en cuyo caso devuelve el valor seleccionado
+	 * o marca como seleccionado el radio que corresponda.
+	 */
+	tagVal(tag, value) {
+		var result = value;
+		var inputRadio = mMojito.tagAs(tag, 'input.radio');
+		if(inputRadio == null) {
+			if(value === undefined) {
+				result = $(tag).val();
+			} else {
+				$(tag).val(result);
+			}
+			
+			var select = mMojito.tagAs(tag, 'select');
+			if(select != null) {
+				$('option[value="' + result + '"]' ,select).fadeIn();
+			}
+		} else {
+			// input type="radio"
+			var name = $(tag).attr('name');
+			if(value === undefined) {
+				result = $('input[type="radio"][name="' + name + '"]:checked').val();
+			} else {
+				$('input[type="radio"][name="' + name + '"]').each(function() {
+					if(mString.equals($(this).val(), result)) {
+						$(this).prop('checked', true);
+					}
+				});
+			}
+		}
+		return result;
+	}
+	
+	tagValIf(tag, value) {
+		var tagValue = mMojito.tagVal(tag);
+		var result = mString.equals(tagValue, value);
+		return result;
+	}
+	
+	tagValRemove(tag, value) {
+		$(tag).each(function() {
+			if(mString.equals(mMojito.tagVal(this), value)) {
+				mMojito.tagVal(this, null);
+			}
+			
+			var select = mMojito.tagAs(tag, 'select');
+			if(select != null) {
+				$('option[value="' + value + '"]', select).hide();
+			}
+		});
+	}
+	
+	tagVisible(tag, visible) {
+		if(visible) {
+			$(tag).fadeIn();
+		} else {
+			$(tag).fadeOut();
+		}
+	}
+}
+
+var mMojito = new mMojitoClass();

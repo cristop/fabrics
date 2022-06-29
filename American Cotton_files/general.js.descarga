@@ -1,0 +1,235 @@
+function customReloadGeneral() {
+	mMojito.onClick('a[data-buscador-grupo-id]', generalGrupo);
+	
+	mMojito.onClick('a.quitarDetalleA', generalDetalleQuitar);
+	
+	mMojito.onClick('button.detalleAgregarButton', generalDetalleAgregar, [ 1 ]);
+	mMojito.onClick('button.detalleRestarButton', generalDetalleAgregar, [ -1 ]);
+	mMojito.onClick('button.detalleAgregar10Button', generalDetalleAgregar, [ 10 ]);
+	mMojito.onClick('button.detalleRestar10Button', generalDetalleAgregar, [ -10 ]);
+	
+	mMojito.onKeyTimer('input#q', buscarQ);
+	// mMojito.onKeyTimer('input#q-mobile', buscarQ);
+	
+	mMojito.onClick('div.complemento-disponible', function() {
+		vxAlert('Luego de presionar el botón AGREGAR aparecerá una nueva ventana para que cargue cuanto necesita de complemento. Donde podrá pedir como máximo el 15% del peso de la tela principal.');
+	});
+	
+	mMojito.onClick('a#whatsappAyudaA', function() {
+		utilMethodCallFormCustom('pedirAyuda');
+	});
+}
+
+function generalGrupo() {
+	var id = $(this).attr('data-buscador-grupo-id');
+	mMojito.sessionPut('filtroGrupo', id);
+	mMojito.navGoTo('buscador.htm');
+}
+
+function generalDetalleQuitar() {
+	var tr = $(this).closest('tr[data-string]').get(0);
+	var detalle = mEntity.get(tr);
+
+	tagUtilGetControlMojito('idArticuloSeleccionado', this, 'hidden', 'setValue', [ detalle.idArticulo ]);
+	tagUtilGetControlMojito('idDetalleSeleccionado', this, 'hidden', 'setValue', [ detalle.id ]);
+	utilMethodCall(this, 'detalleQuitar', null, generalDetalleQuitarCallback, [ this ]);
+}
+
+function generalDetalleQuitarCallback(data, element) {
+	var dataObj = JSON.parse(data);
+	
+	var tr = $(element).closest('tr').get(0);
+	
+	$('span#subtotalSpan').text(dataObj.subtotal);
+	$('span#totalSpan').text(dataObj.total);
+	$('span#recargoFormaPagoSpan').text(dataObj.recargoFormaPago);
+	
+	var contador = dataObj.contador;
+	$('div#contadorDiv').text(contador);
+	
+	$(tr).remove();
+	
+	if(dataObj.idDetalleComplementado != null) {
+		$('input[data-integer="idDetalleComplementado"][value="' + dataObj.idDetalleComplementado + '"]').each(function() {
+			$(this).closest('tr').remove();
+		});
+	}
+	
+	if(dataObj.contador <= 0) {
+		tagUtilCloseModal();
+	}
+	
+	reloadDetalles(dataObj.minorista);
+}
+
+function reloadDetalles(minorista) {
+	mMojito.refCall('reloadMinorista', null, [ minorista ]);
+	
+	var context = $('tr[data-string=idArticulo]').get(0);
+	var descuentoHandler = mMojito.tagM('campania.descuento', context);
+	var descuento = mInt.translate(descuentoHandler.getValue(), 0);
+	
+	$('tr[data-string=idArticulo]').each(function() {
+		var detalle = mEntity.get(this);
+		
+		var total;
+		if(minorista) {
+			monto = detalle.cantidad * detalle.precio;
+		} else {
+			monto = detalle.cantidad * detalle.precioMayorista;
+		}
+		total = monto - (monto / 100 * descuento);
+		if(detalle.setMonto != null) {
+			detalle.setMonto(monto, '$ ');
+		}
+		detalle.setTotal(total);
+	});
+}
+
+function generalDetalleAgregar(cantidadOffset) {
+	// console.log('offset: ' + cantidadOffset);
+	var tr = $(this).closest('tr[data-string]').get(0);
+	var detalle = mEntity.get(tr);
+	
+	if(detalle.idDetalleComplementado == null) {
+		tagUtilGetControlMojito('idArticuloSeleccionado', this, 'hidden', 'setValue', [ detalle.idArticulo ]);
+		
+		var cantidad = detalle.cantidad + cantidadOffset;
+		if(cantidad < 1) {
+			cantidad = 1;
+		}
+		if(cantidad > 999) {
+			cantidad = 999;
+		}
+		tagUtilGetControlMojito('cantidadSeleccionada', this, 'hidden', 'setValue', [ cantidad ]);
+		detalle.setCantidad(cantidad);
+		// console.log('detalle.cantidad: ' + detalle.cantidad);
+		
+		var execId = mString.random(10);
+		$(this).prop('execId', execId);
+		clearInterval($(this).prop('timeout'));
+		
+		var self = this;
+		var timeout = setTimeout( function() {
+			utilMethodCall(self, 'detalleAgregar', null, generalDetalleAgregarCallback, [ detalle, self, execId ])
+		  }, 500 );
+		
+		$(this).prop('timeout', timeout);
+	} else {
+		//tagUtilCloseModal(null, function() {
+			tagUtilShowModal('agregarComplemento.htm?idDetalleComplementado=' + detalle.idDetalleComplementado + '&modificar=1', 500);
+		  //} );
+	}
+}
+
+function generalDetalleAgregarCallback(data, detalle, execIdTag, execId) {
+	if($(execIdTag).prop('execId') == execId) {
+		var dataObj = JSON.parse(data);
+		
+		if(detalle != null) {
+			detalle.setCantidad(dataObj.cantidad);
+			detalle.setTotal(dataObj.precio);
+		}
+	
+		$('span#subtotalSpan').text(dataObj.subtotal);
+		$('span#totalSpan').text(dataObj.total);
+		$('span#recargoFormaPagoSpan').text(mFloat.format(dataObj.recargoFormaPago));
+		$('span#recargoFormaEnvioSpan').text(mFloat.format(dataObj.recargoFormaEnvio));
+		if(dataObj.recargoFormaEnvio <= 0) {
+			$('tr.flete').fadeOut();
+		} else {
+			$('tr.flete').fadeIn();
+		}
+		
+		// complemento
+		// complementoCantidad
+		// complementoPrecio
+		// <tr data-string="idArticulo" data-value="R0414-0101">
+		if(dataObj.idDetalleComplementado != null) {
+			var inputDetalleComplementado = $('input[data-integer="idDetalleComplementado"][value="' + dataObj.idDetalleComplementado + '"]');
+			if(inputDetalleComplementado.length == 1) {
+				var complementoTr = inputDetalleComplementado.get(0).closest('tr');
+				var complemento = mEntity.get(complementoTr);
+				complemento.setTotal(dataObj.complementoPrecio);
+				complemento.setCantidad(dataObj.complementoCantidad);
+			}
+		}
+		
+		reloadDetalles(dataObj.minorista);
+	}
+}
+
+function generalAgregarAviso(contador, nombre, imagen, cantidad, precio) {
+	$('div#contadorDiv').text(contador);
+	
+	var div = $('div#agregarMensajeDiv').get(0);
+	
+	// var seAgregaron = cantidad == 1 ? 'Se agreg&oacute;' : 'Se agregaron';
+	// $('span#linea1Span', div).html(seAgregaron + ' ' + cantidad + ' kg de');
+	// $('span#linea2Span', div).text(nombre + '.');
+	
+	$('span#linea1Span', div).html('Agregado al carrito. Total ' + cantidad + ' kg');
+	$('span#linea2Span', div).text(nombre + '.');
+	
+	var src = mObject.convNull($('div.cart-imagen > img', div).attr('data-src'), '');
+	src += imagen;
+	$('div.cart-imagen > img', div).attr('src', src);
+	
+	$('div.cart-price', div).text(precio);
+	
+	$('div#agregarMensajeDiv').fadeIn();
+	
+	setTimeout(function() {
+		$('div#agregarMensajeDiv').fadeOut(); 
+	}, 5000);
+}
+
+function buscarQ() {
+	var q = $(this).val();
+	if(q == '') {
+		$('.desplegable-busqueda').html('');
+	}
+	if(mString.length(q) >= 3) {
+		utilMethodCallFormCustom('buscarQ', null, [ 'q', q ], buscarQCallback);
+	}
+}
+
+function buscarQCallback(dataJson) {
+	var data = JSON.parse(dataJson);
+	var resultado = '';
+	
+	if(data != null) {
+		for(var i = 0; i < data.length; i++) {
+			resultado += '\
+					<div class="item" onclick="mMojito.navGoTo(\'producto-' + data[i].sinonimo + '.htm\');">\
+	                	<div class="imagen">\
+	                		<img src="'+ data[i].imagen13 +'" alt="">\
+	                	</div>\
+	                	<div class="nombre">\
+							'+ data[i].nombre +'\
+	                    </div>\
+	                    <div class="precio">\
+							$ '+ data[i].precio +'\
+	                   </div>\
+	                </div>';
+		}
+		
+		if(resultado==''){
+			resultado += '\
+				<div class="item no-results-list">\
+                	<div class="nombre">\
+                		<img src="assets/img/images/lupa.svg" alt=""> <div class="textos"><b style="font-size: 120%">SIN RESULTADOS</b> <br>\
+						<small style="font-size: 120%">Nuestros productos incluyen frisa, jersey, plush, polar, piqué, rústico. Tenemos también los complementos necesarios para nuestras telas. Y una gran variedad de colores.</small></div> \
+                    </div>\
+                </div>';
+		}
+		$('.search .desplegable-busqueda').html(resultado);
+	}
+}
+
+$(function() {
+	$(document).delegate('.search .desplegable-busqueda .item', 'click', function(){
+		$('#q').val($(this).data('nombre'));
+		$('.search .desplegable-busqueda').html('');
+	})
+});

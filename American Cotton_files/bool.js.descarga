@@ -1,0 +1,61 @@
+// IMPORTANTE: si cambian estas descripciones modificarlas en todos los tipos de dato (bool, float, int, string, date y object).
+// translate(value, defaultValue, tryFlag): loQueSea (esperando formato de programación) a este tipo de dato. Si value está vacío se devuelve null (o defaultValue).
+// translateLocale(value, defaultValue, tryFlag): loQueSea (esperando formato según configuración regional) a este tipo de dato
+// format: este tipo de dato a String según la configuración regional. En el caso de float se usa separador de miles. En el caso de int, no.
+// toString: este tipo de dato a String en modo programación. En ningún caso se usa separador de miles.
+// is[Type]: chequea si una variable es del tipo de dato de la utilería. Cuidado porque para float-int existe isNumber porque Javascript no diferencia
+// entre entero y punto flotante. Y el isFloat da true si el número tiene decimales.
+
+class mBoolClass {
+	
+	isFalse(bool, nullResult) {
+		var result = false;
+
+		if(bool != null) {
+			var boolString = bool.toString();
+			result = !(mString.in(boolString, '1', 'yes', 'y', 'true', 't', 'verdadero', 'v') || mString.startsWith(boolString, 's'));
+		} else {
+			result = nullResult != undefined ? nullResult : true;
+		}
+		return result;
+	}
+
+	isTrue(bool, nullResult) {
+		var result = false;
+
+		if(bool != null) {
+			var boolString = bool.toString();
+			result = mString.in(boolString, '1', 'yes', 'y', 'true', 't', 'verdadero', 'v') || mString.startsWith(boolString, 's');
+		} else {
+			result = nullResult != undefined ? nullResult : true;
+		}
+		return result;
+	}
+	
+	toString(bool) {
+		var result = '';
+		if(bool != null) {
+			result = mBool.isTrue(bool) ? '1' : '0';
+		}
+		return result;
+	}
+	
+	format(bool) {
+		var result = '';
+		if(bool != null) {
+			// Falta definir reloadYes y reloadNo en reload.js.
+			result = mBool.isTrue(bool) ? reloadYes : reloadNo;
+		}
+		return result;
+	}
+	
+	translate(bool) {
+		var result = '';
+		if(bool != null) {
+			result = mBool.isTrue(bool);
+		}
+		return result;
+	}
+}
+
+var mBool = new mBoolClass();

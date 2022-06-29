@@ -1,0 +1,23 @@
+$(document).ready(function () {
+	reloadReload(null);
+	
+	if(reloadIsLayoutNew()) {
+		tagUtilLabelClick();
+		tagUtilDataFontAdjust();
+		mGlobal.favicon = new Favico({ position: 'down', animation: 'popFade', bgColor: '#dd2c00', textColor:'#fff0e2', fontStyle: 'normal'});
+		utilOcultarProcesando();
+		
+		$(window).on("focus", function() {
+			if(mBool.isTrue(mGlobal.inSession, false)) {
+				if(!mGlobal.intervalsStop) {
+					setTimeout(function() { utilDoAjax('checkSession.ajax', null, utilCheckSession); }, 500);
+				}
+			}
+		} );
+		// Gaston (2018-11-12) Encontré en este link https://www.quora.com/How-do-you-prevent-a-form-from-resubmitting-when-the-page-is-refreshed que con esa instrucción se 
+		// previene el re-submit del formulario
+		if (window.history.replaceState) {
+			window.history.replaceState(null, null, window.location.href);
+		}
+	}
+});

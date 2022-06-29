@@ -1,0 +1,55 @@
+function jqSelect(selectorOrControl) {
+    var result = selectorOrControl;
+    var toStringCall = Object.prototype.toString.call(selectorOrControl);
+    
+    if(toStringCall == "[object String]") {
+        //var selector = selectorOrControl.replace(/(:)/g, '\\\$1').replace(/(\.)/g, '\\.');
+        
+        // var selector = selectorOrControl.replace( /(\[|\]|\/|:|\.|\[|\]|,|=|@)/g, "\\$1" );
+        var selector = jqEscape(selectorOrControl);
+        
+        // alert(selector);
+    	result = $(selector);
+    } else {
+        result = $(selectorOrControl);
+    }
+    
+    // alert(result.length);
+    
+    return result;
+}
+
+function jqEscape(value) {
+	var result;
+	if (value !== undefined) {
+		result = value.replace( /(\[|\]|\/|:|\.|\[|\]|,|=|@)/g, "\\$1" );
+	}
+	return result;
+}
+
+/**
+ * Devuelve el control jQuery por id o name (pero solamente si el control es el único con ese name).
+ * @param controlIdOrControl Id, name o el control en sí mismo.
+ * @returns El control jQuery por id o name (pero solamente si el control es el único con ese name).
+ */
+function jqSelectId(controlIdOrControl) {
+    var result = tagUtilGetControl(controlIdOrControl);
+    result = $(result);
+    return result;
+}
+
+/**
+ * Devuelve el elemento Javascript.
+ * @param control
+ */
+function jqControl(control) {
+	var result = control;
+	if (control instanceof jQuery) {
+		if(control.length > 0) {
+			result = control.get(0);
+		} else {
+			result = null;
+		}
+	}
+	return result;
+}

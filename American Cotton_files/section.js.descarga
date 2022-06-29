@@ -1,0 +1,139 @@
+function sectReload(innerPrefix) {
+	reloadCheck('section', innerPrefix, function(div) {
+		new sectSection(div);
+	});
+}
+
+function sectSection(div){
+	var self = this;
+	
+	this.root = tagUtilGetControl(div);
+	this.prefix = 'sect';
+	this.root.sect = this;
+	this.root.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	if(reloadIsLayoutNew()) {
+		this.content = $('div.panel-group div.panel div.panel-collapse', this.root);
+		// Si no es colapsable, no tiene showHide.
+		this.showHide = $(this.root).children('input[type="hidden"]');
+		this.url = $(this.root).attr('data-url');
+		
+		$(this.root).bind('show.bs.collapse', function () {
+			tagUtilAlternateValue($(self.showHide).attr('id'), 'true', 'false');
+			rendSessionPut($(self.root).attr('id'), $(self.showHide).val());
+			
+			// Fernando (2021-11-23): hay que usar mMojito.navGetUrlAjax para que le agregue _jx=1 para que se detecte esta sección como Ajax.
+			
+			//utilDoAjaxDirect(self.url, $(self.content).attr('id'), false, false, true);
+			var urlAux = self.sectGetUrlToLoad();
+			utilAjaxPost(urlAux, $(self.content).attr('id') + utilAvoidUseParent, null, null, null, null, true, true);
+			return true;
+		});
+		$(this.root).bind('hidden.bs.collapse', function () {
+			tagUtilAlternateValue($(self.showHide).attr('id'), 'true', 'false');
+			rendSessionPut($(self.root).attr('id'), $(self.showHide).val());
+			return true;
+		});
+		
+		if(this.url != null && ($(this.showHide).length == 0 || $(this.showHide).val() == 'false')) {
+			var urlAux = this.sectGetUrlToLoad();
+			utilAjaxPost(urlAux, $(this.content).attr('id') + utilAvoidUseParent, null, null, null, null, true, true);
+		}
+        var interval = $(this.root).attr("data-interval");
+        if(this.url != null && interval != null) {
+        	var selfWindow = window;
+            var interval = setInterval(
+              function() {
+            	  if(!selfWindow.reloadIntervalsStop) {
+            		  self.sectRefresh(null, null, true);
+            	  }
+              }, interval * 1000
+            );
+            
+            $(self.root).prop('interval', interval);
+        }
+        
+        var reactions = $(this.root).attr('data-reactions');
+        if(stringUtilNotEmpty(reactions)) {
+    		var reactionsJson = actions = JSON.parse(reactions);
+    		if(actions != null) {
+    			actions.array.forEach(function(action) {
+    				var rp = new rpReversePolish($(self.root).attr('id'), action.expression, 'boolean', null, self.innerInfo.innerPrefix, function(value) {
+    					utilMode4Call(self.root, action.method, value);
+    				});
+    				rp.init();
+    			});
+    		}
+    	}
+	}
+}
+
+sectSection.prototype.sectRefresh = function(url, queryString, noLoading) {
+	// Gastón (2019-12-12): cambié para que la llamada ajax sea post. Sino perdía valores de inputs al momento de refresco. Si falla algo invertir las llamadas de abajo 		
+	// utilDoAjaxDirect(url, divId, false, true, true, true);
+	// Fernando (2020-04-24): no sé por qué el reloading se pasaba como false. Y si es false no recarga los controles. En particular la campana de layoutTopNotifications.
+	// Me llama la atención que las otras llamadas también pasan false, o sea que en las secciones no deberían andar los controles que se cargan con el reload.
+	
+	var noLoadingAux = noLoading == null ? false : stringUtilToBool(noLoading);
+	
+	if(stringUtilNotEmpty(url)) {
+		this.url = url;
+	} else {
+		if(stringUtilNotEmpty(queryString)) {
+			var urlParts = this.url.split('?');
+			if(urlParts.length > 0) {
+				this.url = urlParts[0] + '?' + queryString;
+				$(this.root).attr('data-url', this.url);
+			}
+		}
+	}
+	
+	if(!noLoadingAux) {
+		// utilShowProcesando($(this.content).attr('id'));
+		$(this.content).html('');
+	}
+	
+	if(this.xmlHttp != null && this.xmlHttp.readyState < 4) {		
+		this.xmlHttp.abort();
+		this.xmlHttp = null;
+	}
+	
+	var urlAux = this.sectGetUrlToLoad();
+    this.xmlHttp = utilAjaxPost(urlAux, $(this.content).attr('id') + utilAvoidUseParent, null, null, null, null, noLoadingAux, true, null, true);
+}
+
+sectSection.prototype.sectGetUrlToLoad = function() {
+	var result = this.url;
+	if(utilGetParameter('editLang') == '1') {
+		result = utilAddParameter(result, 'editLang', 1);
+	}
+	return result;
+}
+
+sectSection.prototype.sectSetVisible = function(visible) {
+	if(visible) {
+		$($(this.root).children()[0]).css('display', 'inherit');
+	} else {
+		$($(this.root).children()[0]).css('display', 'none');
+	}
+}
+
+function sectIntervalSwap(event) {
+	window.reloadIntervalsStop = !window.reloadIntervalsStop;
+	if(window.reloadIntervalsStop) {
+		if(reloadIsLayoutHorizontalNew()) {
+			$(event.target).attr('class', 'cil-media-pause-circle');
+		}
+		if(reloadIsLayoutVertical()) {
+			$(event.target).attr('class', 'fa fa-times');
+		}
+	} else {
+		if(reloadIsLayoutHorizontalNew()) {
+			$(event.target).attr('class', 'cil-media-play-circle');
+		}
+		if(reloadIsLayoutVertical()) {
+			$(event.target).attr('class', 'fa fa-check');
+		}
+	}
+}

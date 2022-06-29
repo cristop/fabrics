@@ -1,0 +1,55 @@
+class mEventsClass {
+	constructor() {
+		this.events = [];
+		
+		var self = this;
+		$(document).on('visibilitychange', function() {
+			if (document.visibilityState != "hidden") {
+				for(var i = 0; i < self.events.length; i++) {
+					self.events[i].open();
+				}
+			} else  {
+				for(var i = 0; i < self.events.length; i++) {
+					self.events[i].close();
+				}
+			}
+		});
+	}
+	
+	register(owner, url, callback) {
+		var event = new mEvent(owner, url, callback);
+		this.events.push(event);
+		
+		if (document.visibilityState != "hidden") {
+			event.open();
+		}
+	}
+}
+
+class mEvent {
+	constructor(owner, url, callback) {
+		this.owner = owner;
+		this.url = mMojito.navAddParameter(url, '_page', mMojito.navGetPage());
+		this.callback = callback;
+	}
+	
+	close() {
+		if(this.source != null) {
+			this.source.close();
+			this.source = null;
+		}
+	}
+	
+	open() {
+		this.source = new EventSource("eventsource/" + this.url);
+		var self = this;
+		this.source.onmessage = function(event) {
+			var message = mDate.format(new Date(), "HH:mm:ss") + ': ' + event.data;
+			evenLog.log(evenLogEvents, log_Info, 'Message received: ' + message);
+			var callbackFunc = self.callback.bind(self.owner);
+			callbackFunc(event.data);
+		};
+	}
+}
+
+var mEvents = new mEventsClass();

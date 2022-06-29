@@ -1,0 +1,155 @@
+// IMPORTANTE: si cambian estas descripciones modificarlas en todos los tipos de dato (bool, float, int, string, date y object).
+// translate(value, defaultValue, tryFlag): loQueSea (esperando formato de programación) a este tipo de dato. Si value está vacío se devuelve null (o defaultValue).
+// translateLocale(value, defaultValue, tryFlag): loQueSea (esperando formato según configuración regional) a este tipo de dato
+// format: este tipo de dato a String según la configuración regional. En el caso de float se usa separador de miles. En el caso de int, no.
+// toString: este tipo de dato a String en modo programación. En ningún caso se usa separador de miles.
+// is[Type]: chequea si una variable es del tipo de dato de la utilería. Cuidado porque para float-int existe isNumber porque Javascript no diferencia
+// entre entero y punto flotante. Y el isFloat da true si el número tiene decimales.
+
+class mFloatClass {
+
+	constructor() {
+		this.decimalSeparator = mGlobal.decimalComma ? ',' : '.';
+		this.groupSeparator = mGlobal.decimalComma ? '.' : ',';
+	}
+
+	equals(value1, value2) {
+		var result = false;
+		if(value1 != null && value2 != null) {
+			result = mFloat.translate(value1) == mFloat.translate(value2);
+		} else {
+			result = (value1 == null && value2 == null);
+		}
+		return result;
+	}
+
+	format(number, scale, useGroupSeparator) {
+		var result = '';
+		
+		if(number != null) {
+			var scaleAux = scale == null ? 2 : scale;
+			
+			// var numberFloat = mFloat.translate(number);
+			var numberFloat = mFloat.round(number, scaleAux);
+			
+			
+			var numberString = numberFloat.toString();
+			numberString = numberString.replace('.', this.decimalSeparator);
+			
+			var hasMinus = numberString.indexOf('-') >= 0;
+			numberString = stringUtilReplace(numberString, '-', '');
+
+			var comaIndex = numberString.indexOf(this.decimalSeparator);
+			var decimalPart = '';
+			var intPart = '';
+			if (comaIndex > 0) {
+				decimalPart = numberString.substring(comaIndex + 1);
+				intPart = numberString.substring(0, comaIndex);
+			}
+			else { 
+				intPart = numberString;
+			}
+			
+			if(mBool.isTrue(useGroupSeparator)) {
+				var groupSeparatorIndex = intPart.length - 3;
+				
+				while (groupSeparatorIndex > 0) {
+					intPart = intPart.substring(0, groupSeparatorIndex) + this.groupSeparator + intPart.substring(groupSeparatorIndex);
+					groupSeparatorIndex = groupSeparatorIndex - 3;
+				}
+			}
+
+			if (scaleAux > 0) {
+				if (decimalPart.length != scaleAux) {
+					decimalPart = mString.padRight(decimalPart, scaleAux, '0');
+				}
+				numberString = intPart + this.decimalSeparator + decimalPart;
+			} else {
+				numberString = intPart;
+			}        
+
+			if (hasMinus) {
+				numberString = '-' + numberString;
+			}
+			
+			result = numberString;
+		}
+		return result;
+	}
+	
+	/**
+	 * Se fija si el número tiene valores decimales. Si lo que se quiere saber es
+	 * si la variable es numérica usar isNumber.
+	 * Esto es así porque float no es un tipo de dato nativo de Javascript. El tipo
+	 * de dato es number. Float es una subclasificación de number usada por Mojito.
+	 */
+	isFloat(number) {
+		return Number(number) === number && number % 1 !== 0;
+	}
+
+	isNumber(number) {
+		var result = !isNaN(number) && !mString.isString(number);
+		return result;
+	}
+
+	toString(number) {
+		var result = number.toString(); // mFloat.format(number, null, false);
+		return result;
+	}
+
+	round(number, scale) {
+		var result = null;
+		var scaleAux = scale != null ? scale : 0;
+		var numberAux = mFloat.translate(number);
+		if(numberAux != null) {
+			numberAux = numberAux * 10**scaleAux;
+			numberAux = Math.round(numberAux);
+			result = numberAux / 10**scaleAux;
+		}
+		return result;
+	}
+	
+	translate(number) {
+		var result = number;
+		
+		if(number != null) {
+			if(!this.isNumber(number)) {
+				if(mString.isString(number)) {
+					number = mString.stripAll(number, ' $' + String.fromCharCode(8364) + ',');
+					if(mString.isNotEmpty(number)) {
+						number = number.replace(this.decimalSeparator, '.');
+						try {
+							result = parseFloat(number);
+						} catch(error) {
+							throw 'Se intentó transformar un String a float pero no fue posible parsearlo (String: ' + logDescription(number) + '). El error fue: "' + logDescription(number) + '".';
+						}
+					} else {
+						result = 0.0;
+					}
+				} else {
+					throw 'Se intentó transformar a float algo que no era un número ni un string interpretable como número.';
+				}
+			} else {
+				result = parseFloat(number);
+			}
+		} else {
+			result = 0.0;
+		}
+		return result;
+	}
+	
+	translateLocale(number) {
+		var numberAux = number;
+		if(mString.isString(numberAux)) {
+			numberAux = mString.stripAll(numberAux, ' $' + String.fromCharCode(8364));
+			if(this.groupSeparator == '.') {
+				numberAux = mString.stripAll(numberAux, '.');
+				numberAux = numberAux.replace(',', '.');
+			}
+		}
+		var result = mFloat.translate(numberAux);
+		return result;
+	}
+}
+
+var mFloat = new mFloatClass();

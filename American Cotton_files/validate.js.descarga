@@ -1,0 +1,251 @@
+/**
+ * configuration:
+ * validateIfHidden: indica si el tag debe validarse si está oculto. Por defecto es false.
+ */
+class mValidateClass {
+
+	constructor() {
+		this.validations = new Array();
+		this.validationName = null;
+	}
+	
+	execute(validationName, caller) {
+		var result = true;
+		for(var name in this.validations) {
+			var validatorsInfo = this.validations[name];
+			
+			for(var i = 0; i < validatorsInfo.length; i++) {
+				var selector = validatorsInfo[i].selector;
+				var validators = validatorsInfo[i].validators;
+				
+				var self = this;
+				$(selector).each(function() {
+					var func = self.validate.bind(this);
+					var validated = func(validators);
+					result = result && validated;
+				});
+			}
+		}
+		if(caller != null) {
+			var spanMError = mValidate.getErrorSpan(caller);
+			if(result) {
+				$(spanMError).fadeOut();
+			} else {
+				$(spanMError).html('Algunos datos ingresados no son correctos. Verifique.');
+				$(spanMError).fadeIn();
+			}
+		}
+		return result;
+	}
+	
+	getErrorSpan(control) {
+		var result = $('span.mError,div.mError', $(control).parent());
+		if($(result).length == 0) {
+			result = $('span.mError,div.mError', $(control).parent().parent());
+			// Si se necesita ir un nivel más arriba probablemente convenga parametrizar.
+			// El caso de 1 nivel extra arriba es común de los input tipo options.
+		}
+		return result;
+	}
+	
+	init(name) {
+		var validators = [];
+		this.validations[name] = validators;
+		this.validationName = name;
+	}
+	
+	/**
+	 * Registra una nueva validación asociada a un control.
+	 * selector: es un selector de jQuery para elegir los controles a los cuales se les van a
+	 * aplicar los validadores.
+	 * validators: array de validadores. Soporta que haya validadores nulos que serán ignorados.
+	 * configuration: cofiguración de la validación. Esta configuración se guarda en la propiedad
+	 * mValidateConfiguration del control que se va a validar. De esta forma está accesible cuando
+	 * el validador se ejecuta.
+	 */
+	reg(selector, validators, configuration) {
+		var validatorsAux;
+		if(!mObject.isArray(validators)) {
+			validatorsAux = [ validators ];
+		} else {
+			validatorsAux = validators;
+		}
+		
+		this.validations[this.validationName].push(
+		  {
+			  selector: selector,
+			  validators: validatorsAux	
+		  }
+		);
+		
+		$(selector).each(function() {
+			if(configuration != null) {
+				this.mValidateConfiguration = configuration;
+			}
+		});
+		
+		var self = this;
+		
+		$(selector).each(function() {
+			var input = mMojito.tagAs(this, 'input');
+			if(input == null || !mString.equals($(input).attr('type'), 'radio')) {
+				mMojito.onBlur(selector, function() {
+					var func = self.validate.bind(this);
+					func(validatorsAux);
+				});
+			} else {
+				mMojito.onChange(selector, function() {
+					var func = self.validate.bind(this);
+					func(validatorsAux);
+				});
+			}
+		});
+	}
+	
+	// Esta función debe estar bindeada al tag que se va a validar no a la clase mValidateClass. 
+	validate(validators) {
+		var result = true;
+		var configuration = this.mValidateConfiguration;
+		
+		var validateIfHidden = configuration != null && configuration.validateIfHidden != null ? configuration.validateIfHidden : false;
+		
+		if(validateIfHidden || $(this).is(":visible")) {
+			var spanMError = mValidate.getErrorSpan(this);
+			for(var i = 0; i < validators.length; i++) {
+				var validator = validators[i];
+				if(validator != null) {
+					validator.tag = this;
+					var value = mMojito.tagVal(this);
+					if(result && !validator.validate(value)) {
+						$(spanMError).html(validator.getMessage());
+						$(spanMError).fadeIn();
+						result = false;
+					}
+				}
+			}
+		}
+		
+		if(result) {
+			$(spanMError).fadeOut();
+		}
+		
+		return result;
+	}
+	
+	// Validadores (nuevo ordenamiento alfabético)
+	// Propiedades de los validadores:
+	// tag: control que se está validando.
+	
+	cuit() {
+		return {
+			validate(data) {
+				var result = false;
+				if(mString.isString(data) && data.length == 13) {
+					let resultado = 0;
+					let cuit_nro = data.replace("-", "");
+					const codes = "6789456789";
+					let verificador = parseInt(cuit_nro[cuit_nro.length - 1]);
+					let x = 0;
+					
+					while (x < 10)
+					{
+						let digitoValidador = parseInt(codes.substring(x, x+1));
+						if (isNaN(digitoValidador)) digitoValidador = 0;
+						let digito = parseInt(cuit_nro.substring(x, x+1));
+						if (isNaN(digito)) digito = 0;
+						let digitoValidacion = digitoValidador * digito;
+						resultado += digitoValidacion;
+						x++;
+					}
+					resultado = resultado % 11;
+					result = (resultado == verificador);
+				}
+				return result;
+			},
+			getMessage() {
+				return "CUIT inv&aacute;lido.";
+			}
+		};
+	}
+	
+	cuitConditional(conditionalFunc) {
+		return {
+			validate(data) {
+				var result = true;
+				if(conditionalFunc()) {
+					result = mValidate.cuit().validate(data);
+				}
+				return result;
+			},
+			getMessage() {
+				return "CUIT inv&aacute;lido.";
+			}
+		};
+	}
+	
+	fail() {
+		return {
+			validate(data) {
+				// Cuidado: si está vacío el control no debería dar error.
+				// Por ahora se ignora esto porque se armó para un select-option.
+				var select = mMojito.tagAs(this.tag, 'select');
+				var holder = this;
+				if(select != null) {
+					var option = $("option:selected", this.tag);
+					if(option.length > 0) {
+						holder = option.get(0);
+					} else {
+						holder = null;
+					}
+				}
+				this.message = $(holder).attr('data-fail');
+				var result = mString.isEmpty(this.message);
+				return result;
+			},
+			getMessage() {
+				return this.message;
+			}
+		};
+	}
+	
+	isMail() {
+		return {
+			validate(data) {
+				var result = mString.isMail(data);
+				return result;
+			},
+			getMessage() {
+				return "Mail inv&aacute;lido.";
+			}
+		};
+	}
+	
+	notEmpty() {
+		return {
+			validate(data) {
+				var result = mString.isNotEmpty(data);
+				return result;
+			},
+			getMessage() {
+				return "Debe completar el dato.";
+			}
+		};
+	}
+	
+	notEmptyConditional(conditionalFunc) {
+		return {
+			validate(data) {
+				var result = true;
+				if(conditionalFunc()) {
+					result = mValidate.notEmpty().validate(data);
+				}
+				return result;
+			},
+			getMessage() {
+				return "Debe completar el dato." ;
+			}
+		};
+	}	
+}
+
+var mValidate = new mValidateClass();

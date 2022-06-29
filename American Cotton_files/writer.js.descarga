@@ -1,0 +1,25 @@
+var mWriter = new mWriterClass();
+
+function mWriterClass() {
+}
+
+mWriterClass.prototype.attribute = function(attributeName, attributeValue, space) {
+	var result = '';
+	if(attributeValue != null) {
+		result = attributeName + '="' + attributeValue + '"';
+		if(space == null || space) {
+			result += ' ';
+		}
+	}
+	return result;
+}
+
+mWriterClass.prototype.attributes = function(attributes, space) {
+	var result = '';
+	if(attributes != null && attributes.length > 0) {
+		for(var i = 0; i < attributes.length; i += 2) {
+			result += mWriter.attribute(attributes[i], attributes[i + 1], space);
+		}
+	}
+	return result;
+}

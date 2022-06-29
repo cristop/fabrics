@@ -1,0 +1,200 @@
+// translate: loQueSea a bool
+// format: bool a String
+
+class mEntityClass {
+	
+	get(root) {
+		var result = { };
+		
+		result.root = root;
+		
+		$('[data-string]', root).addBack('[data-string]').each(function() {
+			var name = $(this).attr('data-string');
+			var value = null;
+			
+			if(mMojito.tagHasAttribute(this, 'data-value')) {
+				value = $(this).attr('data-value');
+			} else {
+				value = $(this).val();
+			}
+			
+			result[name] = value;
+			result[name + 'Tag'] = this;
+		});
+		
+		$('[data-bool]', root).addBack('[data-bool]').each(function() {
+			var name = $(this).attr('data-bool');
+			var value = null;
+			
+			if(mMojito.tagHasAttribute(this, 'data-value')) {
+				value = mBool.isTrue($(this).attr('data-value'));
+			}
+			
+			result[name] = value;
+			result[name + 'Tag'] = this;
+		});
+		
+		$('[data-integer]', root).addBack('[data-integer]').each(function() {
+			var name = $(this).attr('data-integer');
+			var value = null;
+			var setFunc = null;
+			
+			if(mMojito.tagHasAttribute(this, 'data-value')) {
+				value = mInt.translate($(this).attr('data-value'));
+				setFunc = function(value, prefix) {
+					if(mString.isString(value)) {
+						$(this.tag).val(value);
+						var valueAux = mInt.translateLocale(value);
+						this.entity[this.name] = valueAux;
+					} else {
+						var valueAux = mInt.toString(value);
+						$(this.tag).val(valueAux);
+						this.entity[this.name] = value;
+					}
+				};
+			} else {
+				var inputTag = mMojito.tagAs(this, 'input');
+				if(inputTag != null) {
+					value = mInt.translateLocale($(this).val());
+					setFunc = function(value, prefix, suffix) {
+						if(mString.isString(value)) {
+							$(this.tag).val(value);
+							var valueAux = mInt.translateLocale(value);
+							this.entity[this.name] = valueAux;
+						} else {
+							var valueAux = mInt.toString(value);
+							valueAux = mObject.convNull(prefix, '') + valueAux + mObject.convNull(suffix, '');
+							$(this.tag).val(valueAux);
+							this.entity[this.name] = value;
+						}
+					};
+				}
+				
+				var divSpanTag = mMojito.tagAs(this, [ 'div', 'span' ]);
+				if(divSpanTag != null) {
+					value = mInt.translateLocale($(this).html(), null, true);
+					setFunc = function(value, prefix) {
+						if(mString.isString(value)) {
+							$(this.tag).html(value);
+							var valueAux = mInt.translateLocale(value);
+							this.entity[this.name] = valueAux;
+						} else {
+							var valueAux = mInt.translateLocale(value);
+							$(this.tag).html(valueAux);
+							this.entity[this.name] = value;
+						}
+					};
+				}
+			}
+			
+			result[name] = value;
+			result[name + 'Tag'] = this;
+			result['set' + mString.firstCapital(name)] = setFunc.bind({ entity: result, name: name, tag: this });
+		});
+		
+		$('[data-float]', root).addBack('[data-float]').each(function() {
+			var name = $(this).attr('data-float');
+			var value = null;
+			var setFunc = null;
+			
+			if(mMojito.tagHasAttribute(this, 'data-value')) {
+				value = mFloat.translate($(this).attr('data-value'));
+				setFunc = function(value, prefix) {
+					if(mString.isString(value)) {
+						$(this.tag).val(value);
+						this.entity[this.name] = mFloat.translateLocale(value);
+					} else {
+						var valueAux = mFloat.translateLocale(value);
+						$(this.tag).val(valueAux);
+						this.entity[this.name] = value;
+					}
+				};
+			} else {
+				// No probado.
+				var inputTag = mMojito.tagAs(this, 'input');
+				if(inputTag != null) {
+					value = mFloat.translateLocale($(this).val());
+					setFunc = function(value, prefix, suffix) {
+						if(mString.isString(value)) {
+							$(this.tag).val(value);
+							this.entity[this.name] = mFloat.translateLocale(value);
+						} else {
+							var valueAux = mFloat.format(value);
+							valueAux = mObject.convNull(prefix, '') + valueAux + mObject.convNull(suffix, '');
+							$(this.tag).val(valueAux);
+							this.entity[this.name] = value;
+						}
+					};
+				}
+				
+				var generalTag = mMojito.tagAs(this, ['del', 'div', 'span', 'td']);
+				if(generalTag != null) {
+					value = mFloat.translateLocale($(this).html());
+					setFunc = function(value, prefix, suffix) {
+						if(mString.isString(value)) {
+							mMojito.tagText(this.tag, value);
+							this.entity[this.name] = mFloat.translateLocale(value);
+						} else {
+							var valueAux = mFloat.format(value);
+							valueAux = mObject.convNull(prefix, '') + valueAux + mObject.convNull(suffix, '');
+							mMojito.tagText(this.tag, valueAux);
+							this.entity[this.name] = value;
+						}
+					};
+				}
+			}
+			
+			result[name] = value;
+			result[name + 'Tag'] = this;
+			
+			if(setFunc == null) {
+				setFunc = function() {
+				    entiLog.log(log_Fatal, 'Call ask for setting on float ' + logDescription(name) + '. And that float hasn\'t any setter.');
+				};
+				entiLog.log(log_Warn, 'Setter not found for float ' + logDescription(name) + '.');
+			}
+			result['set' + mString.firstCapital(name)] = setFunc.bind({ entity: result, name: name, tag: this });
+		});
+		
+		return result;
+	}
+
+	isTrue(bool, nullResult) {
+		var result = false;
+
+		if(bool != null) {
+			var boolString = bool.toString();
+			result = mString.in(boolString, '1', 's', 'sí', 'si', 'yes', 'y', 'true', 't', 'verdadero', 'v');
+		} else {
+			result = nullResult != undefined ? nullResult : true;
+		}
+		return result;
+	}
+	
+	toString(bool) {
+		var result = '';
+		if(bool != null) {
+			result = mBool.isTrue(bool) ? '1' : '0';
+		}
+		return result;
+	}
+	
+	format(bool) {
+		var result = '';
+		if(bool != null) {
+			// Falta definir reloadYes y reloadNo en reload.js.
+			result = mBool.isTrue(bool) ? reloadYes : reloadNo;
+		}
+		return result;
+	}
+	
+	translate(bool) {
+		var result = '';
+		if(bool != null) {
+			result = mBool.isTrue(bool);
+		}
+		return result;
+	}
+}
+
+var mEntity = new mEntityClass();
