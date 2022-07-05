@@ -371,6 +371,11 @@
             width: auto
         }
 
+        .text {
+            font-size: 23px;
+            color: #fff;
+        }
+
         @media(max-width:768px) {
             .flex {
                 display: block
@@ -889,7 +894,7 @@
             font-size: 62px;
             padding-bottom: 20px;
             text-align: left;
-            padding-top: 200px;
+            padding-top: 100px;
         }
 
         section#form-principal .title:before {
@@ -909,9 +914,11 @@
         }
 
         section#form-principal .form .flex input {
-            border-radius: 18px;
+            border-radius: 22px;
             border: 2px solid var(--c-terciary);
             padding-left: 24px;
+            height: 45px;
+            font-size: 18px;
         }
 
         section#form-principal .form .flex .btn {
@@ -920,7 +927,7 @@
             background-color: var(--c-primary);
             color: #fff;
             padding: 10px;
-            border-color: #fff;
+            border-color: var(--c-primary);
         }
 
         section#form-principal .flex.principal-col {
@@ -942,7 +949,7 @@
         }
 
         section#form-principal .title-form {
-            font-size: 21px;
+            font-size: 32px;
             font-weight: 700;
             padding-bottom: 5px;
             padding-left: 10px;
@@ -951,9 +958,9 @@
 
         section#form-principal .subtitle-form {
             color: var(--c-terciary);
-            padding-top: 5px;
+            padding-top: 15px;
             padding-left: 10px;
-            padding-bottom: 5px;
+            padding-bottom: 15px;
             font-size: 18px;
         }
 
@@ -964,7 +971,7 @@
         section#form-principal .flex.principal-col>div:nth-child(1) {}
 
         section#form-principal .flex.principal-col>div:nth-child(2) {
-            max-width: 426px;
+            max-width: 465px;
             padding: 36px;
             /* padding-right: 0; */
             background-color: #fff;
@@ -1016,8 +1023,8 @@
         }
 
         section#servicios {
-            padding-top: 50px;
-            padding-bottom: 50px;
+            padding-top: 100px;
+            padding-bottom: 100px;
             position: relative;
         }
 
@@ -1050,10 +1057,11 @@
             text-align: left;
             color: var(--c-primary);
             font-weight: 700;
+            font-size: 21px;
         }
 
         section#servicios .items-servicios .texto_flex {
-            font-size: 13px;
+            font-size: 16px;
             padding-bottom: 10px;
             text-align: left;
             color: var(--c-terciary);
@@ -1458,6 +1466,7 @@
             display: flex;
             gap: 10px;
             line-height: 1.5;
+            font-size: 16px;
         }
 
         footer a.top img {
@@ -1491,18 +1500,18 @@
             height: 60px;
             width: auto;
             object-fit: contain;
-            filter: brightness(15);
+            /* filter: brightness(15); */
         }
 
         footer .items-footer .titulo_flex {
             padding-bottom: 10px;
             text-transform: uppercase;
             font-weight: 600;
-            font-size: 22px;
+            font-size: 21px;
         }
 
         footer .items-footer .texto_flex {
-            font-size: 0.7rem;
+            font-size: 16px;
             padding-bottom: 10px
         }
 
@@ -1512,6 +1521,15 @@
 
         footer .items-footer .texto_flex ul.redes.sociales>li {
             padding-left: 10px;
+        }
+
+        footer .items-footer .texto_flex ul.redes.sociales>li img {
+            height: 26px;
+            object-fit: contain;
+        }
+        footer .items-footer p.mail{
+            margin: 0;
+            font-size: 21px;
         }
 
         @media screen and (max-width:900px) {
@@ -1555,7 +1573,7 @@
     <header id="navHeader">
         <div class="container">
             <a href="/" class="logo js-scroll">
-                <img src="assets/img/transfesa.png" alt="" class="full-logo" />
+                <img src="assets/img/svg-loaders/logo-transfesa.svg" alt="" class="full-logo" />
             </a>
         </div>
     </header>
@@ -1572,6 +1590,16 @@
                     <div class="title">
                         Lorem, ipsum <br>
                         Lorem, ipsum
+                    </div>
+                    <div class="text">
+                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod
+                        tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis
+                        nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.
+                        Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel
+                        illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui
+                        blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.
+                        Lorem ipsum dolor sit amet, cons ectetuer adipiscing elit, sed diam nonummy nibh euismod
+                        tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi
                     </div>
                 </div>
                 <div class="wow fadeInRight">
@@ -1630,7 +1658,7 @@
                 <div class="item">
                     <div class="flex">
                         <div class="icono_flex w20">
-                            <img src="assets/img/angles-down-solid.png" loading="lazy" width="100%" height="100%"
+                            <img src="assets/img/svg-loaders/icono1.svg" loading="lazy" width="100%" height="100%"
                                 alt="" />
                         </div>
                         <div>
@@ -1649,7 +1677,7 @@
                 <div class="item">
                     <div class="flex">
                         <div class="icono_flex w20">
-                            <img src="assets/img/angles-down-solid.png" loading="lazy" width="100%" height="100%"
+                            <img src="assets/img/svg-loaders/icono2.svg" loading="lazy" width="100%" height="100%"
                                 alt="" />
                         </div>
                         <div>
@@ -1668,7 +1696,7 @@
                 <div class="item">
                     <div class="flex">
                         <div class="icono_flex w20">
-                            <img src="assets/img/angles-down-solid.png" loading="lazy" width="100%" height="100%"
+                            <img src="assets/img/svg-loaders/icono3.svg" loading="lazy" width="100%" height="100%"
                                 alt="" />
                         </div>
                         <div>
@@ -1688,7 +1716,7 @@
                 <div class="item">
                     <div class="flex">
                         <div class="icono_flex w20">
-                            <img src="assets/img/angles-down-solid.png" loading="lazy" width="100%" height="100%"
+                            <img src="assets/img/svg-loaders/icono4.svg" loading="lazy" width="100%" height="100%"
                                 alt="" />
                         </div>
                         <div>
@@ -1760,23 +1788,24 @@
                 <div class="item">
                     <div class="bg">
                         <div class="icono_flex">
-                            <img src="assets/img/transfesa.png" loading="lazy" width="100%" height="100%" alt="" />
+                            <img src="assets/img/svg-loaders/logo-footer.svg" loading="lazy" width="100%" height="100%"
+                                alt="" />
                         </div>
                         <div class="titulo_flex">
                             Nos vemos en redes sociales
                         </div>
                         <div class="texto_flex">
                             <ul class="redes sociales">
-                                <li><img src="assets/img/linkedin.svg" alt=""></li>
-                                <li><img src="assets/img/Vector.svg" alt=""></li>
-                                <li><img src="assets/img/yt.svg" alt=""></li>
+                                <li><img src="assets/img/svg-loaders/linkedin.svg" alt=""></li>
+                                <li><img src="assets/img/svg-loaders/facebook.svg" alt=""></li>
+                                <li><img src="assets/img/svg-loaders/youtube.svg" alt=""></li>
                             </ul>
                         </div>
                         <div class="titulo_flex">
                             contáctanos
                         </div>
                         <div class="texto_flex">
-                            transfesa@transfesa.com
+                            <p class="mail">transfesa@transfesa.com</p>
                         </div>
                     </div>
                 </div>
