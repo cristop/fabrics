@@ -14,9 +14,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;800&family=Roboto+Condensed:wght@300;400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap" rel="stylesheet">
 
     <!-- Booster -->
     <style>
@@ -372,8 +370,10 @@
         }
 
         .text {
-            font-size: 23px;
+            font-size: 20px;
             color: #fff;
+            line-height: 1.4;
+            padding-right: 30px;
         }
 
         @media(max-width:768px) {
@@ -755,7 +755,7 @@
         }
 
         body {
-            font-family: 'Open Sans', sans-serif;
+            font-family: 'Lato', sans-serif;
             background-color: #fff;
             color: #000;
             margin: 0;
@@ -983,11 +983,21 @@
 
             section#form-principal .bg-image img {}
 
-            section#form-principal {}
+            section#form-principal {
+                padding-top: 100px;
+            }
 
             section#form-principal .container {}
 
-            section#form-principal .title {}
+            section#form-principal .title {
+                font-size: 30px;
+                padding-top: 0;
+            }
+
+            section#form-principal .text {
+                font-size: 16px;
+                padding-right: 0;
+            }
 
             section#form-principal .form {}
 
@@ -1019,7 +1029,9 @@
 
             section#form-principal .flex.principal-col>div:nth-child(1) {}
 
-            section#form-principal .flex.principal-col>div:nth-child(2) {}
+            section#form-principal .flex.principal-col>div:nth-child(2) {
+                padding: 36px 16px;
+            }
         }
 
         section#servicios {
@@ -1057,16 +1069,15 @@
             text-align: left;
             color: var(--c-primary);
             font-weight: 700;
-            font-size: 21px;
+            font-size: 19px;
         }
 
         section#servicios .items-servicios .texto_flex {
-            font-size: 16px;
+            font-size: 14px;
             padding-bottom: 10px;
             text-align: left;
-            color: var(--c-terciary);
-            line-height: 28px;
-
+            color: #9595A4;
+            line-height: 1.7;
         }
 
         @media screen and (max-width:900px) {
@@ -1080,9 +1091,15 @@
 
             section#servicios .items-servicios .bg {}
 
-            section#servicios .items-servicios .icono_flex {}
+            section#servicios .items-servicios .icono_flex {
+                text-align: left;
+            }
 
-            section#servicios .items-servicios .icono_flex img {}
+            section#servicios .items-servicios .icono_flex im text-align: center;
+
+            g {
+                margin-left: -4px;
+            }
 
             section#servicios .items-servicios .titulo_flex {}
 
@@ -1253,7 +1270,7 @@
         @media screen and (max-width:550px) {
             header .logo img {
                 max-width: 100%;
-                height: 20px;
+                height: 40px;
             }
         }
 
@@ -1466,7 +1483,13 @@
             display: flex;
             gap: 10px;
             line-height: 1.5;
-            font-size: 16px;
+            font-size: 14px;
+            padding-bottom: 2px;
+            width: fit-content;
+        }
+
+        footer a:hover {
+            color: white;
         }
 
         footer a.top img {
@@ -1511,8 +1534,9 @@
         }
 
         footer .items-footer .texto_flex {
-            font-size: 16px;
-            padding-bottom: 10px
+            font-size: 14px;
+            padding-bottom: 10px;
+            line-height: 1.4;
         }
 
         footer .items-footer .texto_flex ul.redes.sociales {
@@ -1527,7 +1551,8 @@
             height: 26px;
             object-fit: contain;
         }
-        footer .items-footer p.mail{
+
+        footer .items-footer p.mail {
             margin: 0;
             font-size: 21px;
         }
@@ -1539,7 +1564,9 @@
 
             footer .items-footer {}
 
-            footer .items-footer .item {}
+            footer .items-footer .item {
+                text-align: left !important;
+            }
 
             footer .items-footer .bg {}
 
@@ -1757,9 +1784,9 @@
                         </div>
                         <div class="texto_flex">
                             <p>Calle Musgo 1, 28023 Madrid</p>
-                            <p>Tel. +34 91.387.99.00 <br>
+                            <p>Tel. <a href="tel:+34913879900">+34 91.387.99.00 </a><br>
                                 © 2021 Transfesa Logistics S.A <br>
-                                www.transfesa.com
+                                <a href="https://www.transfesa.com" target="_blank">www.transfesa.com</a>
                             </p>
                         </div>
                     </div>
@@ -1796,16 +1823,30 @@
                         </div>
                         <div class="texto_flex">
                             <ul class="redes sociales">
-                                <li><img src="assets/img/svg-loaders/linkedin.svg" alt=""></li>
-                                <li><img src="assets/img/svg-loaders/facebook.svg" alt=""></li>
-                                <li><img src="assets/img/svg-loaders/youtube.svg" alt=""></li>
+                                <li>
+                                    <a href="#">
+                                        <img src="assets/img/svg-loaders/linkedin.svg" alt="">
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <img src="assets/img/svg-loaders/facebook.svg" alt="">
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <img src="assets/img/svg-loaders/youtube.svg" alt="">
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                         <div class="titulo_flex">
                             contáctanos
                         </div>
                         <div class="texto_flex">
-                            <p class="mail">transfesa@transfesa.com</p>
+                            <p class="mail">
+                                <a href="mailto:transfesa@transfesa.com">transfesa@transfesa.com</a>
+                            </p>
                         </div>
                     </div>
                 </div>
