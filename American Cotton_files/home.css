@@ -382,83 +382,168 @@ header:not(.sticky) nav > ul > li > a > img {
   top: 21px;
 }
 
-/* PROMOCION JULIO */
+/* Medios de pago */
 
-.promocion-julio {
+.medios-de-pago {
   font-family: "Inter", sans-serif;
   display: flex;
   justify-content: right;
   transform: translateY(-100%);
   flex-wrap: nowrap;
 }
-.promocion-julio .bg-center {
-  /* padding: 0px 10px 0 10px; */
-  color: #fff;
-  background: rgb(182, 226, 235);
-  background: rgb(146, 222, 237);
-  background: linear-gradient(
-    132deg,
-    rgba(146, 222, 237, 1) 12%,
-    rgba(80, 203, 228, 1) 48%
-  );
+.medios-de-pago .bg-principal {
+  background-color: #002c38;
+  padding: 0.5rem 1.5rem;
+  border-radius: 1rem;
 }
-.promocion-julio .bg a {
+.medios-de-pago .bg-principal p.first-text {
+  font-size: 19px;
+  line-height: 23px;
+  margin-bottom: 0.5rem;
+}
+.medios-de-pago .bg-principal p.first-text span {
+  font-weight: 900;
+}
+.medios-de-pago .bg a {
   color: #fff;
 }
-.promocion-julio p {
+.medios-de-pago .bg-center {
+  background-color: #0092a1;
+  margin: 0.3rem;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+.medios-de-pago p {
   text-align: center;
-  font-weight: 800;
+  font-weight: 600;
   margin: 0;
+  line-height: 18px;
+  font-size: 15.4px;
   color: #fff;
+  max-width: 500px;
 }
-.promocion-julio .bg-text-top {
+.medios-de-pago .bg-center p.tarjetas span {
+  font-size: 22.3px;
+  line-height: 26.7px;
+  font-weight: 900;
+}
+.medios-de-pago .bg-text-top {
   padding: 15px;
   background-color: #002c38;
   font-size: 24px;
   border-radius: 10px 10px 0 0;
 }
-.promocion-julio .bg-text-down {
-  padding: 15px;
-  background-color: #002c38;
-  font-size: 24px;
-  border-radius: 0 0 10px 10px;
+.medios-de-pago .bg-text-down {
+  background-color: #0092a1;
+  border-radius: 10px;
+  padding: 0.1rem;
+  margin: 0.7rem 1rem;
 }
-.promocion-julio a::after {
-  content: "";
-  display: block;
-}
-.promocion-julio .top-text {
-}
-.promocion-julio .center-text {
-  color: #002c38;
-  font-size: 28px;
-}
-.promocion-julio .center-text span {
-  font-size: 70px;
+.medios-de-pago .bg-text-down span {
   font-weight: 900;
 }
-.promocion-julio .down-text {
-  text-transform: uppercase;
+.medios-de-pago .pagos {
+  text-align: center;
+  justify-content: center;
+}
+.medios-de-pago .pagos p {
+  color: #fff;
+  background-color: #0092a1;
+  margin: 0.2rem;
+  padding: 0.3rem 1rem;
+  border-radius: 15px;
+  font-size: 15px;
+  line-height: 18px;
+  font-weight: 600;
+  max-width: fit-content;
+}
+.medios-de-pago .last-text {
+  margin-top: 0.8rem;
+  font-size: 12px;
+  line-height: 14px;
+}
+@media screen and (max-width: 900px) {
+  .medios-de-pago {
+    position: absolute;
+    height: 0;
+  }
+  .medios-de-pago .bg-center {
+  }
+  .medios-de-pago .bg a {
+  }
+  .medios-de-pago p {
+    font-size: 13px !important;
+  }
+  .medios-de-pago .top-text {
+  }
+  .medios-de-pago .bg-center {
+  }
+  .medios-de-pago .center-text {
+  }
+  .medios-de-pago .center-text span {
+    font-size: 33px;
+  }
+  .medios-de-pago .bg-text-down {
+  }
+  .medios-de-pago .down-text {
+  }
 }
 
-@media screen and (max-width: 900px) {
-  .promocion-julio {
-  position: absolute;
-  height: 0;
-  }
-  .promocion-julio .bg-center {
-  }
-  .promocion-julio .bg a {
-  }
-  .promocion-julio p {
-  font-size: 13px!important;
-  }
-  .promocion-julio .top-text {}
-  .promocion-julio .bg-center{}
-  .promocion-julio .center-text{}
-  .promocion-julio .center-text span {
-    font-size: 33px;
+/* BANNER MEDIOS DE PAGO */
+
+.banner-medios-pagos {
 }
-  .promocion-julio .bg-text-down{}
-  .promocion-julio .down-text{}
+.banner-medios-pagos .container {
+}
+.banner-medios-pagos .pago-telefonico {
+}
+.banner-medios-pagos .pago-telefonico .bg-principal {
+  background-color: #002c38;
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+  font-size: 21px;
+}
+.banner-medios-pagos .pago-telefonico .bg-principal .first-text {
+  font-size: 30px;
+  margin: 0;
+  padding: 0.9rem 0 0.5rem 0;
+}
+.banner-medios-pagos .pago-telefonico .bg-principal .bg {
+}
+.banner-medios-pagos .pago-telefonico .bg-principal .first-text span {
+  font-weight: 900;
+}
+.banner-medios-pagos .pago-telefonico .bg-center {
+  background-color: #0092a1;
+  padding: 0.8rem;
+}
+.banner-medios-pagos .pago-telefonico .bg-center p {
+  margin: 0;
+  line-height: 25px;
+}
+.banner-medios-pagos .pago-telefonico .text-sin-recargo p span {
+  font-weight: 900;
+}
+.banner-medios-pagos .pago-telefonico .bg-center p span {
+  font-size: 30px;
+  font-weight: 900;
+}
+.banner-medios-pagos .pago-telefonico .text-sin-recargo {
+  justify-content: center;
+}
+.banner-medios-pagos .pago-telefonico .text-sin-recargo p {
+  background-color: #0092a1;
+  margin: 0.5rem;
+  padding: 0.4rem;
+  border-radius: 10px;
+  max-width: fit-content;
+  font-size: 25px;
+  line-height: 30px;
+}
+.banner-medios-pagos p.promo-valida {
+  margin: 0;
+  padding: 0.5rem;
+  font-size: 15px;
+  line-height: 18px;
 }
