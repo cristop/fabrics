@@ -22,6 +22,9 @@
 	<meta name="description" content="">
 
 	<title>American Cotton</title>
+	<link rel="stylesheet" href="./assets/library/OwlCarousel2-2.3.4/dist/assets/owl.carousel.min.css" />
+	<link rel="stylesheet" href="./assets/library/OwlCarousel2-2.3.4/dist/assets/owl.theme.default.css">
+
 	<script type="text/javascript" src="./American Cotton_files/jquery-1.12.4.min.js.descarga"></script>
 	<script type="text/javascript" src="./American Cotton_files/vex.combined-4.0.1.js.descarga"></script>
 	<script type="text/javascript" src="./American Cotton_files/vexUtil.js.descarga"></script>
@@ -63,6 +66,8 @@
 		}
 	</script>
 	<script src="./American Cotton_files/general.js.descarga"></script>
+	<link rel="stylesheet" href="dist/assets/owl.carousel.min.css" />
+	<link rel="stylesheet" href="dist/assets/owl.theme.default.css">
 </head>
 
 <body cz-shortcut-listen="true">
@@ -570,32 +575,33 @@
 
 				<div class="banner-descuentos">
 					<div class="container">
-						<div class="owl-carousel owl-theme">
+						<div class="owl-carousel owl-theme descuentos-banner">
 							<div class="item first">
 								<div class="bg">
-									<div class="title">¡APROVECHÁ 20%OFF CON MERCADO PAGO <br>
-										EN TODO EL MARKET PLACE!
+									<div class="title">¡APROVECHÁ <span>20%OFF</span> CON MERCADO PAGO <br>
+										EN TODO EL MARKET PLACE!*
 									</div>
-									<small>*Promoción válida desde el 19/09/2022 hasta el 30/09/2022. Únicamente válido
-										a través de Mercado Pago. Tope de descuento de $15.000.</small>
+									<p>
+										<small>*Promoción válida desde el 19/09/2022 hasta el 30/09/2022. Únicamente
+											válido
+											a través de Mercado Pago. Tope de descuento de $15.000.</small>
+									</p>
 								</div>
 							</div>
 							<div class="item second">
 								<div class="bg">
 									<div class="title">
-										POR $5000!CHEQ¡TE REGALAMOS UN <span>COTTON</span> <span>CHEQ</span> POR
+										¡TE REGALAMOS UN <span class="font-cotton">COTTON</span> <span class="font-cheq">CHEQ</span> POR
 										<span>$5000</span>!
 									</div>
-									<button>
+									<div class="action">
 										<a class="btn" href="#">HACÉ CLIC Y PEDILO AHORA</a>
-									</button>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-
-
 
 
 				<section id="productos-destacados" class="section wow fadeIn" data-partial=""
@@ -908,11 +914,15 @@
 
 
 
+
 				<!-- jQuery -->
 				<script src="./American Cotton_files/jquery-3.3.1.min.js(1).descarga"></script>
 				<script src="./American Cotton_files/jquery.easing.js.descarga"></script>
 				<script src="./American Cotton_files/jquery-ui.js.descarga"></script>
+				<script src="./assets/library/OwlCarousel2-2.3.4/dist/owl.carousel.min.js"></script>
 				<link rel="stylesheet" href="./American Cotton_files/american-cotton.css">
+
+
 
 
 				<!-- libreria WOW animaciones JS -->
@@ -943,6 +953,22 @@
 							source: availableTags
 						});
 					});
+				</script>
+
+				<script>
+					$('.descuentos-banner').owlCarousel({
+						loop: true,
+						margin: 10,
+						nav: true,
+						responsive: {
+							0: {
+								items: 1
+							},
+							600: {
+								items: 1
+							},
+						}
+					})
 				</script>
 
 				<link rel="stylesheet" href="./American Cotton_files/style.css">

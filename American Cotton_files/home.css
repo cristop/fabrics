@@ -552,19 +552,66 @@ header:not(.sticky) nav > ul > li > a > img {
 }
 .banner-descuentos .container {
 }
+.banner-descuentos .owl-carousel .item .title {
+  font-family: "Inter", sans-serif;
+  text-align: center;
+  font-weight: 700;
+  font-size: 37px;
+  line-height: 44px;
+  padding: 1rem;
+  margin: 0;
+}
 .banner-descuentos .owl-carousel .item {
 }
 .banner-descuentos .owl-carousel .item.first .bg {
+  background-color: #0d2f3a;
+  color: white;
 }
-.banner-descuentos .owl-carousel .item.first small {
+.banner-descuentos .owl-carousel .item.first .title {
+}
+.banner-descuentos .owl-carousel .item.first .title span {
+  color: #2ac1d1;
+}
+.banner-descuentos .owl-carousel .item.first p {
+  text-align: center;
+  margin: 0;
+  padding-bottom: 1rem;
+}
+.banner-descuentos .owl-carousel .item.first p small {
+  font-size: 14px;
+  font-weight: 400;
 }
 .banner-descuentos .owl-carousel .item.second {
+  margin-top: 1rem;
 }
 .banner-descuentos .owl-carousel .item.second .bg {
+  background-color: #0d2f3a;
+  color: white;
 }
 .banner-descuentos .owl-carousel .item.second .title {
 }
-.banner-descuentos .owl-carousel .item.second button {
+.banner-descuentos .owl-carousel .item.second .title span {
+  color: #2ac1d1;
 }
-.banner-descuentos .owl-carousel .item.second button .btn {
+.banner-descuentos .owl-carousel .item.second .title span.font-cotton {
+
+}
+.banner-descuentos .owl-carousel .item.second .title span.font-cheq {
+
+}
+.banner-descuentos .owl-carousel .item.second .action {
+  text-align: center;
+  padding-bottom: 1rem;
+}
+.banner-descuentos .owl-carousel .item.second .action .btn {
+  background-color: #3892a0;
+  border-color: #3892a0;
+  border-radius: 100px;
+  font-family: "Inter", sans-serif;
+  color: white;
+  font-size: 30px;
+  font-weight: 800;
+}
+.banner-descuentos .owl-theme .owl-nav{
+    display: none;
 }
