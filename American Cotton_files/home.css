@@ -567,8 +567,7 @@ header:not(.sticky) nav > ul > li > a > img {
   background-color: #0d2f3a;
   color: white;
 }
-.banner-descuentos .owl-carousel .item.first .title {
-}
+.banner-descuentos .owl-carousel .item.first .title {font-size: 37px;}
 .banner-descuentos .owl-carousel .item.first .title span {
   color: #2ac1d1;
 }
@@ -582,7 +581,7 @@ header:not(.sticky) nav > ul > li > a > img {
   font-weight: 400;
 }
 .banner-descuentos .owl-carousel .item.second {
-  margin-top: 1rem;
+  height: 100%;
 }
 .banner-descuentos .owl-carousel .item.second .bg {
   background-color: #0d2f3a;
@@ -613,5 +612,79 @@ header:not(.sticky) nav > ul > li > a > img {
   font-weight: 800;
 }
 .banner-descuentos .owl-theme .owl-nav{
-    display: none;
+    margin: 0;
+    color: #fff;
+    position: absolute;
+    z-index: 0;
+    top: 50%;
+    width: 100%;
+    transform: translateY(-50%);
+    font-size: 50px;
+    line-height: 1;
+    /* padding-left: 15px; */
+    /* padding-right: 15px; */
+    font-weight: 100;
+}
+
+.banner-descuentos .owl-theme .owl-nav .owl-prev {
+    margin: 0;
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.banner-descuentos .owl-theme .owl-nav .owl-next {
+    margin: 0;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.banner-descuentos .owl-theme .owl-nav button:hover{
+  background-color: transparent;
+  opacity: 0.7;
+}
+
+/*Mobile*/
+@media screen and (max-width:900px){
+    .banner-descuentos .owl-carousel .item.first .bg,
+    .banner-descuentos .owl-carousel .item.second .bg{
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+	.banner-descuentos .owl-carousel .item.first .title{
+		font-size: 18px;
+		line-height: 1.4;
+		padding-left: 0;
+		padding-right: 0;
+		padding-bottom: 5px;
+	}
+  .banner-descuentos .owl-carousel .item.second .title{
+    font-size: 20px;
+    line-height: 1.4;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .banner-descuentos .owl-carousel .item.second .action .btn{
+    font-size: 16px;
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+  }
+  
+  .banner-descuentos .owl-carousel .item.first p{
+    line-height: 0.8;
+  }
+  .banner-descuentos .owl-carousel .item.first p small{
+    font-size: 11px;
+    font-weight: 300;
+  }
+  .banner-descuentos .owl-theme .owl-nav .owl-prev{
+    left: 5px;
+  }
+  .banner-descuentos .owl-theme .owl-nav .owl-next{
+    right: 5px;
+  }
 }
