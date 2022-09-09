@@ -547,3 +547,24 @@ header:not(.sticky) nav > ul > li > a > img {
   font-size: 15px;
   line-height: 18px;
 }
+
+.banner-descuentos {
+}
+.banner-descuentos .container {
+}
+.banner-descuentos .owl-carousel .item {
+}
+.banner-descuentos .owl-carousel .item.first .bg {
+}
+.banner-descuentos .owl-carousel .item.first small {
+}
+.banner-descuentos .owl-carousel .item.second {
+}
+.banner-descuentos .owl-carousel .item.second .bg {
+}
+.banner-descuentos .owl-carousel .item.second .title {
+}
+.banner-descuentos .owl-carousel .item.second button {
+}
+.banner-descuentos .owl-carousel .item.second button .btn {
+}
