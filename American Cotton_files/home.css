@@ -708,6 +708,16 @@ section#formulario-cheq .title {
 section#formulario-cheq .title:before {
   content: "";
 }
+section#formulario-cheq .title span {
+  color: #3892a0;
+}
+section#formulario-cheq .title span.first_text {
+  color: #002c38;
+  font-weight: 800;
+}
+section#formulario-cheq .title span.second_text {font-weight: 800;}
+section#formulario-cheq .title span.terciary_text {
+}
 section#formulario-cheq .text {
   max-width: 600px;
   margin: 0 auto;
@@ -726,10 +736,23 @@ section#formulario-cheq .form .flex label {
   padding-bottom: 10px;
 }
 section#formulario-cheq .form .flex input {
-  border-radius: 100px;
+  border-radius: 19px;
   background-color: #cbe3e6;
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  padding: 0px 25px;
+}
+section#formulario-cheq .form .flex input::placeholder {
+  color: #002c38;
 }
 section#formulario-cheq .form .flex .btn {
+  background-color: #3892a0;
+  border-color: #3892a0;
+  border-radius: 13px;
+  font-weight: 700;
+  color: white;
+  font-size: 1rem;
+  padding: 8px 15px;
 }
 section#formulario-cheq p.text-condiciones {
   text-align: center;
