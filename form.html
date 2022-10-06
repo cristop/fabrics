@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html>
 
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link id="faviconLink" rel="icon" type="image/png"
+        href="data:image/png;base64,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">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta http-equiv="Cache-Control" content="private, no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="google" content="notranslate">
+
+
+
+    <meta name="_csrf" content="b7324296-f20a-4fd2-8519-95c5e3ac1181">
+    <meta name="_csrf_header" content="X-CSRF-TOKEN">
+
+    <meta name="description" content="">
+
+    <title>American Cotton</title>
+</head>
 
 <body>
 

@@ -700,10 +700,12 @@ section#formulario-cheq {
 section#formulario-cheq .container {
 }
 section#formulario-cheq .title {
-  font-weight: 600;
+  font-weight: 800;
   padding-bottom: 20px;
   text-align: center;
   font-family: "Inter", sans-serif;
+  font-size: 2rem;
+  line-height: 1.4;
 }
 section#formulario-cheq .title:before {
   content: "";
@@ -714,33 +716,35 @@ section#formulario-cheq .title span {
 section#formulario-cheq .title span.first_text {
   color: #002c38;
   font-weight: 800;
+  font-size: 2.5rem;
 }
-section#formulario-cheq .title span.second_text {font-weight: 800;}
+section#formulario-cheq .title span.second_text {font-weight: 800;font-size: 2.5rem;}
 section#formulario-cheq .title span.terciary_text {
 }
 section#formulario-cheq .text {
-  max-width: 600px;
+  /* max-width: 600px; */
   margin: 0 auto;
   text-align: center;
   padding-bottom: 40px;
+  font-size: 1.3rem;
 }
-section#formulario-cheq .form {
-}
+section#formulario-cheq .form {max-width: 730px;margin: 0 auto;}
 section#formulario-cheq .form .flex {
   justify-content: center;
 }
 section#formulario-cheq .form .flex > div {
-  width: max-content;
+  /* width: max-content; */
 }
 section#formulario-cheq .form .flex label {
   padding-bottom: 10px;
 }
 section#formulario-cheq .form .flex input {
-  border-radius: 19px;
+  border-radius: 30px;
   background-color: #cbe3e6;
   font-family: "Inter", sans-serif;
   font-size: 16px;
   padding: 0px 25px;
+  margin-bottom: 0;
 }
 section#formulario-cheq .form .flex input::placeholder {
   color: #002c38;
@@ -748,11 +752,12 @@ section#formulario-cheq .form .flex input::placeholder {
 section#formulario-cheq .form .flex .btn {
   background-color: #3892a0;
   border-color: #3892a0;
-  border-radius: 13px;
+  border-radius: 10px;
   font-weight: 700;
   color: white;
-  font-size: 1rem;
-  padding: 8px 15px;
+  font-size: 1.3rem;
+  padding: 10px 17px;
+  margin-top: 10px;
 }
 section#formulario-cheq p.text-condiciones {
   text-align: center;
@@ -765,11 +770,27 @@ section#formulario-cheq p.text-condiciones small {
   section#formulario-cheq .container {
   }
   section#formulario-cheq .title {
+  font-size: 1rem;
+  padding-bottom: 5px;
   }
+
+section#formulario-cheq .title span.second_text {
+    font-size: 1.5rem;
+}
+
+section#formulario-cheq .title span.first_text {
+    font-size: 1.5rem;
+}
   section#formulario-cheq .text {
+  font-size: 0.9rem;
+  padding-bottom: 21px;
   }
   section#formulario-cheq .form {
   }
+
+section#formulario-cheq p.text-condiciones {
+    font-size: 0.8rem;
+}
   section#formulario-cheq .form .flex {
   }
   section#formulario-cheq .form .flex > div {
