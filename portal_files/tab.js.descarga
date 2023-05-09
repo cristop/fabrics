@@ -1,0 +1,87 @@
+function tab_Reload(innerPrefix) {
+	reloadCheck('tab', innerPrefix, function(div) {
+		new tab_Tab(div);
+	});
+}
+
+class tab_Tab {
+	constructor(div) {
+		var self = this;
+		this.id = div.id;
+		this.root = tagUtilGetControl(div);
+		this.root.mHandler = this;
+		this.prefix = 'tab_';
+		this.innerInfo = utilGetInnerInfo(this.root);
+		this.linkDetailInfo = $(this.root).attr('data-linkdetailinfo');
+		
+		this.a = null;
+		var aList = $('a[href="#' + this.id + '"]');
+		if(aList.length > 0) {
+			this.a = aList.get(0);
+		}
+		
+		if(this.a != null) {
+			this.url = $(this.a).attr('data-url');
+			
+			if(mString.isNotEmpty(this.linkDetailInfo) && mString.isNotEmpty(this.url)) {
+				var divId = $(this.a).attr('data-href') !== undefined ? $(this.a).attr('data-href').replace('#', '') : $(this.a).attr('href') !== undefined ? $(this.a).attr('href').replace('#', '') : undefined;
+				var url = this.url + this.linkDetailInfo;
+				utilAjaxPost(url, divId + utilAvoidUseParent, null, null, null, null, true, true);
+			}
+		}
+	}
+	
+	addButton(id, innerPrefix) {
+		// ¿Ver qué pasa si es un modal?
+		// Revisar la usabilidad, sigue no quedando bien.
+		var buttonId = mString.concatNotEmpty(innerPrefix, id);
+		var button = mMojito.tagGet(buttonId);
+		if(button != null) {
+			this.a.innerHTML += button.outerHTML;
+			var buttonNew = $('i#' + jqEscape(buttonId), this.a).get(0);
+			buttonNew.style.backgroundColor = 'transparent';
+			buttonNew.style.color = window.getComputedStyle(button).getPropertyValue('background-color');
+			$(button).remove();
+		}
+	}
+	
+	/**
+	 * Agrega botones a la pestaña.
+	 * ids: id de los botones a agregar separados por coma.
+	 * innerPrefix: innerPrefix de los botones a agregar.
+	 * reset: indica si hay que eliminar todos los botones antes de agregar los enviados por parámetro (por defecto es true).
+	 */
+	addButtons(ids, innerPrefix, reset) {
+		if(mBool.isTrue(reset)) {
+			$('i', this.a).remove();
+		}
+		
+		var idsArray = ids.split(',');
+		for(var i = 0; i < idsArray.length; i++) {
+			var id = idsArray[i];
+			this.addButton(id, innerPrefix);
+		}
+	}
+	
+	mode4Process() {
+		var actions = $(this.root).attr('data-actions');
+		utilMode4Process(this.root);
+	}
+	
+	refresh(method, rerender, timeout) {
+		var forms = $('[data-control=form]', this.root);
+		if(forms.length > 0) {
+			var form = forms.get(0);
+			form.mHandler.refresh(method, rerender, timeout);
+		}
+	}
+	
+	setTitle(title) {
+		$(this.a).html(title);
+	}
+	
+	// Forma anterior
+	tab_Mode4Process() {
+		this.mode4Process();
+	}
+}

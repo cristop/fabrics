@@ -1,0 +1,34 @@
+// IMPORTANTE: si cambian estas descripciones modificarlas en todos los tipos de dato (bool, float, int, string, date y object).
+// translate(value, defaultValue, tryFlag): loQueSea (esperando formato de programación) a este tipo de dato. Si value está vacío se devuelve null (o defaultValue).
+// translateLocale(value, defaultValue, tryFlag): loQueSea (esperando formato según configuración regional) a este tipo de dato
+// format: este tipo de dato a String según la configuración regional. En el caso de float se usa separador de miles. En el caso de int, no.
+// toString: este tipo de dato a String en modo programación. En ningún caso se usa separador de miles.
+// is[Type]: chequea si una variable es del tipo de dato de la utilería. Cuidado porque para float-int existe isNumber porque Javascript no diferencia
+// entre entero y punto flotante. Y el isFloat da true si el número tiene decimales.
+
+class mDateClass {
+	
+	format(date, format) {
+		var result = null;
+		if(date != null && mString.isNotEmpty(format)) {
+			result = format;
+			result = result.replaceAll('dd', mString.padLeft(date.getDate(), 2, '0'));
+			result = result.replaceAll('MM', mString.padLeft(date.getMonth() + 1, 2, '0'));
+			result = result.replaceAll('yyyy', mString.padLeft(date.getYear(), 4, '0'));
+			result = result.replaceAll('yy', mString.padLeft(date.getYear(), 2, '0'));
+			result = result.replaceAll('HH', mString.padLeft(date.getHours(), 2, '0'));
+			result = result.replaceAll('mm', mString.padLeft(date.getMinutes(), 2, '0'));
+			result = result.replaceAll('ss', mString.padLeft(date.getSeconds(), 2, '0'));
+		}
+		return result;
+	}
+}
+// dd
+// MM
+// yy
+// yyyy
+// HH
+// mm
+// ss
+
+var mDate = new mDateClass();

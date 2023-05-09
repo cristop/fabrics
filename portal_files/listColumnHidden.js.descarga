@@ -1,0 +1,24 @@
+function lchiReload(innerPrefix) {
+	reloadCheck('listColumnHidden', innerPrefix, function(td) {
+		new lchiListColumnHidden(td);
+	});
+}
+
+function lchiListColumnHidden(td) {
+	var self = this;
+	this.root = td;
+	this.prefix = 'lchi';
+	this.root.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	this.input = $('input', this.root).get(0);
+}
+
+lchiListColumnHidden.prototype.lchiSetValue = function(value) {
+	$(this.input).val(value);
+	$(this.input).trigger('change');
+}
+
+lchiListColumnHidden.prototype.lchiValue = function(value) {
+	var result = $(this.root).children('input[type=hidden]').val();
+	return result;
+}

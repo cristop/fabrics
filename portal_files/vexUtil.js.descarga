@@ -1,0 +1,66 @@
+function vxAlert(message, callback) {
+    vex.dialog.open({
+      // message: message,
+      unsafeMessage: message.replaceAll('\n', '<br>'),
+      className: 'vex-theme-default',
+      buttons: [
+          $.extend({}, vex.dialog.buttons.YES, { text: 'OK' })
+      ],
+      callback: function() {
+    	  if(callback != null) {
+    		  callback();
+    	  }
+      }
+    });
+}
+
+function vxAlertHtml(message, callback) {
+    vex.dialog.open({
+      unsafeMessage: message,
+      className: 'vex-theme-default',
+      buttons: [
+          $.extend({}, vex.dialog.buttons.YES, { text: 'OK' })
+      ],
+      callback: function() {
+    	  if(callback != null) {
+    		  callback();
+    	  }
+      }
+    });
+}
+
+function vxAlertLongText(message) {
+	$('body').append('<div class="popUpViewMore"><div class="content"><div class="popHeader"><a href="#" onclick="$(this).parent().parent().parent().remove();return false;">&times;</a></div><p>' + message + '</p></div></div>');
+}
+
+function vxConfirm(message, callback, parameter01, parameter02, parameter03) {
+	vex.defaultOptions.closeAllOnPopState = false;
+    vex.dialog.confirm(
+      {
+          message: message,
+          className: 'vex-theme-default',
+          callback: function(value) {
+              if(value) {
+                  callback(parameter01, parameter02, parameter03);
+              }
+          }
+      }
+    );
+}
+
+function vxPrompt(message, placeholder, callback, value, parameter01, parameter02, parameter03) {
+    vex.dialog.prompt(
+      {
+          message: message,
+          className: 'vex-theme-default',
+          placeholder: placeholder,
+          callback: function(value) {
+              if(value != null && value != false) {
+                  if(value.trim() != '') {
+                      callback(value, parameter01, parameter02, parameter03);
+                  }
+              }
+          }
+      }
+    );
+}

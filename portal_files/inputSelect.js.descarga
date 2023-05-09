@@ -1,0 +1,64 @@
+function inseReload(innerPrefix) {
+	reloadCheck('inputSelect', innerPrefix, function(span) {
+		new inseInputSelect(span);
+	});
+}
+
+class inseInputSelect {
+	constructor(span) {
+		var self = this;
+		this.root = tagUtilGetControl(span);
+		this.root.mHandler = this;
+		this.prefix = 'inse';
+		this.innerInfo = utilGetInnerInfo(this.root);
+		
+		/* DEPRECADO (inicio) */
+		/*
+		Fernando (2023-01-25): esto pretende ser una forma de poner el rerender y el método en el atributo rerender.
+		Pero no es correcto, para hacer eso hay que usar: method="metodo" rerender="rerenderIds".
+		Lo mismo pasa en inputEntity.js.
+		*/
+		var rerender = $(this.root).attr('data-rerender');
+		if(stringUtilNotEmpty(rerender) && mString.isEmpty($(this.root).attr('onchange'))) {
+			$(this.root).change(function() {
+				var rerenderArray = rerender.split(':');
+				var method = rerenderArray.length <= 1 ? null : rerenderArray[0];
+				var ids = rerenderArray.length <= 1 ? rerenderArray[0] : rerenderArray[1];
+				
+				utilMethodCall(self.root, method, ids);
+			});
+		}
+		/* DEPRECADO (fin)*/
+		
+		var actions = $(this.root).attr('data-actions');
+		if(stringUtilNotEmpty(actions)) {
+			$(this.root).on('change', function() {
+				utilMode4Process(self.root);
+			});
+		}
+	}
+	
+	setValue(value, startsWith, timeout) {
+		var timeoutInt = mInt.translate(timeout);
+		if(timeoutInt == null) {
+			var self = this;
+			$('option', this.root).each(function() {
+				if(mBool.isFalse(startsWith, true)) {
+					if($(this).attr("value") == value) {
+						$(self.root).val($(this).attr("value"));
+					}
+				} else {
+					if(mString.startsWith($(this).attr("value"), value)) {
+						$(self.root).val($(this).attr("value"));
+					}
+				}
+			});
+		} else {
+			var setValue = this.setValue.bind(this);
+			setTimeout(
+			  function() {
+				setValue(value, startsWith); 
+			  }, timeout);
+		}
+	}
+}

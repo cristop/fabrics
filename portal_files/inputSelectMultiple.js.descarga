@@ -1,0 +1,64 @@
+$.fn.inputSelectMultiple = function() {
+	var div = $(this).next().next();
+	var input = $(this).next();
+	
+	$(input).on('click', function() {
+	    $(div).toggle();
+	  });
+	
+	$(input).on('blur', function() {
+		setTimeout(
+			function() {
+				var focused =  $(document.activeElement);
+				var children = $(div).children();
+				var hide = true;
+				for (var i = 0; i < children.length; i++) {
+					var child = $(children[i]);
+					if(child.is(focused)) {
+						$(input).focus();
+						hide = false;
+					}
+				}
+				if(hide) {
+					$(div).hide();
+				}
+			}, 5
+		  );
+	  });		
+	
+
+	$(div).children().each( function() {
+		$(this).on('click', function() {
+			$(this).toggleClass('multiple-selected');
+			inputSelectMultipleLoadText(div);
+		});
+	  });
+};
+
+function inputSelectMultipleLoadText(div) {
+	var divOptions = $(div).children();
+	var input = $(div).prev();
+	var emptyValue = $(input).attr('data-emptyvalue');
+	var selectOptions = $(div).prev().prev().children();
+	var values = '';
+	
+	for (var i = 0; i < divOptions.length; i++) {
+		var divOption = $(divOptions[i]);
+		var selectOption = $(selectOptions[i+1]); // porque el primer elemento es MojitoController2.NOTHING
+		
+		if($(divOption).hasClass('multiple-selected')) {
+			$(selectOption).prop('selected', true);
+			if(values != '') {
+				values += '; ';
+			}
+			values += $(selectOption).text().trim();
+		} else {
+			$(selectOption).prop('selected', false);
+		}
+	}
+	
+	if(values == '') {
+		values = emptyValue;
+	}
+	$(input).val(values);
+}

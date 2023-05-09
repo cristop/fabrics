@@ -1,0 +1,125 @@
+/**
+ * Dragdealer.js 0.9.8
+ * http://github.com/skidding/dragdealer
+ *
+ * (c) 2010+ Ovidiu Cherecheș
+ * http://skidding.mit-license.org
+ */
+
+.dragdealer {
+  position: relative;
+  height: 30px;
+  background: #EEE;
+}
+.dragdealer .handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}
+
+
+.dragdealer .disabled {
+  background: #898989;
+}
+
+
+
+body {
+  /*margin: 0;
+  padding: 0;
+  background: #fcfcfc;
+  color: #222;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 20px;*/
+  /* Fix for preserving font sizes on iPhones (at least) */
+   -webkit-text-size-adjust: 100%;
+}
+
+/*.dragdealer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+
+  height: 60px;
+  width: 740px;
+  border-radius: 3px;
+}*/
+
+
+.dragdealer {
+  /*left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  height: 9px;
+  width: 100%;
+  border-radius: 3px;
+  margin-top: 10px;*/
+
+  height: 9px;
+  width: 71%;
+  border-radius: 3px;
+  margin-top: 10px;
+  display: inline-block;
+  margin-right: 10px;
+}
+.dragdealer .completed{
+  position: absolute;
+  height: 9px;
+  width: 0%;
+  border-radius: 3px 0px 0px 3px;
+  left: 0px;
+  top: 0px;
+  
+}
+.dragdealer .handle {
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: 50%;
+  margin-top: -4px;
+  text-align: center;
+}
+.dragdealer .value {
+  padding: 0 0 0 5px;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+/*colores*/
+.dragdealer.red-bar .completed{
+  background-color: #ffe7d4;
+}
+.dragdealer.red-bar .handle{
+  background: #ff7e1b;
+}
+.dragdealer.red-bar+.value.complet{
+  color: #ff7e1b;
+  font-weight: bold;
+}
+
+.dragdealer.celestial-bar .completed{
+  background-color: #deeff2;
+}
+.dragdealer.celestial-bar .handle{
+  background: #63b3c3;
+}
+.dragdealer.celestial-bar+.value.complet{
+  color: #63b3c3;
+  font-weight: bold;
+}
+
+.dragdealer.gray-bar .completed{
+  background-color: #d8d9df;
+}
+.dragdealer.gray-bar .handle{
+  background: #d8d9df;
+}
+.dragdealer.gray-bar+.value.complet{
+  color: #888;
+  font-weight: bold;
+}

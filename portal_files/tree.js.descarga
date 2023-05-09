@@ -1,0 +1,105 @@
+var droppableElement;
+
+function treeReload(innerPrefix) {
+	reloadCheck('tree', innerPrefix, function(tree) {
+		new treeTree(tree);
+	});
+}
+
+function treeTree(tree){
+	var self = this;
+	
+	tree.tree = this;
+	
+	this.tree = tree;
+	var methodDrop = $(tree).attr("data-method-drop");
+	var rerender = $(tree).attr("data-rerender");
+	
+	$('.mojito-tree-folder',tree).each(function(index, el) {
+		var empty=($('.mojito-tree-folder',this).find('*').length) ? false : true;
+		if (empty) {
+			$(this).addClass('empty');
+		} 
+		$(this).append('<div class="bg"></div>');
+	});
+	$('.mojito-tree-folder i',tree).click(function(event) {
+    	
+		if ($(this).parent().hasClass('empty')){}else{
+			if ($(this).parent().hasClass('open')) {
+	    		$(this).parent().removeClass('open');
+	    	}else{
+	    		$(this).parent().addClass('open');
+	    	}
+		}
+    });
+    $('.mojito-tree-folder span',tree).click(function(event) {
+    	
+    	$('.mojito-tree-folder span',tree).each(function(index, el) {
+    		$(this).parent().removeClass('active');
+    	});
+    	
+    	$(this).parent().addClass('active');
+    	
+    	utilMode4Process(this);
+    });
+	
+    $('.mojito-tree-folder > span',tree).droppable({
+    	tolerance:'pointer',
+    	drop: function( event, ui ) {
+    		    
+    		$(this).parent().removeClass('mojito-drop');
+    		
+    		if(self.isOpen($(this).parent())){
+    			var dragData = JSON.parse(ui.draggable.attr('data-drag'));
+    			var dropId= $(this).parent().attr("data-id");
+    			
+    			console.log('Drop Folder: '+dropId);
+    			
+    			var dragElement = $('[name="dragId"]');
+    			var dropElement = $('[name="dropId"]');
+    			
+    			if(dragElement == null||dragElement.length == 0){
+    				dragElement = $('<input type="hidden" name="dragId" value />');
+    			}
+    			$(dragElement).val(dragData.id);
+    			
+    			if(dropElement == null||dropElement.length == 0){
+    				dropElement = $('<input type="hidden" name="dropId" value />');
+    			}
+    			$(dropElement).val(dropId);
+    			
+    			$('form').append(dragElement);
+    			$('form').append(dropElement);
+    			
+    			utilSetMethodToCall('methodName', methodDrop, true, null, null, null, null, null, null, null, rerender);
+    			return false;
+    		}
+    		
+    		
+		    
+    	},
+    	over:function (event, ui) {
+    		droppableElement = $(this).parent().attr("data-id");
+    		$(ui.helper).addClass('over-drop');
+    		$(this).parent().addClass('mojito-drop');
+    	},
+    	out: function (event, ui){
+    		if(droppableElement == $(this).parent().attr("data-id")){
+    			$(ui.helper).removeClass('over-drop');    		
+    			droppableElement = null;
+    		}
+    		$(this).parent().removeClass('mojito-drop');
+    	}
+    });
+}
+
+treeTree.prototype.isOpen = function(control) {
+	var result = false;
+	var dropId= $(control).attr("data-id");
+	if($(control).parent().hasClass('mojito-tree-folder') && $(control).parent().hasClass('open')){
+		result = this.isOpen($(control).parent());
+	} else { 
+		result = $(control).parent().hasClass('mojito-tree');
+	}
+	return result;
+}

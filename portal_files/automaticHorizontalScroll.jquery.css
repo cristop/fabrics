@@ -1,0 +1,120 @@
+/* ******************************* */
+/* ******************************* */
+/* 
+Developed: by Cristo
+Required:
+Jquery
+FontAwebsome
+*/
+/* ******************************* */
+/* ******************************* */
+
+.automaticHorizontalScroll .hs-arrow{
+	opacity: 0;
+}
+@media screen and (min-width:760px){
+	.automaticHorizontalScroll {
+		position: relative;
+		overflow: hidden;
+		
+		white-space: nowrap;
+	}
+	.automaticHorizontalScroll.hs-active{
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+	/* Bootstrap Fix */
+	.automaticHorizontalScroll .nav-tabs > li{
+		display: inline-block;
+		float: none;
+	}
+	
+	*[class*="hs_Mask"]{
+	    /* Make this scrollable when needed */
+	    overflow-x: auto;
+	    /* We don't want vertical scrolling */
+	    overflow-y: hidden;
+	    /* For WebKit implementations, provide inertia scrolling */
+	    -webkit-overflow-scrolling: touch;
+	    /* We don't want internal inline elements to wrap */
+	    white-space: nowrap;
+		/* positioning context for advancers */
+		position: relative;
+	
+		width: 100%;
+	}
+	/*Mobile*/
+	/*@media screen and (min-width:760px){
+		*[class*="hs_Mask"]{
+			overflow-x: hidden !important;
+		}
+	}*/
+	*[class*="hs_Mask"]{
+		overflow-x: hidden !important;
+	}
+	
+	/* If JS present, let's hide the default scrollbar */
+	.js *[class*="hs_Mask"] {
+	    /* Make an auto-hiding scroller for the 3 people using a IE */
+	    -ms-overflow-style: -ms-autohiding-scrollbar;
+	}
+	/* Remove the default scrollbar for WebKit implementations */
+	.js *[class*="hs_Mask"]:-webkit-scrollbar {
+	    display: none;
+	}
+	.hs_Content {
+		float: left;
+		transition: transform .2s ease-in-out;
+	}
+	.hs_Content-no-transition {
+		transition: none;
+	}
+	.automaticHorizontalScroll .hs-arrow {
+		/* Reset the button */
+		appearance: none;
+		background: transparent;
+		padding: 0;
+		border: 0;
+		/* Now style it as needed */
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		/* Set the buttons invisible by default */
+		opacity: 0;
+		transition: opacity .3s;
+		font-size: 22px;
+		line-height: 22px;
+		
+		padding: 0px !important;
+		border: 0 !important;
+		-webkit-border-radius: 0px !important;
+		border-radius: 0px !important;
+	}
+	.automaticHorizontalScroll .hs-arrow i{
+		padding: 0px !important;
+		border: 0 !important;
+		-webkit-border-radius: 0px !important;
+		border-radius: 0px !important;
+		color: black;
+	}
+	.hs-arrow:focus {
+		outline: 0;
+	}
+	.hs-arrow:hover {
+		cursor: pointer;
+	}
+	*[class*="hs-Left"] {
+		left: 2px;
+	}
+	[data-overflowing="both"] ~ *[class*="hs-Left"],
+	[data-overflowing="left"] ~ *[class*="hs-Left"] {
+		opacity: 1;
+	}
+	*[class*="hs-Right"] {
+		right: 2px;
+	}
+	[data-overflowing="both"]  ~ *[class*="hs-Right"],
+	[data-overflowing="right"] ~ *[class*="hs-Right"] {
+		opacity: 1;
+	}
+}

@@ -1,0 +1,1910 @@
+// Se utiliza también en util.js
+var tagModalDivId = 'mojito-modal-content-div';
+var tagModalDivCounter = 0;
+
+function tagUtilClearValue(controlName) {
+	tagUtilSetValue(controlName, '');
+}
+
+function tagUtilSetValue(controlName, value) {
+	var control = document.getElementById(controlName);
+	
+	if(control.options == null) {
+		control.value = value;
+	} else {
+	    for(var i = 0; i < control.options.length; i++) {
+	    	if(control.options[i].value == value) {
+	    		control.options[i].selected = true;
+	    	}
+	    }
+	}
+}
+
+function tagUtilClearValueAndSubmit(controlName) {
+	tagUtilClearValue(controlName);
+	document.forms[0].submit();
+}
+
+function tagUtilSetValueAndSubmit(controlName, value) {
+	tagUtilSetValue(controlName, value);
+	document.forms[0].submit();
+}
+
+function tagUtilSetValueAndSubmitAjax(controlName, value, url, formId) {
+	tagUtilSetValue(controlName, value);
+	utilShowProcesando();
+	utilAjaxPost(url, formId);
+}
+
+function tagUtilSubmitOnEnter(e, rerender) {
+	var characterCode;
+	if(e && e.wich) {
+		characterCode = e.wich;
+	} else {
+		characterCode = e.keyCode;
+	}
+	
+	if(characterCode == 13) {
+		if(rerender == null || rerender.trim() == '') {
+			utilShowProcesando();
+			document.forms[0].submit();
+		} else {
+			utilSetMethodToCall('methodName', 'doNothing', null, null, null, null, null, null, null, null, rerender);
+		}
+		return false;
+	}
+	return true;
+}
+
+function tagUtilSubmitAjaxOnEnter(e, url, formId) {
+	var characterCode;
+	if(e && e.wich) {
+		characterCode = e.wich;
+	} else {
+		characterCode = e.keyCode;
+	}
+	
+	if(characterCode == 13) {
+		// utilShowProcesando();
+		utilAjaxPost(url, formId);
+		return false;
+	}
+	return true;
+}
+
+function clearInputs(controlId) {
+	var control = document.getElementById(controlId);
+	var inputs = control.getElementsByTagName("input");
+	
+	for(i = 0; i < inputs.length; i++) {
+		inputs[i].value = "";
+	}
+}
+
+function clearInputsAndSubmit(controlId) {
+	clearInputs(controlId);
+	document.forms[0].submit();
+}
+
+function clearInputsAndSubmitAjax(controlId, url, formId) {
+	clearInputs(controlId);
+	utilSubmit(url, formId);
+}
+
+function tagUtilNotEmpty(controlId) {
+	var control = document.getElementById(controlId);
+	return stringUtilNotEmpty(control.value);
+}
+
+function tagUtilValueNotPresent(controlId, value) {
+	var control = document.getElementById(controlId);
+	var result = true;
+	
+	if(control != null) {
+		result = (control.innerHTML.toLowerCase().indexOf(value.toLowerCase()) < 0);
+	}
+	
+	return result;
+}
+
+function tagUtilAlternateImage(controlId, image1, image2) {
+	var control = document.getElementById(controlId);
+	if(stringUtilEndsWith(control.src, image1)) {
+		control.src = image2;
+	} else {
+		control.src = image1;
+	}
+	
+	return false;
+}
+
+function tagUtilSetImage(event, image) {
+	tagUtilGetEventElement(event).src = image;
+	
+	return false;
+}
+
+function tagUtilGetEventElement(event) {
+	return (event.srcElement) ? event.srcElement : event.target;
+}
+
+function tagUtilAlternateTitle(controlId, title1, title2) {
+	var control = document.getElementById(controlId);
+	if(control.title == title1) {
+		control.title = title2;
+	} else {
+		control.title = title1;
+	}
+	
+	return false;
+}
+
+function tagUtilAlternateInnerHtml(controlOrId, innerHtml1, innerHtml2) {
+	var control = tagUtilGetControl(controlOrId);
+	if(control.innerHTML.trim() == innerHtml1) {
+		control.innerHTML = innerHtml2;
+	} else {
+		control.innerHTML = innerHtml1;
+	}
+	
+	return false;
+}
+
+function tagUtilAlternateValue(controlId, value1, value2) {
+	var control = document.getElementById(controlId);
+	if(control != null) {
+		if(control.value == value1) {
+			control.value = value2;
+		} else {
+			control.value = value1;
+		}
+	}
+	
+	return false;
+}
+
+
+function tagUtilAlternateDisplay(controlIdOrControl) {
+	var control = tagUtilGetControl(controlIdOrControl);
+	if(control.style.display == 'block' || control.style.display == '') {
+		control.style.display = 'none';
+	} else {
+		control.style.display = '';
+	}
+	
+	return false;
+	/*
+	var control = tagUtilGetControl(controlIdOrControl);
+	if(control.style.display == 'block' || control.style.display == '') {
+		control.style.display = 'none';
+	} else {
+		control.style.display = 'block';
+	}
+	
+	return false;
+	*/
+}
+
+function tagUtilAlternateDisplayForTwo(value, controlIdTrue, controlIdFalse) {
+	var controlTrue = document.getElementById(controlIdTrue);
+	var controlFalse = document.getElementById(controlIdFalse);
+	
+	if(value) {
+		controlFalse.style.display = 'none';
+		controlTrue.style.display = 'block';
+	} else {
+		controlTrue.style.display = 'none';
+		controlFalse.style.display = 'block';
+	}
+	
+	return false;
+}
+
+function tagUtilAlternateDisplayMainMenu(controlId, parentId) {
+	var control = document.getElementById(controlId);
+	var parent = document.getElementById(parentId);
+	
+	control.style.top = (parent.offsetTop + parent.offsetHeight + (tagUtilIsIE() ? 44 : -15)) + "px";
+	control.style.left = (parent.offsetLeft + (tagUtilIsIE() ? 10 : 0)) +"px";
+	
+	if(control.style.display == 'block') {
+		control.style.display = 'none';
+	} else {
+		control.style.display = 'block';
+	}
+	
+	return false;
+}
+
+function tagUtilShowMainMenu(controlId, parentId) {
+	var control = document.getElementById(controlId);
+	var parent = document.getElementById(parentId);
+	
+	control.style.top = (parent.offsetTop + parent.offsetHeight + (tagUtilIsIE() ? 44 : -15)) + "px";
+	control.style.left = (parent.offsetLeft + (tagUtilIsIE() ? 10 : 0)) +"px";
+	
+	control.style.display = 'block';
+	
+	return false;
+}
+
+function tagUtilHideMainMenu(controlId, parentId) {
+	var control = document.getElementById(controlId);
+	var parent = document.getElementById(parentId);
+	
+	control.style.top = (parent.offsetTop + parent.offsetHeight + (tagUtilIsIE() ? 44 : -15)) + "px";
+	control.style.left = (parent.offsetLeft + (tagUtilIsIE() ? 10 : 0)) +"px";
+	
+	control.style.display = 'none';
+	
+	return false;
+}
+
+function tagUtilSelectValue(selectId, value) {
+	var select = document.getElementById(selectId);
+
+	for(var i = 0; i < select.options.length; i++) {
+		if(select.options[i].value == value) {
+			select.options[i].selected = true;
+		}
+	}
+}
+
+function tagUtilEventCurrentTarget(event, target) {
+	return (event.currentTarget) ? event.currentTarget : target;//event.srcElement;
+}
+
+function tagUtilIsIE() {
+	var appName = navigator.appName;
+	return (appName == 'Microsoft Internet Explorer');
+}
+
+function tagUtilHideBrothers(bigBrotherId) {
+	var bigBrother = document.getElementById(bigBrotherId);
+	var parent = bigBrother.parentNode;
+	
+	for(var i = 0; i < parent.childNodes.length; i++) {
+		if(parent.childNodes[i].id != bigBrotherId && parent.childNodes[i].nodeType == 1) {
+			parent.childNodes[i].style.display = 'none';
+		}
+	}
+
+	return false;
+}
+
+
+function tagUtilHide(controlIdOrControl) {
+	var control = tagUtilGetControl(controlIdOrControl);
+	
+	if(control != null) {
+		control.style.display = 'none';
+	}
+
+	return false;
+}
+
+function tagUtilDisplay(controlIdOrControl) {
+	//alert("tagUtilDisplay");
+	var control = tagUtilGetControl(controlIdOrControl);
+	
+	if(control != null) {
+		control.style.display = 'block';
+	}
+
+	return false;
+}
+
+function tagUtilSetCheckboxToHidden(checkboxId, hiddenId, highlight) {
+	var checkBox = document.getElementById(checkboxId);
+	var hidden = document.getElementById(hiddenId);
+	if (checkBox.checked) {
+		hidden.value = 'true';
+		if(highlight != null && highlight) {
+			$(hidden).closest('tr').addClass('attention-state');
+		}
+	} else {
+		hidden.value = 'false';
+		if(highlight != null && highlight) {
+			$(hidden).closest('tr').removeClass('attention-state');
+		}
+	}
+	
+	//Agrego esto para poder detectar en las páginas si se cambio el checkbox.
+	$(hidden).trigger('change');
+	// Fernando (2017-1030) agrego el blur porque valueCalculated funciona sacándole
+	// el foco al control que se modificó, y para el caso de checkbox el que se
+	// modifica es el input hidden que tiene el valor de si está seleccionado o no.
+	// alert('before blur, value: ' + hidden.value);
+	$(hidden).trigger('blur');
+}
+
+function tagUtilSetCheckboxToHidden2(checkboxId, hiddenId, trueValue, falseValue) {
+	var checkBoxLabel = tagUtilGetControl(checkboxId);
+	var hidden = $(checkBoxLabel).next(); // tagUtilGetControl(hiddenId);
+	if (checkBoxLabel.innerHTML.trim() == trueValue) {
+		$(hidden).val('false');
+		checkBoxLabel.innerHTML = falseValue;//'&nbsp;';
+	} else {
+		$(hidden).val('true');
+		checkBoxLabel.innerHTML = trueValue;
+	}
+	
+	//Agrego esto para poder detectar en las páginas si se cambio el checkbox.
+	$(hidden).trigger('change');
+}
+
+function tagUtilSetCheckboxToHidden3(iId, hiddenName) {
+	var checkBoxI = tagUtilGetControl(iId);
+	var hidden = $('input[type="hidden"][name="' + hiddenName + '"]'); // tagUtilGetControl(hiddenId);
+	if(reloadIsLayoutVertical()) {
+		if($(checkBoxI).hasClass('fa-check')) {
+			$(hidden).val('false');		
+			$(checkBoxI).removeClass('fa-check');
+		} else {
+			$(hidden).val('true');
+			$(checkBoxI).addClass('fa-check');
+		}
+	}
+	if(reloadIsLayoutHorizontalNew()) {
+		if($(checkBoxI).hasClass('cis-check')) {
+			$(hidden).val('false');		
+			$(checkBoxI).removeClass('cis-check');
+		} else {
+			$(hidden).val('true');
+			$(checkBoxI).addClass('cis-check');
+		}
+	}
+	
+	//Agrego esto para poder detectar en las páginas si se cambio el checkbox.
+	$(hidden).trigger('change');
+}
+
+function tagUtilPassValue(value) {
+	var control = document.getElementById(document.forms[0].methodName.value);
+	control.value = value;
+	
+	if(control.type != 'hidden') {
+		control.onblur();
+	}
+}
+
+function tagUtilInputCheckBoxDeselectByName(name, selectedId) {
+	var inputClicked = document.getElementById(selectedId);
+	var inputs = document.getElementsByName(name);
+	
+	if(inputClicked.checked) {
+		for(var i = 0; i < inputs.length; i++) {
+			if(inputs[i].id != selectedId) {
+				inputs[i].checked = false;
+				tagUtilSetCheckboxToHidden(inputs[i].id, inputs[i].id.substr(0, inputs[i].id.length - 9));
+			}
+		}
+	}
+	
+	tagUtilSetCheckboxToHidden(selectedId, selectedId.substr(0, selectedId.length - 9));
+}
+
+function tagUtilHasClass(controlOrControlId, className) {
+	var result = false;
+	var control = tagUtilGetControl(controlOrControlId);
+	
+	if(control.className) {
+		result = control.className.indexOf(className) >= 0;
+	}
+	
+	return result;
+}
+
+function tagUtilAddClass(controlOrControlId, className) {
+	var control = tagUtilGetControl(controlOrControlId);
+	
+	if(!tagUtilHasClass(control, className)) {
+		control.className = control.className + " " + className; 
+	}
+}
+
+function tagUtilRemoveClass(controlOrControlId, className) {
+	var control = tagUtilGetControl(controlOrControlId);
+	
+	if(tagUtilHasClass(control, className)) {
+		if(control.className == className) {
+			control.className = "";
+		} else {
+			control.className = control.className.replace(new RegExp("^" + className + " "), "");
+			control.className = control.className.replace(new RegExp(" " + className + "$"), "");
+			control.className = control.className.replace(" " + className + " ", " ");
+		}
+	}
+}
+
+function tagUtilAddClassUi(controlOrControlId, className) {
+	tagUtilRemoveClass(controlOrControlId, 'alternative-bad-state');
+	tagUtilAddClass(controlOrControlId, className);
+}
+
+/**
+ * Devuelve un control por medio del control mismo o de su id o de su name (pero solamente si hay un único control
+ * con ese name).
+ * Se utiliza para permitir que las variables pasadas por parámetros puedan ser tanto controles como id de controles.
+ * @param controlIdOrControl Control que se va a devolver o el id del control a devolver.
+ * @returns Si controlIdOrControl es un contro, lo devuelve. Si es un id, busca el control con ese id y lo devuelve.
+ */
+function tagUtilGetControl(controlIdOrControl) {
+	var result = controlIdOrControl;
+	var toStringCall = Object.prototype.toString.call(controlIdOrControl); 
+	
+	if(toStringCall == "[object String]") {
+		result = document.getElementById(controlIdOrControl);
+		
+		if(result == null) {
+			var byName = document.getElementsByName(controlIdOrControl);
+			if(byName.length == 1) {
+				result = byName[0];
+			} else {
+				result = null;
+			}
+		}
+	}
+	
+	return result;
+}
+
+function tagUtilOnlineCombo(selectId, valuesHiddenId, searchTextId) {
+	if(valuesHiddenId != null) {
+		var valuesHidden = document.getElementById(valuesHiddenId);
+		var searchText = document.getElementById(searchTextId);
+		var select = document.getElementById(selectId);
+		var values = '';
+		var i;
+		
+		for (i = 0; i < select.options.length; i++) {
+			values += '|';
+			values += select.options[i].value;
+			values += '|';
+			values += select.options[i].text;
+		}
+		values = values.substr(1);
+		valuesHidden.value = values;
+		
+		searchText.onkeyup = function() {
+			var values = valuesHidden.value;
+			var search = searchText.value.toLowerCase();
+			var actualValue = null;
+			
+			if(select.selectedIndex >= 0) {
+				actualValue = select.options[select.selectedIndex].value;
+			}
+			
+			while (select.options.length > 0) {
+				select.remove(0);
+			}
+			
+			var i;
+			var valuesArray = values.split('|');
+			var indexSelected = -1;
+			for (i = 0; i < valuesArray.length; i += 2) {
+				if (valuesArray[i].toLowerCase() == search) {
+					indexSelected = i;
+				}
+			}
+			
+			var firstSelected = false;
+			for (i = 0; i < valuesArray.length; i += 2) {
+				if (indexSelected >= 0 || search == '' || valuesArray[i + 1].toLowerCase().indexOf(search) >= 0) {
+					var option = document.createElement('option');
+					option.value = valuesArray[i];
+					option.text = valuesArray[i + 1];
+					
+					if(indexSelected >= 0) {
+						if(indexSelected == i) {
+							option.selected = true;
+						}
+					} else {
+						if(!firstSelected) {
+							option.selected = true;
+							firstSelected = true;
+						}
+					}
+					
+					select.add(option);
+				}
+			}
+			
+			var newValue = null;
+			if(select.selectedIndex >= 0) {
+				newValue = select.options[select.selectedIndex].value;
+			}
+	
+			if(newValue != actualValue) {
+				tagUtilFireEvent(select, "change");
+				/*
+				if ("fireEvent" in select)
+					select.fireEvent("onchange");
+				else
+				{
+				    var event = document.createEvent("HTMLEvents");
+				    event.initEvent("change", false, true);
+				    select.dispatchEvent(event);
+				}
+				*/
+			}
+		};
+	}
+}
+
+function tagUtilFireEvent(controlIdOrControl, eventName) {
+	// eventName: "change"
+	var control = tagUtilGetControl(controlIdOrControl);
+	
+	if ("fireEvent" in control)
+		control.fireEvent("on" + eventName);
+	else
+	{
+	    var event = document.createEvent("HTMLEvents");
+	    event.initEvent(eventName, false, true);
+	    control.dispatchEvent(event);
+	}
+}
+
+function tagUtilSetWindowHeight(controlIdOrControl, minusHeight) {
+	var control = tagUtilGetControl(controlIdOrControl);
+	if( control !== null && control !== undefined ) {
+		
+		
+		var height = utilGetWindowHeight() - 5;
+		if(minusHeight != null) {
+			height = height - minusHeight;
+		}
+		
+		control.height = height;
+	}
+}
+
+function tagUtilCheckLength(e, controlIdOrControl, maxLength) {
+	var control = tagUtilGetControl(controlIdOrControl);
+    var keynum;
+	
+    if (window.event) { // IE
+        keynum = e.keyCode;
+    } else {
+        if (e.which) { // Netscape/Firefox/Opera
+            keynum = e.which;
+        } else {
+            keynum = 49;
+        }
+    }
+    
+    var value = control.value;
+    var result = true;
+    
+    // Gaston (2017-04-28) Agrego esto porque el length de javascript toma el \r\n como un s�lo caracter y hace mal la validaci�n.
+    var newLines = value.match(/(\r\n|\n|\r)/g);
+    var addition = 0;
+    if (newLines != null) {
+        addition = newLines.length;
+    }
+    
+    // Cambio por Cristo para agregar color cuando se pasa
+    if(value.length + addition/* + 1*/ > maxLength) {
+    	//result = false;
+    	//$(control).css({'border-color':'red', 'color':'red'});
+    	$(control).addClass("all-red");
+    }else{
+    	// Cambio por Cristo para quitar color cuando se pasa
+    	//$(control).removeAttr('style');
+    	$(control).removeClass("all-red");
+    }
+    
+	return result;
+}
+
+function tagUtilSetLength(textIdOrText, countIdOrCount, maxLength) {
+	//alert("tagUtilSetLength");
+	var text = tagUtilGetControl(textIdOrText);
+	var count = tagUtilGetControl(countIdOrCount);
+	var currentLetters;
+	
+	// Gaston (2017-04-28) Agrego esto porque el length de javascript toma el \r\n como un s�lo caracter y hace mal la validaci�n.
+    var newLines = text.value.match(/(\r\n|\n|\r)/g);
+    var addition = 0;
+    if (newLines != null) {
+        addition = newLines.length;
+    }
+    
+    //Cambio de Cristo, cuando se supere el limite permitido, el contador de letras se mostrará en negativo
+    currentLetters = text.value.length+addition;
+	
+    if( currentLetters > maxLength){
+    	currentLetters = maxLength-currentLetters;
+    }
+    
+	count.innerHTML = currentLetters + "/" + maxLength.toString();
+}
+
+function tagUtilPositionTop(controlIdOrControl, referenceIdOrReference) {
+	var control = tagUtilGetControl(controlIdOrControl);
+	var reference = tagUtilGetControl(referenceIdOrReference);
+	
+	var referenceTop = reference;
+	var top = -1 * control.clientHeight;
+	while(referenceTop != null) {
+		top += referenceTop.offsetTop;
+		referenceTop = referenceTop.offsetParent;
+	}
+	
+	var referenceLeft = reference;
+	var left = 1;
+	while(referenceLeft != null) {
+		left += referenceLeft.offsetLeft;
+		referenceLeft = referenceLeft.offsetParent;
+	}
+	
+	control.style.top = top + "px";
+	control.style.left = left + "px";
+}
+
+function scapeId(originalId){
+	return originalId.replace(/\./g,'\\.');
+}
+
+function tagUtilTableClick(tableName, useNewConfiguration, hiddenShowLinkdTextName) {
+	// $(document).ready(function(){
+		$('table[name="'+tableName+'"] tr.mojito-querytable-data-tr td').click(function(e) {
+			var event = e || window.event;
+			if(!($(this).has('input[type="checkbox"]').length) && !($(this).has('a').length)) {
+				var clickAction = $(this).closest('tr').attr('data-clickaction');
+				var isColumnAction = /^true$/i.test($(this).children('label:first').attr('data-iscolumnaction'));
+				//isColumnAction = isColumnAction || $(this).children('label:first').is('.mojito-columnaction-action-label, .mojito-columnaction-action-disabled-label');
+				var isColumnActionEnabled=/^true$/i.test($(this).children('label:first').attr('data-iscolumnactionenabled'));
+				if(clickAction === undefined || clickAction == null || isColumnAction){			
+					if(isColumnAction &&isColumnActionEnabled ) {
+					//if($(this).children('label:first').hasClass('mojito-columnaction-action-label')) { 
+						
+						var clickScript = $(this).find('label').attr('data-clickaction');
+						eval(clickScript);
+					//} else if($(this).children('label:first').hasClass('mojito-columnaction-action-disabled-label')) {
+					} else if(isColumnAction && !isColumnActionEnabled) { 
+						return false;
+					} else { 
+						utilShowProcesando();
+						var a = document.createElement('a');
+						a.id = 'a';
+						var noLink = false;
+						if($('#'+scapeId(hiddenShowLinkdTextName)).val() == '1') {
+							var url = $(this).closest('td').attr('data-link');
+							if(!url){
+								if (useNewConfiguration) {
+									url = $(this).closest('tr').attr('data-link');
+								} else {
+									noLink = true;
+								}							
+							}
+							a.href = url;
+						} else{
+							a.href = $(this).closest('tr').attr('data-link');
+						}
+						if(event.ctrlKey){
+							a.target = '_blank';
+							a.href = utilRemoveUrlParameter(a.href, '_nhid');
+							a.href = a.href + '&_nhid=' + utilRandom(8);
+						}
+						if(!noLink){
+							$('body').append(a);
+							if( document.createEvent ) {
+								var mouseEvent = document.createEvent('MouseEvents');
+								mouseEvent.initEvent( 'click', true, true );
+								a.dispatchEvent(mouseEvent);
+						    } else if( a.click ) {
+						    	a.click();						    	
+						    }
+							utilOcultarProcesando();
+						}
+					}
+				}else{
+					if(clickAction != "" && useNewConfiguration){					
+						eval(clickAction);
+					}			
+				}
+			}else if($(this).has('i').length){
+				var clickScript = $(this).find('i').attr('data-clickaction');
+				eval(clickScript);
+			}
+		});
+	// });
+}
+
+function tagUtilAppend(controlIdOrControl, append) {
+	var control = tagUtilGetControl(controlIdOrControl);
+	control.value = control.value + append;
+}
+
+function tagUtilExporting(exportFileType, exportFieldId) {
+	var exportField = document.getElementById(exportFieldId);
+	exportField.value = exportFileType;
+	if (document.forms.lenght > 0 &&document.forms[0].submit() !== 'undefined' ) {
+		document.forms[0].submit();
+	}
+	
+	return false;
+}
+
+function tagUtilExportingAjax(exportFileType, exportFieldId, url, formId) {
+	var exportField = document.getElementById(exportFieldId);
+	exportField.value = exportFileType;
+	utilShowProcesando();
+	utilAjaxPost(url, formId);
+}
+
+function tagUtilAssertLinks(showLink, tableName){
+	$('table[name="'+tableName+'"] tr td[data-link]').each(function(){
+		if(document.getElementById(showLink)!= null && document.getElementById(showLink).value == '1') {
+			$(this).css('text-decoration', 'underline');
+		} else{
+			$(this).css('text-decoration', 'none');
+		}
+	});
+}
+
+function tagUtilBlink(controlOrId) {
+	var target = tagUtilGetControl(controlOrId);
+	if(!target.blinking) {
+		target.blinking = true;
+		target.step = 0;
+		target.colorPrevious = target.style.color;
+		target.timer = setInterval( function() { tagUtilBlinkTimer(target) }, 50);
+	}
+}
+
+function tagUtilBlinkTimer(target) {
+	var color = 0;
+	var low = 0; // color m�s oscuro.
+	var high = 220; // color m�s claro.
+	var interval = (high - low) / 10; // intervalo.
+	var times = 8; // cantidad de veces que hace el fade (titila la mitad de veces).
+	
+	if(target.step == 0) {
+		color = low;
+	} else {
+		var i = 0;
+		var upDown = true;
+		for(var i = 0; i < (times * 10); i += 10) {
+			if(target.step > i && target.step <= (i + 10)) {
+				if(upDown) {
+					color = low + (target.step - i) * interval;
+				} else {
+					color = high - (target.step - i) * interval;
+				}
+				
+				break;
+			}
+			upDown = !upDown;
+		}
+	}
+	if(target.step <= (times * 10)) {
+		target.style.color = color = 'rgb(' + color + ',' + color + ',' + color + ')';
+		target.step = target.step + 1;
+	} else {
+		target.style.color = target.colorPrevious;
+		clearInterval(target.timer);
+		target.blinking = false;
+	}
+}
+
+function tagUtilBlock(controlOrId, color) {
+	var controlOrIdAux = controlOrId.name + '.description';
+	var target = tagUtilGetControl(controlOrIdAux);
+	if(target == null) {
+		target = tagUtilGetControl(controlOrId);
+	}
+	
+	if(target != null && target.readOnly != null) {
+		target.readOnly = true;
+		target.style.backgroundColor = color;
+		
+		if(target.getAttribute("data-control-block") == "inputEntity") {
+			var label = target.nextSibling.nextSibling;
+			label.style.visibility = "hidden";
+		}
+	}
+}
+
+function tagUtilUnblock(controlOrId, color) {
+	var controlOrIdAux = controlOrId.name + '.description';
+	var target = tagUtilGetControl(controlOrIdAux);
+	if(target == null) {
+		target = tagUtilGetControl(controlOrId);
+	}
+	
+	if(target != null && target.readOnly == true) {
+		target.readOnly = false;
+		target.style.backgroundColor = color;
+		
+		if(target.getAttribute("data-control-block") == "inputEntity") {
+			var label = target.nextSibling.nextSibling;
+			label.style.visibility = "visible";
+		}
+	}
+}
+
+function tagUtilClean(controlOrId) {
+	var controlOrIdAux = controlOrId.name + '.description';
+	var target = tagUtilGetControl(controlOrIdAux);
+	if(target == null) {
+		target = tagUtilGetControl(controlOrId);
+	}
+	
+	if(target != null) {
+		target.value = null;
+	}
+}
+
+function tagUtilPositionInnerTopRight(controlIdOrControl, referenceIdOrReference) {
+	var control = tagUtilGetControl(controlIdOrControl);
+	var reference = tagUtilGetControl(referenceIdOrReference);
+	
+	var referenceTop = reference;
+	var top = -1 * control.clientHeight; //0;
+	while(referenceTop != null) {
+		top += referenceTop.offsetTop;
+		referenceTop = referenceTop.offsetParent;
+	}
+	
+	var referenceLeft = reference;
+	var left = reference.clientWidth - control.clientWidth + 4;
+	while(referenceLeft != null) {
+		left += referenceLeft.offsetLeft;
+		referenceLeft = referenceLeft.offsetParent;
+	}
+	
+	control.style.top = top + "px";
+	control.style.left = left + "px";
+}
+
+function tagUtilCheckedAll (name, checkedElement) {
+	for (var i = 0; i <document.getElementsByName(name).length; i++) {
+		if(!document.getElementsByName(name).item(i).disabled) {
+			document.getElementsByName(name).item(i).checked = checkedElement.checked;
+		}
+	}
+	tagUtilCountChecked(name);
+}
+
+function tagUtilCountChecked (nameValue) {
+	nameValueScaped = nameValue.replace(/([!\u0022#$%&'()*+,./:;<=>?@[\]^`{|}~])/g, '\\$1');
+	var count = $('input[name=' + nameValueScaped + ']:checked').length;
+	$('#' + nameValueScaped + 'Count').remove();
+	if(count > 0) {
+		var labelCount = $( '<label id=\u0022' + nameValue + 'Count\u0022>(' + count + ')</label>' )
+		$('input[name=\u0022checkall\u0022]').closest('td').append(labelCount);
+	}
+}
+
+function tagUtilMultiply1(event) {
+	var scaleValue = event.data.scale;
+	var factors = event.data.factors;
+	var nullValue = isNaN(parseInt(event.data.nullValue))?1:parseInt(event.data.nullValue);
+	var newValue= 1;
+	var nonValues = 0;
+	var factorValues= new Array();
+	// alert('tagUtilMultiply1');
+	for(var i = 0; i < factors.length; i++) {
+		var inputValue = $('[name=\u0022' + factors[i] + '\u0022]').val();
+		if(inputValue !== undefined ){
+			// alert('before multiply, ' + inputValue);
+			if(inputValue != 'true') {
+				inputValue = inputValue.replace(',', '.');
+			} else {
+				inputValue = 1;
+			}
+		}
+		if(isNaN(parseFloat(inputValue))) {
+			inputValue = $('[id=\u0022' + factors[i] + '\u0022]').val();
+
+			if(inputValue !== undefined ){
+				inputValue = inputValue.replace(',', '.');
+			}
+			
+			if(isNaN(parseFloat(inputValue))) {
+				factorValues[i] = nullValue;
+				nonValues++;
+			} else {
+				factorValues[i] = parseFloat(inputValue);
+			}
+		} else {
+			factorValues[i] = parseFloat(inputValue);
+		}
+	}
+	if(factors.length - 1 != nonValues){
+		for(var i = 0; i < factorValues.length; i++) {
+			newValue = newValue * factorValues[i];
+		}
+	} else {
+		newValue = 0;
+	}
+	newValue = newValue.toFixed(parseInt(scaleValue));
+	if(event.data.enabled) {
+		$('[id=\u0022'+event.data.result+'\u0022]').val(newValue);
+		tagUtilFireEvent(event.data.result, 'blur');
+	} else {
+		var hidden = $('[id=\u0022'+event.data.result+'\u0022]')
+		$(hidden).closest('td').contents().filter(
+			function() {
+				return this.nodeType == 3;
+			}
+		).remove();
+		var textValue = newValue.toString().replace(',', '').replace('.', ',');;
+		$(hidden).val(textValue);
+		$(hidden).before(numberUtilFormat(textValue,6,scaleValue));
+		$(hidden).focusout();
+	}
+}
+
+function tagUtilSubstract(event) {
+	var scaleValue = event.data.scale;
+	var factors = event.data.factors;
+	var newValue= 1;
+	var nonValues = 0;
+	var factorValues= new Array();
+	
+	for(var i = 0; i < factors.length; i++) {
+		var inputValue = $('[name=\u0022' + factors[i] + '\u0022]').val();
+		if(isNaN(parseFloat(inputValue))) {
+			inputValue = $('[id=\u0022' + factors[i] + '\u0022]').val();
+			if(isNaN(parseFloat(inputValue))) {
+				factorValues[i] = 0;
+				nonValues++;
+			} else {
+				factorValues[i] = parseFloat(inputValue);
+			}
+		} else {
+			factorValues[i] = parseFloat(inputValue);
+		}
+		if (i == 0) {
+			newValue = factorValues[i]; 
+		}
+	}
+
+	if(factors.length - 1 != nonValues) {
+		for(var i = 0; i < factorValues.length; i++) {
+			if (i == 0 ) {
+				newValue = factorValues[i];
+			} else {
+				newValue = newValue - factorValues[i];
+			}
+		}
+	}
+	
+	newValue = newValue.toFixed(parseInt(scaleValue));
+	if(event.data.enabled) {
+		$('[id=\u0022'+event.data.result+'\u0022]').val(newValue);
+		tagUtilFireEvent(event.data.result, 'blur');
+	} else {
+		var hidden = $('[id=\u0022'+event.data.result+'\u0022]')
+		$(hidden).closest('td').contents().filter(
+			function() {
+				return this.nodeType == 3;
+			}
+		).remove();
+		$(hidden).val(newValue);
+		$(hidden).before(numberUtilFormat(newValue.toString(),6,scaleValue));
+		$(hidden).focusout();
+	}
+}
+
+function tagUtilSutract(minuendControlId, subtrahendControlId, differenceId) {
+	var minuendControl = document.getElementById(minuendControlId);
+	var subtrahendControl = document.getElementById(subtrahendControlId);
+	var differenceControl = document.getElementById(differenceId);
+	var minuend = numberUtilGetNumber(minuendControlId);
+	var subtrahend = numberUtilGetNumber(subtrahendControlId);
+	var difference = minuend - subtrahend;
+	differenceControl.value = difference;
+}
+
+function tagUtilChangeValue(id, value) {
+	beforeValue = $('#' + id + ' input').val();
+	$('#' + id + ' input').val(value);
+	if (beforeValue != value) {
+		$('#' + id + ' span').each(
+			function(index) {
+				if (index < value) {
+					$(this).attr('class','mojito-inputbase-star-on-span');
+				} else {
+					$(this).attr('class','mojito-inputbase-star-off-span');
+				}
+			}
+		);
+	} else {
+		$('#' + id + ' input').val('');
+		$('#' + id + ' span').each(function(index) {
+			$(this).attr('class','mojito-inputbase-star-off-span');
+		});
+	}
+}
+
+function tagUtilMultiply(event) {
+	var f1Control = $('[id=\u0022' + event.data.f1 + '\u0022]');
+	var f2Control = $('[id=\u0022' + event.data.f2 + '\u0022]');
+	var resultControl = $('[id=\u0022'+event.data.result+'\u0022]');
+	var f1Value = f1Control.val().replace('.', '').replace(',', '.');
+	var f2Value = f2Control.val().replace('.', '').replace(',', '.');
+	
+	var defalutValue = event.data.defaultValue === undefined || event.data.defaultValue == null ? 0 : parseFloat(event.data.defaultValue);
+	if(!(f1Value == '' && f2Value == '')) {
+		f1Value = isNaN(parseFloat(f1Value)) ? defalutValue : parseFloat(f1Value);
+		f2Value = isNaN(parseFloat(f2Value)) ? defalutValue : parseFloat(f2Value);
+		resultControl.val(f1Value * f2Value);
+	} else {
+		resultControl.val('');
+	}
+	tagUtilFireEvent(event.data.result, 'blur');
+	/*
+	var f1Value = $('[id=\u0022' + event.data.f1 + '\u0022]').val();
+	var f2Value = $('[id=\u0022' + event.data.f2 + '\u0022]').val();
+	var defalutValue = event.data.defaultValue===undefined || event.data.defaultValue==null?1:parseInt(event.data.defaultValue);
+	if(!(f1Value == '' && f2Value == '')) {
+		f1Value = isNaN(parseInt($('[id=\u0022'+event.data.f1+'\u0022]').val()))? defalutValue : parseInt($('[id=\u0022'+event.data.f1+'\u0022]').val());
+		f2Value = isNaN(parseInt($('[id=\u0022'+event.data.f2+'\u0022]').val()))? defalutValue : parseInt($('[id=\u0022'+event.data.f2+'\u0022]').val());
+		$('[id=\u0022'+event.data.result+'\u0022]').val(f1Value * f2Value);
+	} else {
+		$('[id=\u0022'+event.data.result+'\u0022]').val('');
+	}
+	tagUtilFireEvent(event.data.result, 'blur');
+	*/
+}
+
+function tagUtilAddFocusOutEvent(regExp, elementId, functionValue, decimalComma){
+	var decimalCommaAux = decimalComma == null ? true : decimalComma;
+	
+	$('*').filter(
+		function() {
+			return regExp.test(this.id);
+		}
+	).each(
+		function(){
+			$(this).focusout( { param: regExp, result: elementId, decimalComma: decimalComma }, functionValue);
+		}
+	);
+}
+
+/*
+function tagUtilBalloon(elementId, content){
+	var escapedId = utilEscapeId(elementId);
+	window[escapedId+'ShowHide'] = true;
+	$('#'+escapedId).on("click", function() {
+		window[escapedId+'ShowHide'] ? $(this).hideBalloon() : $(this).showBalloon();
+		window[escapedId+'ShowHide'] = !window[escapedId+'ShowHide'];
+	}.showBalloon({ html: true, contents: content});
+}
+function tagUtilBalloon(elementId){
+	var escapedId = utilEscapeId(elementId);
+	$('#'+escapedId).click();
+}
+ */
+
+function tagUtilBalloon(element, content){
+	if( $(element).data('ShowHide') === undefined || $(element).data('ShowHide') === null) {
+		$(element).data('ShowHide', true);
+		$(element).on("click", function() {
+			$(this).data('ShowHide') ? $(this).hideBalloon() : $(this).showBalloon();
+			$(this).data('ShowHide', !$(this).data('ShowHide'));
+		}).showBalloon({ html: true, contents: content, position: "right", classname: "mojito-balloon"});
+	}
+	//$(element).click();
+}
+
+function tagUtilFilterButton(filterName, filterPage) {
+	$(document).ready(
+		function() {
+			var filterControl = $('[name = \"' + filterName + '\"]');
+			var buttonControl = filterControl.siblings('.mojito-querytable-filter-div');
+			
+			filterControl.hover(
+				function() {
+					$(this).siblings('.mojito-querytable-filter-div').show();
+				},
+				function() {
+					$(this).siblings('.mojito-querytable-filter-div').hide();
+				}
+			);
+			
+			buttonControl.hover(
+				function() {
+					$(this).show();
+				},
+				function() {
+					$(this).hide();
+				}
+			);
+
+			buttonControl.click(
+				function() {
+					tagUtilShowModal(filterPage + "?name=" + filterName, '500', null);
+				}
+			);
+	});
+}
+
+function tagUtilDataFontAdjust() {
+	$("[data-font-adjust]").each(
+		function() {
+			$(this).keyup(
+				function() {
+					tagUtilDataFontAdjustGo($(this));
+				}
+			);
+			
+			tagUtilDataFontAdjustGo($(this));
+		}
+	);
+}
+
+function tagUtilDataFontAdjustGo(control) {
+	var inputWidth = $(control).width();
+	var textWidth = $(control).textWidth();
+	var size = $(control).css("font-size");
+	size = parseInt(size, 10);
+	var sizeOriginal = $(control).attr("data-font-size-original");
+	
+	if(inputWidth < textWidth) {
+		if(sizeOriginal == null) {
+			$(control).attr("data-font-size-original", size);
+		}
+		
+		if(size > 8) {
+			$(control).css("font-size", "-=1");
+			textWidth = $(control).textWidth();
+			if(inputWidth < textWidth) {
+				tagUtilDataFontAdjustGo(control);
+			}
+		}
+	} else {
+		if(sizeOriginal != null && size < sizeOriginal) {
+			$(control).css("font-size", "+=1");
+			if(inputWidth >= textWidth) {
+				tagUtilDataFontAdjustGo(control);
+			}
+		}
+	}
+}
+
+function tagUtilHtmlText(controlOrId, height, callback) {
+	$(document).ready(function () {
+		var control = tagUtilGetControl(controlOrId);
+		
+		var trumbowyg = $(control).trumbowyg({
+			urlProtocol: true,
+			semantic: false,
+			spellcheck: true,
+			removeformatPasted: true,
+			btnsDef: {
+				indent: {
+					fn: 'indent',
+					text: '&#9658;',
+					title: 'Indent',
+					isSupported: function () { return !!document.queryCommandSupported && !!document.queryCommandSupported('indent'); },
+					hasIcon: false
+				},
+				outdent: {
+					fn: 'outdent',
+					text: '&#9668;',
+					title: 'Outdent',
+					isSupported: function () { return !!document.queryCommandSupported && !!document.queryCommandSupported('outdent'); },
+					hasIcon: false
+				},
+			},
+			btns: [
+				['viewHTML'],
+				['undo', 'redo'],
+				['strong'],
+				['unorderedList', 'orderedList'],
+				['outdent', 'indent'],
+				['fullscreen']
+			]
+		});
+	
+// Gastón (2019-07-31) Configuración original
+//		btns: [
+//				['viewHTML'],
+//				['undo', 'redo'],
+//				['strong', 'em', 'underline', 'del'],
+//				['unorderedList', 'orderedList'],
+//				['fontfamily', 'fontsize'],
+//				['foreColor', 'backColor'],
+//				['outdent', 'indent'],
+//				['fullscreen']
+//			]
+		
+		// Fernando (2018-08-31): lo piso porque a veces toma el bold del estilo de la página y no queda bien.
+		$(control).parent().css("font-weight", "normal");
+		
+		if(height != null) {
+			$(control).parent().css("max-height", height);
+			$(control).parent().css("min-height", height);
+			
+			var heightAux = height.replace('px', '') - 39;
+			$(control).prev().css("max-height", heightAux + 'px');
+			$(control).prev().css("min-height", heightAux + 'px');
+		}
+		
+//		$(control).parent().on("paste", function() {
+//			for(var i = 0; i < event.clipboardData.types.length - 1; i++) {
+//				alert(event.clipboardData.types[i]);
+//			}
+//			alert(event.clipboardData.getData('text/plain'));
+//			var toPaste = event.clipboardData.getData('text/plain');
+//			toPaste = 'nada';
+//			$(event.target).html(toPaste);
+//		  }
+//		);
+		
+		if(callback != null) {
+			callback(trumbowyg);
+		}
+	});
+}
+
+function tagUtilToggleCallback(data, controlId, callback) {
+	// tagUtilToggle(controlId);
+	
+	if(callback != null) { 
+		callback(data, controlId);
+	}
+}
+
+function tagUtilToggle(controlId) {
+	var input = document.getElementById(controlId);
+	var trueText = $(input).attr('data-true');
+	var falseText = $(input).attr('data-false');
+	
+	if($(input).val() == 'true') {
+		$(input).val('false');
+		$(input).next().html(falseText);
+	} else {
+		$(input).val('true');
+		$(input).next().html(trueText);
+	}
+}
+
+function tagUtilShowModal(url, width) {
+	// El control que llamó al modal se guarda en utilCaller.
+	
+	tagModalDivCounter += 1;
+	
+	var modalDiv = document.createElement('DIV');
+	
+	modalDiv.id = 'mojito-modal-div-' + tagModalDivCounter;
+	modalDiv.className = 'mojito-modal-div';
+
+	modalDiv.style.display = 'none';
+	modalDiv.style.position = 'fixed';
+	modalDiv.style.zIndex = 100 * tagModalDivCounter;
+	modalDiv.style.paddingTop = '50px';
+	modalDiv.style.left = '0';
+	modalDiv.style.top = '0';
+	modalDiv.style.width = '100%';
+	modalDiv.style.height = '100%';
+	modalDiv.style.overflow = 'auto';
+	modalDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+	modalDiv.caller = utilCaller;
+	// modalDiv.callerIdVirtual = utilCallerIdVirtual;
+	
+	var headerDiv = document.createElement('DIV');
+	headerDiv.id = 'mojito-modal-header-div';
+	
+	var titleDiv = document.createElement('DIV');
+	titleDiv.id = 'mojito-modal-title-div';
+	
+	var layoutDiv = document.createElement('DIV');
+	layoutDiv.style.backgroundColor = '#aaa';
+	layoutDiv.style.margin = 'auto';
+	layoutDiv.style.padding = '0px';
+	layoutDiv.style.border = '0px solid black';
+	layoutDiv.style.width = width != null ? width + 'px' : '80%';
+	layoutDiv.style.position = 'relative';
+	
+	var eyeDiv = document.createElement('DIV');
+	eyeDiv.id = 'mojito-modal-eye-div';
+	eyeDiv.innerHTML = '&#128065;';
+	eyeDiv.style.display = 'none';
+	
+	var closeDiv = document.createElement('DIV');
+	closeDiv.id = 'mojito-modal-close-div';
+	closeDiv.innerHTML = '&times;';
+	
+	var contentDiv = document.createElement('DIV');
+	
+	contentDiv.id = tagModalDivId + '-' + tagModalDivCounter;
+	contentDiv.className = tagModalDivId;
+	
+	contentDiv.style.backgroundColor = '#fefefe';
+	contentDiv.style.padding = '20px 20px 10px 20px';
+	
+	window.onclick = function(event) {
+	    if (event.target == modalDiv) {
+	    	document.body.removeChild(modalDiv);
+	    	tagModalDivCounter -= 1;
+	    	
+	    	if(utilCaller != null) {
+	    		var response = JSON.parse('{ "result": "close" }');
+	    		utilMode4Process(modalDiv.caller.getTagMode4(), response);
+	    	}
+	    }
+	}
+	
+	eyeDiv.onclick = function() {
+		vxAlert(url)
+	}
+	
+	closeDiv.onclick = function(event) {
+    	document.body.removeChild(modalDiv);
+    	tagModalDivCounter -= 1;
+    	
+    	if(utilCaller != null) {
+    		var response = JSON.parse('{ "result": "close" }');
+    		utilMode4Process(modalDiv.caller.getTagMode4(), response);
+    	}
+	}
+	
+	headerDiv.appendChild(titleDiv);
+	headerDiv.appendChild(eyeDiv);
+	headerDiv.appendChild(closeDiv);
+	layoutDiv.appendChild(headerDiv);
+	layoutDiv.appendChild(contentDiv);
+	modalDiv.appendChild(layoutDiv);
+	document.body.appendChild(modalDiv);
+	
+	var urlAux = stringUtilResolve(url);
+	
+	urlAux = mMojito.navGetUrlAjax(urlAux, true, true);
+	
+	utilDoAjaxDirect(urlAux, contentDiv.id, false, false, true, false, tagUtilShowModalCallback, [ modalDiv ]);
+}
+
+function tagUtilShowModalCallback(modalDiv) {
+	modalDiv.style.display = 'block';
+	
+	// Fernando (2021-11-07): no sé para qué está y además da error. Lo comento.
+	// var header = document.getElementById('mojito-modal-header-div');
+	// $(modalDiv).children("div").first().draggable({
+	//	  handle: 'div#mojito-modal-header-div'
+	//});
+	
+	var formInnerTitle = $(modalDiv).find('.mojito-form-inner-title-input');
+	if($(formInnerTitle).length > 0) {
+		$('#mojito-modal-title-div', modalDiv).html($(formInnerTitle).val());
+	}
+	var formInnerAdminTest = $(modalDiv).find('.mojito-form-inner-admin-test-input');
+	if($(formInnerAdminTest).length > 0) {
+		$('#mojito-modal-eye-div', modalDiv).show();
+	}
+}
+
+/**
+ * 
+ * @param last Indica si se va a cerrar el último modal que se abrió. Mandar esto en null o false está deprecado.
+ * @param callback
+ * @param resultJson Json que se enviará a la action asociada al cierre del modal. Este json debe venir en forma de string.
+ * @returns
+ */
+function tagUtilCloseModal(last, callback, resultJson) {
+	if(last == null || !last) {
+		trshUtilAjaxPost002(callback);
+	} else {
+		var divId = 'div#mojito-modal-div-' + tagModalDivCounter;
+		var divModal = $(divId).get(0);
+		if(divModal != null) {
+	    	$(divModal).remove();
+	    	tagModalDivCounter -= 1;
+	    	
+			var caller = $(divModal).prop('caller');
+			if(caller != null) {
+				var form = document.getElementById(caller.formId);
+				if(form != null) {
+		    		var response = mString.isNotEmpty(resultJson)?JSON.parse(resultJson):null;
+		    		utilMode4Process(form, response, caller.dataActions, true);
+				}
+			}
+			/*
+			var caller = $(divModal).prop('caller');
+			if(caller != null && caller.tag.isConnected && mString.isNotEmpty(resultJson)) {
+	    		var response = JSON.parse(resultJson);
+	    		utilMode4Process(caller.getTagMode4(), response);
+	    	}
+	    	*/
+		}
+	}
+}
+
+function tagUtilSlider(sliderDivIdOrControl) {
+	var sliderDiv = tagUtilGetControl(sliderDivIdOrControl);
+	
+	if(sliderDiv.isVisible == null) {
+		sliderDiv.isVisible = false;
+	}
+
+	var position = $(sliderDiv).attr('data-position');
+	
+	var propertiesVisible = {};
+	var propertiesInvisible = {};
+	
+	switch(position){
+		case "top":
+		case "bottom":
+			propertiesVisible['top'] = '+=' + $(sliderDiv).height().toString() + 'px'; 
+			propertiesInvisible['top'] = '-=' + $(sliderDiv).height().toString() + 'px';
+			break;
+		case "left":
+		case "right":
+			propertiesVisible['left'] = '+=' + $(sliderDiv).width().toString() + 'px';
+			propertiesInvisible['left'] = '-=' + $(sliderDiv).width().toString() + 'px';
+			break;
+	}	
+	
+	
+    if(sliderDiv.isVisible) {
+        $(sliderDiv).animate( propertiesVisible, 1000);
+    } else {
+        $(sliderDiv).animate( propertiesInvisible, 1000);
+    }
+    sliderDiv.isVisible = !sliderDiv.isVisible;
+}
+
+function tagUtilScrollify(tblAsJQueryObject, height) {
+  var oTbl = tblAsJQueryObject;
+
+  // for very large tables you can remove the four lines below
+  // and wrap the table with <div> in the mark-up and assign
+  // height and overflow property  
+  var oTblDiv = $("<div/>");
+  oTblDiv.css('height', height);
+  oTblDiv.css('overflow-y', 'auto');
+  oTblDiv.css('background-color', '#000'); // agregado
+  oTbl.wrap(oTblDiv);
+
+  // save original width
+  oTbl.attr("data-item-original-width", oTbl.width());
+  oTbl.find('thead tr td').each(function() {
+    $(this).attr("data-item-original-width", $(this).width());
+  });
+  oTbl.find('tbody tr:eq(0) td').each(function() {
+    $(this).attr("data-item-original-width", $(this).width());
+  });
+
+  // clone the original table
+  var newTbl = oTbl.clone();
+
+  // remove table header from original table
+  oTbl.find('thead tr').remove();
+  // remove table body from new table
+  newTbl.find('tbody tr').remove();
+  newTbl.css('margin-bottom', '0px'); // agregado
+
+  oTbl.parent().parent().prepend(newTbl);
+  newTbl.wrap("<div/>");
+  newTbl.closest('div').css('background-color', '#71B6CC'); // agregado
+
+  // replace ORIGINAL COLUMN width				
+  newTbl.width(newTbl.attr('data-item-original-width'));
+  newTbl.find('thead tr td').each(function() {
+    $(this).width($(this).attr("data-item-original-width"));
+  });
+  oTbl.width(oTbl.attr('data-item-original-width'));
+  oTbl.find('tbody tr:eq(0) td').each(function() {
+    $(this).width($(this).attr("data-item-original-width"));
+  });
+  
+  
+  oTbl.find('tbody').css('width', '100%'); // agregado
+  oTbl.css('margin-bottom', '0px'); // agregado
+}
+
+function tagUtilListColumnNumber(innerPrefix) {
+    $("[data-control=listColumnNumber]").each(
+      function() {
+    	  var controlOk = $(this).attr("data-control-OK");
+    	  if(controlOk == null) {
+	          var withInnerPrefix = (innerPrefix != null && innerPrefix != '');
+	          var formulaControlId = $(this).attr('id');
+			  
+	          if(formulaControlId == null || ((!withInnerPrefix && formulaControlId.indexOf('/') < 0) || (withInnerPrefix && formulaControlId.startsWith(innerPrefix + '/')))) {
+	        	  
+	        	  var input = $('input', this);
+	        	  if(input.length > 0) {
+		        	  $(input).on('keypress', function() {
+		        		  var result = true;
+		        		  
+		        		  if(event.keyCode != 61) { // "=" para activar la fórmula
+		        		  } else {
+		        			  if(!$(input).is('[readonly]')) {
+			        			  var self = $(input);
+			        			  vxPrompt('Input formula', null, function(value) {
+			        				  $(self).attr('data-formula-input', value);
+				        			  var rp = new rpReversePolish(null, value, 'number', mGlobal.decimalComma, null, function(value) {
+					        			  var length = value.toString().length;
+					        			  var maxLength = $(self).attr('maxlength');
+					        			  if(maxLength == null || length <= maxLength) {
+						        			  $(self).val(value);
+						        			  $(self).focus();
+					        			  } else {
+					        				  vxAlert('Incorrect result');
+					        			  }
+				        			  });
+				        			  rp.executeAndGo($(self).attr('id'));
+				        			  
+			        			  });
+			        			  result = false;
+		        			  }
+		        		  }
+		        		  
+		        		  return result;
+		        	  });
+	        	  }
+	        	  
+	        	  $(this).attr("data-control-OK", true);
+	          }
+    	  }
+      }
+    );
+}
+
+function tagUtilTdShowDetail(tdThis, containerId, linkDetail, overrideTarget) {
+	var container = jqSelect("#" + containerId);
+	
+	if($(container).parent().hasClass('mojito-querytable-data-detail-tr')) {
+		$(container).parent().toggle();
+	} else {
+		if($(container).html().trim() != '') {
+			$(container).toggle();
+		}
+	}
+	$(container).attr('data-url', linkDetail);
+	$(tdThis).toggleClass('mojito-columnaction-detail-td');
+	$(tdThis).parent().toggleClass('mojito-columnaction-detail-tr');
+	utilDoAjaxDirect(linkDetail, containerId, true, overrideTarget, false, true);
+}
+
+function tagUtilLabelClick(){
+	$('.mojito-input-label-a').click(function(e){
+		
+		var event = e || window.event;
+		if(event.ctrlKey){
+			var a = document.createElement('a');
+			a.target = '_blank';
+			a.href = utilRemoveUrlParameter(this.href, '_nhid');
+			a.href = a.href + '&_nhid=' + utilRandom(8);
+		
+			$('body').append(a);
+			if( document.createEvent ) {
+				var mouseEvent = document.createEvent('MouseEvents');
+				mouseEvent.initEvent( 'click', true, true );
+				a.dispatchEvent(mouseEvent);
+		    } else if( a.click ) {
+		    	a.click();						    	
+		    }
+			
+			return false;
+		}
+		
+		return true;
+		
+	});
+}
+
+function tagUtilNeonSign(value) {
+	if(this.reloadIsLayoutHorizontalNew()) {
+		var section = tagUtilGetControlMojito('section-layoutTopSign', null, 'section');
+		utilMethodCallFormCustom('loadNeonSignEvent', 'hiHtml', ['neonSign', value]);
+	} else {
+		var section = tagUtilGetControlMojito('section-layoutTopSign', null, 'section');
+		utilMethodCallFormCustom('loadNeonSign', 'hiHtml', ['neonSign', value], function() { $(section).prop('mHandler').sectRefresh(); });
+	}
+}
+
+function tagUtilNotificationRead(caller, id) {
+	tagUtilSetValue('logEntryNotifyContent.htm/notificationSelected', id);
+	var section = tagUtilGetControlMojito('section-layoutTopNotifications', null, 'section');
+	utilMethodCall(caller, 'read', null, function() { section.prop('mHandler').sectRefresh(); });
+}
+
+function tagUtilGetControlMojito(id, context, control, call, callParameters) {
+	var result;
+	
+	if(id != null) {
+		var idAux = context != null ? utilGetInnerInfo(context).getId(id) : id;
+		
+		if(stringUtilNotEmpty(control)) {
+			result = $('#' + jqEscape(idAux) + '[data-control="' + control + '"]');
+		} else {
+			result = $('#' + jqEscape(idAux));
+		}
+	} else {
+		result = $(context).closest('[data-control]');
+	}
+	
+	if(result.length > 0) {
+		result = result.get(0);
+		if(call != null) {
+			var mHandler = $(result).prop('mHandler');
+			if(mHandler != null) {
+				if(mHandler[call] != null) {
+					if(callParameters == null) {
+						mHandler[call]();
+					}
+					if(callParameters != null && callParameters.length == 1) {
+						mHandler[call](callParameters[0]);
+					}
+					if(callParameters != null && callParameters.length == 2) {
+						mHandler[call](callParameters[0], callParameters[1]);
+					}
+				} else {
+					var callAux = mHandler.prefix + stringUtilFirstCapital(call);
+					if(mHandler[callAux] != null) {
+						if(callParameters == null) {
+							mHandler[callAux]();
+						}
+						if(callParameters != null && callParameters.length == 1) {
+							mHandler[callAux](callParameters[0]);
+						}
+						if(callParameters != null && callParameters.length == 2) {
+							mHandler[callAux](callParameters[0], callParameters[1]);
+						}
+					}
+				}
+			}
+		}
+	} else {
+		result = null;
+	}
+	
+	return result;
+}
+
+function tagUtilFaviconLoading() {
+	var faviconLink = document.getElementById('faviconLink');
+	faviconLink.i = 1;
+	if(faviconLink.hrefPrevious == null) {
+		faviconLink.hrefPrevious = faviconLink.href;
+		// console.log('loading.previous favicon: ' + faviconLink.href);
+	}
+	faviconLink.timer = setInterval(tagUtilFaviconLoadingAnimate, 250);
+}
+
+function tagUtilFaviconUnloading() {
+	var faviconLink = document.getElementById('faviconLink');
+	clearInterval(faviconLink.timer);
+	if(mString.isNotEmpty(faviconLink.hrefPrevious)) {
+		faviconLink.href = faviconLink.hrefPrevious;
+		// console.log('unloading favicon: ' + faviconLink.href);
+	}
+}
+
+function tagUtilFaviconLoadingChange(index) {
+	var faviconLink = document.getElementById('faviconLink');
+	faviconLink.href = 'jar/mojito/utils/web/images/spin' + index + '.png';
+	// console.log('loading.change favicon: ' + faviconLink.href);
+}
+
+function tagUtilFaviconLoadingAnimate() {
+	var faviconLink = document.getElementById('faviconLink');
+    tagUtilFaviconLoadingChange(faviconLink.i);
+    faviconLink.i += 1;
+    if (faviconLink.i == 8) {
+    	faviconLink.i = 1;
+    }
+}
+
+function tagUtilReloadSection(control, url) {
+	utilOcultarProcesando(true);
+	
+	var innerInfo = utilGetInnerInfo(control);
+	
+	var formOrIdAux = null;
+	var formContainer = innerInfo.rootControl;
+	if(formContainer != null) {
+		var parent = $(formContainer);
+		while(parent.length == 1 && formOrIdAux == null) {
+			if(parent.attr('id') == 'mojito-modal-content-div') {
+				formOrIdAux = 'mojito-modal-content-div';
+			}
+			parent = $(parent).parent();
+		}
+	}
+	if(formOrIdAux == null) {
+		formOrIdAux = innerInfo.innerId;
+	}
+	
+	if(url.indexOf('_jx') < 0) {
+		if(url.indexOf('?') >= 0) {
+			url += "&_jx=1";
+		} else {
+			url += "?_jx=1";
+		}
+	}
+	
+	utilDoAjaxDirect(url, formOrIdAux, null, true, true); //, noLoading, callback, callbackParameters);
+}
+
+// Agrega la función textWidth a cualquier objeto de jQuery.
+(function($) {
+	$.fn.textWidth = function () {
+		$body = $('body');
+		$this =  $(this);
+		
+		$text = $this.text();
+		if($text=='' || $text == null) {
+			$text = $this.val();
+		}
+		if($text=='' || $text == null) {
+			$text = '';
+		}
+		
+		// alert($text);
+		var calc = '<div style="clear:both;display:block;visibility:hidden;"><span style="width;inherit;margin:0;font-family:'  + $this.css('font-family') + ';font-size:'  + $this.css('font-size') + ';font-weight:' + $this.css('font-weight') + '">' + $text + '</span></div>';
+		$body.append(calc); 
+		var width = $('body').find('span:last').width(); 
+		$body.find('span:last').parent().remove(); 
+		return width; 
+	};
+})(jQuery);
+
+/** cssParentSelector 1.0.12 | MIT and GPL Licenses | git.io/cssParentSelector */
+(function($) {
+
+    $.fn.cssParentSelector = function() {
+        var k = 0, i, j,
+
+             // Class that's added to every styled element
+            CLASS = 'CPS',
+
+            stateMap = {
+                hover: 'mouseover mouseout',
+                checked: 'click',
+                focus: 'focus blur',
+                active: 'mousedown mouseup',
+                selected: 'change',
+                changed: 'change'
+            },
+
+            attachStateMap = {
+                mousedown: 'mouseout'
+            },
+
+            detachStateMap = {
+                mouseup: 'mouseout'
+            },
+
+            pseudoMap = {
+                'after': 'appendTo',
+                'before': 'prependTo'
+            },
+
+            pseudo = {},
+
+            parsed, matches, selectors, selector,
+            parent, target, child, state, declarations,
+            pseudoParent, pseudoTarget,
+
+            REGEXP = [
+                /[\w\s\.\-\:\=\[\]\(\)\~\|\'\*\"\^#]*(?=!)/,
+                /[\w\s\.\-\:\=\[\]\(\)\~\|\,\*\^$#>!]+/,
+                /[\w\s\.\-\:\=\[\]\'\,\"#>]*\{{1}/,
+                /[\w\s\.\-\:\=\'\*\|\?\^\+\/\\\(\);#%]+\}{1}/
+            ],
+
+            REGEX = new RegExp((function(REGEXP) {
+                var ret = '';
+
+                for (var i = 0; i < REGEXP.length; i++)
+                    ret += REGEXP[i].source;
+
+                return ret;
+            })(REGEXP), "gi"),
+
+            parse = function(css) {
+
+                // Remove comments.
+                css = css.replace(/(\/\*([\s\S]*?)\*\/)/gm, '');
+
+                if ( matches = css.match(REGEX) ) {
+
+                    parsed = '';
+                    for (i = -1; matches[++i], style = matches[i];) {
+
+                        // E! P > F, E F { declarations } => E! P > F, E F
+                        selectors = style.split('{')[0].split(',');
+
+                        // E! P > F { declarations } => declarations
+                        declarations = '{' + style.split(/\{|\}/)[1].replace(/^\s+|\s+$[\t\n\r]*/g, '') + '}';
+
+                        // There's nothing so we can skip this one.
+                        if ( declarations === '{}' ) continue;
+
+                        declarations = declarations.replace(/;/g, ' !important;');
+
+                        for (j = -1; selectors[++j], selector = $.trim(selectors[j]);) {
+
+                            j && (parsed += ',');
+
+                            if (/!/.test(selector) ) {
+
+                                // E! P > F => E
+                                parent = $.trim(selector.split('!')[0].split(':')[0]);
+
+                                // E! P > F => P
+                                target = $.trim(selector.split('!')[1].split('>')[0].split(':')[0]) || []._;
+
+                                // E:after! P > after
+                                pseudoParent = $.trim(selector.split('>')[0].split('!')[0].split(':')[1]) || []._;
+
+                                // E! P:after > after
+                                pseudoTarget = target ? ($.trim(selector.split('>')[0].split('!')[1].split(':')[1]) || []._) : []._;
+
+                                // E! P > F => F
+                                child    = $($.trim(selector.split('>')[1]).split(':')[0]);
+
+                                // E! P > F:state => state
+                                state = (selector.split('>')[1].split(/:+/)[1] || '').split(' ')[0] || []._;
+
+
+                                child.each(function(i) {
+
+                                    var subject = $(this)[parent == '*' ? 'parent' : 'closest'](parent);
+
+                                    pseudoParent && (subject = pseudoMap[pseudoParent] ?
+                                        $('<div></div>')[pseudoMap[pseudoParent]](subject) :
+                                        subject.filter(':' + pseudoParent));
+
+                                    target && (subject = subject.find(target));
+
+                                    target && pseudoTarget && (subject = pseudoMap[pseudoTarget] ?
+                                        $('<div></div>')[pseudoMap[pseudoTarget]](subject) :
+                                        subject.filter(':' + pseudoTarget));
+
+                                    var id = CLASS + k++,
+                                        toggleFn = function(e) {
+
+                                            e && attachStateMap[e.type] &&
+                                                $(subject).one(attachStateMap[e.type], function() {$(subject).toggleClass(id) });
+
+                                            e && detachStateMap[e.type] &&
+                                                $(subject).off(detachStateMap[e.type]);
+
+                                            $(subject).toggleClass(id)
+                                        };
+
+                                    i && (parsed += ',');
+
+                                    parsed += '.' + id;
+                                    var $this = $(this);
+                                    if($this.is(':checked') && state === 'checked'){
+                                        $(subject).toggleClass(id);
+                                    }
+                                    ! state ? toggleFn() : $(this).on( stateMap[state] || state , toggleFn );
+
+                                });
+                            } else {
+                                parsed += selector;
+                            }
+                        }
+
+                        parsed += declarations;
+
+                    };
+
+                    $('<style type="text/css">' + parsed + '</style>').appendTo('head');
+
+                };
+
+            };
+
+        $('link[rel=stylesheet], style').each(function() {
+            $(this).is('link') ?
+                $.ajax({url:this.href,dataType:'text'}).success(function(css) { parse(css); }) : parse($(this).text());
+        });
+
+    };
+
+    $().cssParentSelector();
+
+})(jQuery);

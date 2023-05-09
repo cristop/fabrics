@@ -1,0 +1,153 @@
+function tablReload(innerPrefix) {
+	reloadCheck('tabLayout', innerPrefix, function(span) {
+		new tablTabLayout(span);
+	});
+}
+
+function tablTabLayout(span) {
+	var self = this;
+	this.root = tagUtilGetControl(span);
+	this.root.mHandler = this;
+	this.prefix = 'tabl';
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	if(reloadIsLayoutNew()) {
+		this.selectedTab = $(this.root).children().get(0);
+		let widthWindow = $(window).width();
+		let indexChildren = reloadIsLayoutMobile() && widthWindow < 768  ? 3 : 2;
+		this.tabs = $('li > a', $(this.root).children().get(indexChildren));
+		
+		this.tabs.each(function() {
+			var href = $(this).attr('data-href') !== undefined ? $(this).attr('data-href') : $(this).attr('href');
+			href = jqEscape(href);
+			$(this).attr('href', href);
+		});
+		
+		this.tabs.on('click', function() {
+			var divId = $(this).attr('data-href') !== undefined ?  $(this).attr('data-href').replace('#', '') : $(this).attr('href') !== undefined ? $(this).attr('href').replace('#', '') : undefined;
+			
+			var selectedTab = $(this).parent().attr('data-index');
+			$(self.selectedTab).val(selectedTab);
+			rendSessionPut($(self.root).attr('id'), selectedTab);
+			
+			var url = $(this).attr('data-url');
+			
+			if(stringUtilNotEmpty(url)) {
+				var autoRefresh = $(this).attr('data-autorefresh');
+				
+				if(stringUtilEmpty($(this).attr('data-loaded')) || autoRefresh == 'true') {
+					$(this).attr('data-loaded', 'true');
+					// Agrego overwrite que es el décimo parámetro.
+					utilAjaxPost(url, divId + utilAvoidUseParent, null, null, null, null, true, true, null, true);
+				}
+			} else {
+				
+			}
+			if (reloadIsLayoutMobile() && widthWindow < 768) {
+				$(self.tabs).each(function() {
+					if(selectedTab !== $(this).parent().attr('data-index')) {
+						$(this).parent().removeClass('active');
+					}else{
+						
+					}
+				});
+				$('#tab_button_selector', $(self.root).children().get(3)).text($(this).text());
+			}
+			if (divId !== undefined) {
+				tagUtilGetControl(divId).mHandler.tab_Mode4Process();
+			}
+		});
+		
+		$(this.tabs).each(function() {
+			if($(this).parent().hasClass('active')) {
+				$(this).trigger('click');
+			}
+		});
+	}
+}
+
+tablTabLayout.prototype.tablManageTabs = function() {
+}
+
+//Automatic horizontal scroll para tabs
+//SCROLL IZQUIERDA/DERECHA
+
+var	settingsNavBarTravelDistance = 150;
+
+$( document ).ready(function() {
+	initAutomaticHorizontalScroll();
+});
+
+$( window ).resize(function() {
+	resizeAutomaticHorizontalScroll();
+});
+
+//init
+function initAutomaticHorizontalScroll(div){
+	activateArrowClick(div);
+	visibilityArrow();
+}
+//resize
+function resizeAutomaticHorizontalScroll(){
+	visibilityArrow();
+}
+
+
+function activateArrowClick(root){
+	$('.hs-Right-tab').click(function() {
+	    $(this).siblings('.hs_Mask_tab').animate({
+		    scrollLeft: "+="+settingsNavBarTravelDistance+"px"
+		}, 200);
+	});
+	$('.hs-Left-tab').click(function() {
+	    $(this).siblings('.hs_Mask_tab').animate({
+		    scrollLeft: "-="+settingsNavBarTravelDistance+"px"
+		}, 200);
+	});
+}
+
+
+function visibilityArrow(root){
+	$('.hs_Mask_tab').each(function(index, el){
+		var mask_width=$(this).width();
+		var content_width=$(this).find('.hs_Content').width();
+
+		if(content_width > mask_width){
+			$(this).scroll(function(){
+				//Vemos si ponemos el arrowLeft
+				if($(this).scrollLeft()==0){
+					$(this).siblings('.hs-Left-tab').hide();
+					$(this).siblings('.hs-Left-tab').css({
+						opacity: 0
+					});
+				}else{
+					$(this).siblings('.hs-Left-tab').show();
+					$(this).siblings('.hs-Left-tab').css({
+						opacity: 1
+					});
+				}
+
+				//vemos con el arrowRight
+				var fin = Math.round($(this).find('.hs_Content').width()-$(this).width())
+				if($(this).scrollLeft()>=fin){
+					$(this).siblings('.hs-Right-tab').hide();
+					$(this).siblings('.hs-Right-tab').css({
+						opacity: 0
+					});
+				}else{
+					$(this).siblings('.hs-Right-tab').show();
+					$(this).siblings('.hs-Right-tab').css({
+						opacity: 1
+					});
+				}
+			});
+			$(this).parent().addClass('hs-active');
+			$(this).trigger('scroll');
+		}else{
+			$(this).siblings('.hs-Left-tab, .hs-Right-tab').css({
+				opacity: 0
+			});
+			$(this).parent().removeClass('hs-active');
+		}
+	});
+}

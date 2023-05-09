@@ -1,0 +1,141 @@
+var lcacDisabled = [ ];
+
+/**
+ * clipboardCopy: Copia un texto al portapapeles.
+ * - text: Texto que se va a copiar en el portapapeles.
+ * copyFromAbove = targetColumn, rowIndex, overwrite 
+ */
+function lcacReload(innerPrefix) {
+	reloadCheck('listColumnAction', innerPrefix, function(td) {
+		new lcacListColumnAction(td);
+	});
+}
+
+
+class lcacListColumnAction {
+	constructor(td) {
+		var self = this;
+		this.root = tagUtilGetControl(td);
+		this.prefix = 'lcac';
+		this.root.mHandler = this;
+		this.innerInfo = utilGetInnerInfo(this.root);
+		this.list = $(this.root).parents('[data-control=list]');
+		
+		this.modal = $(this.root).attr('data-modal');
+		this.modalWidth = $(this.root).attr('data-modal-width');
+		
+		this.audio = $(this.root).attr('data-audio');
+		// No siempre existe el button.
+		this.button = $('a.icon>i.action-label', this.root);
+		
+		// Llama a un modal explícitamente.
+		if(stringUtilNotEmpty(this.modal)) {
+			var a = $('a', this.root);
+			if(a.length > 0) {				
+				$(this.root).on('click', function() {
+					
+					if(!$(self.root).hasClass('mojito-listcolumn-disabled')){
+						utilSetCaller(self.root);
+						var url = stringUtilResolve(self.modal, self.root);
+						tagUtilShowModal(url, self.modalWidth, self.root);
+					}
+				});
+			}
+		}
+		
+		if(stringUtilNotEmpty(this.audio)) {
+			var audioElement = $('a>i',this.root); 
+			audioElement.addClass('customAudioPlayer');
+			audioElement.attr('data-player-href', this.audio);
+			initBootstrapModal(audioElement);
+		}
+		
+		var actions = $(this.root).attr('data-actions');
+		if(stringUtilNotEmpty(actions) &&
+          stringUtilEmpty($(this.root).attr('onclick')) &&
+          (this.button.length == 0 || stringUtilEmpty($(this.button).attr('onclick'))) &&
+          stringUtilEmpty(this.modal) &&
+          stringUtilEmpty(this.audio)) {
+			// No tiene onclick ni modal (acciones de página puras).
+			var a = $('a', this.root);
+			if(a.length > 0) {
+				$(a).on('click', function(e) {
+					$(self.list).prop('mHandler').setSelected(this);
+					
+					utilMode4Process(self.root);
+					// Fernando (2022-10-25): estas dos líneas (stopPropagation y preventDefault) estaban comentadas.
+					// Las descomento porque en addendumTypeRecord.jsp de Barrel al presionar el botón clonar de la
+					// lista de secciones tiene que mostrar un vex tipo prompt y si no está esto ese prompt aparece y
+					// desaparece.
+					// En principio parecería que está bien detener el evento.
+					// IMPORTANTE: en SVN parece que estas líneas nunca estuvieron descomentadas. Nacieron comentadas
+					// (revisión 6366 de SVN). Recién hoy en el caso que se describe anteriormente fue necesario
+					// descomentarlas.
+					e.stopPropagation();
+					e.preventDefault();
+				});
+			}
+		} else {
+			// Si no son acciones puras de página entonces el botón no puede presionarse dos veces seguidas.
+			var idVirtual = this.getIdVirtual();
+			$(this.root).on('click', function() {
+				lcacDisabled.push(idVirtual);
+				mMojito.tagDisabledByTime(self.root, 2000);
+			});
+			
+			var index = lcacDisabled.indexOf(idVirtual);
+			if(index >= 0) {
+				mMojito.tagDisabledByTime(this.root, 2000);
+				lcacDisabled[index] = '[emptyValue]';
+			}
+		}
+	}
+	
+	clipboardCopy(text) {
+		utilCopyToClipboard(text);
+		
+		var messageListId = this.innerInfo.getId('messageList');
+		var messageList = jqSelectId(messageListId);
+		var messageListHandler = $(messageList).prop('mHandler');
+		
+		var textAuxAbbreviate = stringUtilAbbreviate(text, 30);
+		messageListHandler.meslShowInfo('Clipboard (' + textAuxAbbreviate + ')', 2);
+	}
+	
+	copyFromAbove(targetColumn, rowIndex, overwrite) {
+		var listId = $(this.list).attr('id');
+		
+		if(rowIndex > 0) {
+			var listColumnIdSource = listId + '[' + (rowIndex - 1) + '].' + targetColumn;
+			var listColumnIdTarget = listId + '[' + rowIndex + '].' + targetColumn;
+			
+			var source = jqSelectId(listColumnIdSource);
+			var target = jqSelectId(listColumnIdTarget);
+			
+			var sourceValue = $(source).val();
+			var targetValue = $(target).val();
+			
+			if(mBool.isTrue(overwrite, true) || mString.isEmpty(targetValue)) {
+				var targetHandler = $(target).prop('mHandler');
+				targetHandler.setValue(sourceValue);
+			} else {
+				// vxAlert('No se puede sobreescribir el valor.');
+			}
+		}
+	}
+	
+	getIdVirtual(){
+		var result = mString.convEmpty(this.root.className, '(empty)') + '|' +
+		  mString.convEmpty($(this.root).attr('title'), '(empty)');
+		return result;
+	}
+	
+	// Forma anterior
+	lcacClipboardCopy(text){
+		this.clipboardCopy(text);
+	}
+	
+	lcacCopyFromAbove(targetColumn, rowIndex, overwrite) {
+		this.copyFromAbove(targetColumn, rowIndex, overwrite);
+	}
+}

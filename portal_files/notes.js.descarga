@@ -1,0 +1,75 @@
+function noteReload(innerPrefix) {
+	reloadCheck('notes', innerPrefix, function(div) {
+		new noteNotes(div);
+	});
+}
+
+class noteNotes{
+	constructor(div) {
+		var self = this;
+		this.root = tagUtilGetControl(div);
+		this.root.mHandler = this;
+		this.prefix = 'note';
+		this.innerInfo = utilGetInnerInfo(this.root);
+		this.selected = $('>input.mojito-notes-selected-input', this.root);
+		this.selectedImage = $('>input.mojito-notes-selectedImage-input', this.root);
+		// this.selectedIndex = $('>input.mojito-notes-selectedIndex-input', this.root);
+		
+		$('[data-method]', this.root).on('click', function(e) {
+			var id = $('.item.active>a', this.root).attr('data-id');
+			var method = $(this).attr('data-method');
+			self.select(this);
+			var refreshImageFn = self.refreshImage.bind(self);
+			utilMethodCall(self.root, method, null, refreshImageFn);
+			return false;
+		});
+		
+		this.lightGallery = $('.mojito-notes-carousel-div',this.root).lightGallery({selector: '.gallery-item', hash: true});
+		
+	}
+	
+	refreshImage() {
+		var image = $('div.carousel-inner>div[data-id="' + $(this.selectedImage).val() + '"].item.active>a.gallery-item');
+		if(image.length > 0) {
+			var urlImage = $(image).css('background-image');
+			urlImage = urlImage.substring(5, urlImage.length - 2);
+			urlImage += "&_d=" + new Date();
+			$(image).css('background-image', 'url("' + urlImage + '")');
+			
+			urlImage = $(image).attr('href');		
+			urlImage += "&_d=" + new Date();
+			$(image).attr('href',urlImage);
+			
+			
+			urlImage = $(image).attr('data-src');		
+			urlImage += "&_d=" + new Date();
+			$(image).attr('data-src',urlImage);
+			
+//			lightGallery().refresh();
+		}
+	}
+	
+	rerender(ids, method) {
+		var methodAux = stringUtilNotEmpty(method) ? method : 'doNothing';
+		utilMethodCall(this.root, methodAux, ids);
+	}
+	
+	select(control) {
+		var note = $(control).closest('div.mojito-notes-note-div');
+		var id = $(note).attr('data-id');
+		$(this.selected).val(id);
+		
+		var image = $('div.carousel-inner>div.item.active', note);
+		if(image.length > 0) {
+			var idImage = $(image).attr('data-id');
+			$(this.selectedImage).val(idImage);
+		}
+	}
+
+	// Forma anterior
+	noteRerender(ids, method) {
+	}
+	
+	noteSelect(control) {
+	}
+}

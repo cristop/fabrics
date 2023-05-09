@@ -1,0 +1,451 @@
+function graphicsUtilReload(innerPrefix) {
+	$('svg[data-type]').each(
+	  function (index) {
+		  
+		  var formulaControlId = utilGetInnerInfo(this).innerId;
+    	  var withInnerPrefix = (innerPrefix != null && innerPrefix != '');
+			
+    	  if((!withInnerPrefix && formulaControlId.indexOf('/') < 0) || (withInnerPrefix && formulaControlId.startsWith(innerPrefix + '/'))) {
+    		  
+			  var controlOk = $(this).attr("data-control-OK");
+	    	  if(controlOk == null) {
+			  
+				  var type = $(this).attr('data-type');
+				  
+				  var obj = null;
+				  var configuration = $(this).attr('data-configuration');
+				  if(configuration != null && configuration.trim() != '') {
+					  obj = JSON.parse(configuration);
+				  }
+				  
+				  if(type == 'BAR') {
+					  graphicsUtilRenderGraphicsBar($(this), obj);
+				  }
+				  if(type == 'BAR_COMPARE') {
+					  graphicsUtilRenderGraphicsBarCompare($(this), obj);
+				  }
+				  if(type == 'BLOCK') {
+					  graphicsUtilRenderGraphicsBlock($(this), obj);
+				  }
+				  if(type == 'BLOCK_TWO') {
+					  graphicsUtilRenderGraphicsBlockTwo($(this), obj);
+				  }
+				  if(type == 'RECTANGLE') {
+					  graphicsUtilRenderGraphicsRectangle($(this), obj);
+				  }
+				  if(type == 'STACKED_BAR') {
+					  graphicsUtilRenderGraphicsStackedBar($(this), obj);
+				  }
+				  if(type == 'TRAFFIC_LIGHTS') {
+					  graphicsUtilRenderGraphicsTrafficLights($(this), obj);
+				  }
+			  
+				  $(this).attr("data-control-OK", true);
+	    	  }
+    	  
+    	  }
+	  }
+	);
+}
+
+function graphicsUtilGraphic(e, type, configuration) {
+	$(e.target).append("<div>Hi!</div>")
+	console.log('type: ' + type);
+	console.log('configuration: ' + configuration);
+}
+
+function graphicsUtilRenderGraphicsBar(svg, obj) {
+	var total = obj.total;
+	var percentage = obj.percentage;
+	var totalText = obj.totalText;
+	  
+	var percentageWidth = total != 0 ? (percentage / total) * 100 : 0;
+	var totalWidth = total != 0 ? 100 - (percentage / total) * 100 : 0;
+	
+	svg.css("height", "30px");
+	svg.css("width", "100px");
+	
+	var element;
+	var text;
+	  
+	element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+	element.setAttribute("x", percentageWidth);
+	if(totalWidth > 0) {
+		element.setAttribute("width", totalWidth);
+	} else {
+		element.setAttribute("width", "0px");
+	}
+	element.setAttribute("height", "35");
+	element.setAttribute("style", "fill:rgb(228,231,209);");
+	svg.append(element);
+	  
+	element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+	element.setAttribute("width", percentageWidth);
+	element.setAttribute("height", "35");
+	element.setAttribute("style", "fill:rgb(211,216,177);");
+	svg.append(element);
+	
+	/*element = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+	element.setAttribute("points", "30,17 15,0 16,35");
+	element.setAttribute("style", "fill:rgb(211,216,177);");
+	svg.append(element);*/
+	
+	element = document.createElementNS('http://www.w3.org/2000/svg','text');
+	element.setAttribute("x", "5");
+	element.setAttribute("y", "20");
+	/*element.setAttribute("text-anchor", "end");*/
+	element.setAttribute("fill", "rgb(255,255,255)");
+	element.setAttribute("style", "font-family: Hind, sans-serif; font-size: 15px;");
+	
+	text = document.createTextNode(totalText);
+	element.appendChild(text);
+	svg.append(element);
+}
+
+function graphicsUtilRenderGraphicsBarCompare(svg, obj) {
+	var labels = obj.labels;
+	var value1 = obj.value1;
+	var value1Text = obj.value1Text;
+	var value2 = obj.value2;
+	var value2Text = obj.value2Text;
+	var diff = obj.diff;
+	var diffText = obj.diffText;
+	
+	var width1;
+	var width2;
+	
+	if(value1 > value2) {
+		width1 = 50;
+		width2 = value2 / value1 * 50;
+	} else {
+		width2 = 50;
+		width1 = value1 / value2 * 50;
+	}
+	
+	svg.css("height", "30px"); //este es el que se divide al medio
+	svg.css("width", "120px");
+	
+	//barra agregada para agregar bordes 1
+	element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+	element.setAttribute("x", "0");
+	element.setAttribute("y", "1");
+	element.setAttribute("width", "52");
+	element.setAttribute("height", "12");
+	element.setAttribute("style", "fill:rgb(255,255,255);stroke-width:1;stroke:rgb(221,221,221);");
+	svg.append(element);
+	
+	//barra agregada para agregar bordes 2
+	element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+	element.setAttribute("x", "60");
+	element.setAttribute("y", "1");
+	element.setAttribute("width", "52");
+	element.setAttribute("height", "12");
+	element.setAttribute("style", "fill:rgb(255,255,255);stroke-width:1;stroke:rgb(221,221,221);");
+	svg.append(element);
+	
+	element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+	if(width1 > 0) {
+		element.setAttribute("width", width1);
+	} else {
+		element.setAttribute("width", "0px");
+	}
+	element.setAttribute("x", "1px");
+	element.setAttribute("y", "2px");
+	element.setAttribute("height", "10px");
+	element.setAttribute("style", "fill:rgb(211,216,177);");
+	svg.append(element);
+	
+	element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+	if(width2 > 0) {
+		element.setAttribute("width", width2);
+	} else {
+		element.setAttribute("width", "0px");
+	}
+	element.setAttribute("y", "2px");
+	element.setAttribute("x", "61px");
+	element.setAttribute("height", "10px");
+	element.setAttribute("style", "fill:rgb(228,160,160);");
+	svg.append(element);
+	
+	element = document.createElementNS('http://www.w3.org/2000/svg','text');
+	element.setAttribute("x", "5");
+	element.setAttribute("y", "27");
+	element.setAttribute("fill", "rgb(119,119,119)");
+	if(diff >= 0) {
+		element.setAttribute("style", "font-family: Hind, sans-serif; font-size: 12px;");
+	} else {
+		element.setAttribute("style", "font-family: Hind, sans-serif; font-size: 12px; fill: #e4a0a0;");
+		//element.setAttribute("style", "font-family: Hind, sans-serif; font-size: 15px; fill: rgb(228,160,160);");
+	}
+	
+	text = document.createTextNode(diffText);
+	element.appendChild(text);
+	svg.append(element);
+	
+	var contents = '';
+	contents += "<span style='color: rgb(211,216,177);'>&#x25A0; " + labels[1] + ": ";
+	contents += value1Text;
+	contents += "</span><br>";
+	contents += "<span style='color: rgb(228,160,160);'>&#x25A0; " + labels[2] + ": ";
+	contents += value2Text;
+	contents += "</span>";
+	
+	$(svg).balloon({
+		html: true,
+		contents: contents,
+		minLifetime: 0,
+		delay: 500,
+		css: {
+			fontSize: '14px'
+		}
+	});
+}
+
+function graphicsUtilRenderGraphicsStackedBar(svg, obj) {
+	var totalText = obj.totalText;
+	var labels = obj.labels;
+	var values = obj.values;
+	var valuesText = obj.valuesText;
+	var valuesWidth = [ ];
+	  
+	var total = 0.0;
+	for(var i = 0; i < values.length; i++) {
+		total += values[i];
+	}
+	for(var i = 0; i < values.length; i++) {
+		valuesWidth.push(total != 0 ? (values[i] / total) * 100 : 0);
+	}
+	
+	svg.css("height", "30px"); //este
+	svg.css("width", "103px");
+		
+	var element;
+	var text;
+	
+	var left = 0;
+	
+	//barra agregada para agregar bordes
+	element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+	element.setAttribute("x", left);
+	element.setAttribute("y", "1");
+	element.setAttribute("width", "102");
+	element.setAttribute("height", "12");
+	element.setAttribute("style", "fill:rgb(255,255,255);stroke-width:1;stroke:rgb(221,221,221);");
+	svg.append(element);
+	
+	for(var i = 0; i < values.length; i++) {
+		element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		element.setAttribute("x", (left+1));
+		element.setAttribute("y", "2");
+		if(valuesWidth[i] > 0) {
+			element.setAttribute("width", valuesWidth[i]);
+			left += valuesWidth[i];
+		} else {
+			element.setAttribute("width", "0px");
+		}
+		element.setAttribute("height", "10");
+		switch(i) {
+			case 0:
+				element.setAttribute("style", "fill:rgb(211,216,177);");
+				break;
+			case 1:
+				element.setAttribute("style", "fill:rgb(239,243,160);");
+				// element.setAttribute("style", "fill:rgb(219,223,193);");
+				break;
+			case 2:
+				element.setAttribute("style", "fill:rgb(228,160,160);");
+				// element.setAttribute("style", "fill:rgb(228,231,209);");
+				break;
+			default:
+				element.setAttribute("style", "fill:rgb(211,216,177);");
+				break;
+		}
+		
+		svg.append(element);
+	}
+	  
+	element = document.createElementNS('http://www.w3.org/2000/svg','text');
+	element.setAttribute("x", "5");
+	element.setAttribute("y", "27");
+	/*element.setAttribute("text-anchor", "end");*/
+	element.setAttribute("fill", "rgb(119,119,119)");
+	element.setAttribute("style", "font-family: Hind, sans-serif; font-size: 12px;");
+	
+	text = document.createTextNode(totalText);
+	element.appendChild(text);
+	svg.append(element);
+	
+	var contents = '';
+	for(var i = 0; i < values.length; i++) {
+		if(values[i] != 0) {
+			var color;
+			switch(i) {
+				case 0:
+					color = "rgb(211,216,177)";
+					break;
+				case 1:
+					color = "rgb(219,223,140)";
+					break;
+				case 2:
+					color = "rgb(228,160,160)";
+					break;
+				default:
+					color = "rgb(211,216,177)";
+					break;
+			}
+			contents += "<span style='color: " + color + "'>&#x25A0; " + labels[i] + ": ";
+			contents += valuesText[i];
+			contents += "</span><br>";
+		}
+	}
+	$(svg).balloon({
+		html: true,
+		contents: contents,
+		minLifetime: 0,
+		delay: 500,
+		css: {
+			fontSize: '14px'
+		}
+	});
+}
+
+function graphicsUtilRenderGraphicsTrafficLights(svg, obj) {
+	var visible = obj.visible;
+	
+	svg.css("height", "24px");
+	svg.css("width", "24px");
+	
+	if(visible) {
+		var value = obj.value;
+		// var color = obj.color == 'green' ? '#64C662' : (obj.color == 'yellow' ? '#DEBA4E' : '#FF7E1B');
+		var color = obj.color == 'green' ? '#64C662' : (obj.color == 'yellow' ? '#e5e500' : '#FF7E1B');
+		//rgb(211,216,177)
+		// var color = obj.color == 'green' ? '#a9b366' : (obj.color == 'yellow' ? '#deba4e' : '#ff7e1b');
+		var colorBorder = obj.color == 'green' ? '#009900' : (obj.color == 'yellow' ? '#999900' : '#990000');
+		
+		var element;
+		var text;
+		
+		element = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		element.setAttribute("cx", "12");
+		element.setAttribute("cy", "12");
+		element.setAttribute("r", "12");
+		element.setAttribute("fill", color);
+		// element.setAttribute("stroke-width", 1);
+		// element.setAttribute("stroke", colorBorder);
+		svg.append(element);
+		
+		element = document.createElementNS('http://www.w3.org/2000/svg','text');
+		element.setAttribute("x", "49%");
+		element.setAttribute("y", "68%");
+		element.setAttribute("text-anchor", "middle");
+		element.setAttribute("fill", "rgb(255,255,255)");
+		element.setAttribute("style", "font-family: Hind, sans-serif; font-size: 14px; font-weight: bold; text-shadow: 1px 1px 6px #666;");
+		text = document.createTextNode(value);
+		element.appendChild(text);
+		svg.append(element);
+	}
+}
+
+function graphicsUtilRenderGraphicsBlock(svg, obj) {
+	var visible = true;
+	
+	svg.css('height', '24px');
+	svg.css('width', "100%");
+	
+	if(visible) {
+		var position = obj.position;
+		var color = obj.color;
+		
+		var x = '0';
+		var width = '100%';
+		
+		if(position == 'left') {
+			width = '50%';
+		}
+		if(position == 'right') {
+			x = '50%';
+		}
+		
+		var element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		element.setAttribute('x', x);
+		element.setAttribute('y', '3');
+		element.setAttribute('width', width);
+		element.setAttribute('height', '18');
+		element.setAttribute('fill', color);
+		svg.append(element);
+		
+		var td = $(svg).parent().parent();
+		$(td).css('cssText', 'padding-left: 0px !important; padding-right: 0px !important; ' + $(td).attr("style"));
+	}
+}
+
+function graphicsUtilRenderGraphicsBlockTwo(svg, obj) {
+	var visible = true;
+	
+	svg.css('height', '24px');
+	svg.css('width', "100%");
+	
+	if(visible) {
+		var colorLeft = obj.colorLeft;
+		var colorRight = obj.colorRight;
+		
+		var element;
+		
+		element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		element.setAttribute('x', '0');
+		element.setAttribute('y', '3');
+		element.setAttribute('width', '50%');
+		element.setAttribute('height', '18');
+		element.setAttribute('fill', colorLeft);
+		svg.append(element);
+		
+		element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		element.setAttribute('x', '50%');
+		element.setAttribute('y', '3');
+		element.setAttribute('width', '100%');
+		element.setAttribute('height', '18');
+		element.setAttribute('fill', colorRight);
+		svg.append(element);
+
+		var td = $(svg).parent().parent();
+		$(td).css('cssText', 'padding-left: 0px !important; padding-right: 0px !important; ' + $(td).attr("style"));
+	}
+}
+
+function graphicsUtilRenderGraphicsRectangle(svg, obj) {
+	var visible = true;
+	
+	var width = obj.width;
+	if(width == null){
+		width ='100%';
+	}else {
+		width = width+'px';
+	}
+	
+	svg.css('height', '24px');
+	svg.css('width', width);
+	
+	if(visible) {
+		var color = obj.color;
+		
+		if (color != null) {
+			var element;
+		
+			
+			
+			element = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			element.setAttribute('x', '0');
+			element.setAttribute('y', '0');
+			element.setAttribute('width', width);
+			element.setAttribute('height', '100%');
+			element.setAttribute('fill', color);
+			svg.append(element);
+			
+			var td = $(svg).parent().parent();
+			$(td).css('cssText', 'padding: 0px !important; ' + $(td).attr("style"));
+			$(td).addClass('graphic');
+		}
+		
+	}
+}

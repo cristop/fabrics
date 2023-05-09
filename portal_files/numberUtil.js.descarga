@@ -1,0 +1,418 @@
+var previousNumber;
+var previousPreviousNumber;
+
+function numberUtilCheck(controlName, numberPrecision, numberScale, allowNegative, decimalComma) {
+	var decimalCommaAux = (decimalComma == null ? true : decimalComma);
+    var control = document.getElementById(controlName);
+
+    if(decimalCommaAux) {
+	    if (control.value != control.value.replace(".", ",")) {
+	        control.value = control.value.replace(".", ",");
+	    }
+    } else {
+	    // if (control.value != control.value.replace(",", ".")) {
+    	//     control.value = control.value.replace(",", ".");
+    	// }
+    }
+
+    if (!numberUtilInnerCheck(control, numberPrecision, numberScale, allowNegative, decimalCommaAux)) {
+    	// console.log('rechaza control.value: ' + control.value);
+        if (numberUtilInnerCheckValue(previousNumber, numberPrecision, numberScale, allowNegative, decimalCommaAux)) {
+            control.value = previousNumber;
+            $(control).trigger('input');
+        } else {
+        	// console.log('rechaza previousNumber: ' + previousNumber);
+            control.value = previousPreviousNumber;
+            $(control).trigger('input');
+        }
+
+        previousNumber = previousPreviousNumber;
+        previousPreviousNumber = '';
+    }
+}
+
+function numberUtilIsNumber(e, controlName, numberPrecision, numberScale, allowNegative, decimalComma) {
+	var decimalCommaAux = decimalComma == null ? true : decimalComma;
+    var result = false;
+    var control = document.getElementById(controlName);
+
+    if (numberUtilInnerCheck(control, numberPrecision, numberScale, allowNegative, decimalCommaAux)) {
+        var keynum;
+        var keychar;
+
+        previousPreviousNumber = previousNumber;
+        previousNumber = control.value;
+        
+        // console.log('previousPreviousNumber = ' + previousPreviousNumber);
+        // console.log('previousNumber = ' + previousNumber);
+
+        if (window.event) { // IE
+            keynum = e.keyCode;
+        } else {
+            if (e.which) { // Netscape/Firefox/Opera
+                keynum = e.which;
+            } else {
+                keynum = 49;
+            }
+        }
+
+        keychar = String.fromCharCode(keynum);
+
+        if (/\d/.test(keychar)) {
+            result = true;
+        } else {
+            if ((keychar == "." || keychar == ",") && numberScale > 0) {
+                result = true;
+            } else {
+                if (keychar == "\t" || keychar == "\b") {
+                    result = true;
+                } else {
+                    if (allowNegative && keychar == "-") {
+                        result = true;
+                    }
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+function numberUtilInnerCheck(control, numberPrecision, numberScale, allowNegative, decimalComma) {
+    var result = numberUtilInnerCheckValue(control.value, numberPrecision, numberScale, allowNegative, decimalComma);
+    return result;
+}
+
+function numberUtilInnerCheckValue(value, numberPrecision, numberScale, allowNegative, decimalComma) {
+	var decimalCommaAux = decimalComma == null ? true : decimalComma;
+    var regExString;
+
+    if(allowNegative){
+    	if (numberScale > 0) {
+            if(decimalCommaAux) {
+            	regExString = "^(|-|(-|)[0-9]{1," + (numberPrecision - numberScale) + "}(|\,|\,[0-9]{0," + numberScale + "}))$";
+            } else {
+            	// regExString = "^(|-|(-|)[0-9\,]{1," + (numberPrecision - numberScale) + "}(|\.|\.[0-9]{0," + numberScale + "}))$";
+            	regExString = "^(|-|(-|)[0-9\,]{1," + (numberPrecision - numberScale) + "}(|\.|\.[0-9]{0," + numberScale + "}))$";
+            }
+        } else {
+            regExString = "^(|-|(-|)[0-9]{1," + numberPrecision + "})$";
+        }
+    } else {
+    	if (numberScale > 0) {
+    		if(decimalCommaAux) {
+    			regExString = "^(|[0-9]{1," + (numberPrecision - numberScale) + "}(|\,|\,[0-9]{0," + numberScale + "}))$";
+    		} else {
+    			regExString = "^(|[0-9]{1," + (numberPrecision - numberScale) + "}(|\.|\.[0-9]{0," + numberScale + "}))$";
+    		}
+        } else {
+            regExString = "^(|[0-9]{1," + numberPrecision + "})$";
+        }
+    }
+
+    var regEx = new RegExp(regExString);
+    var result = regEx.test(value);
+    return result;
+}
+
+function numberUtilAdd(controlId, value) {
+    var control = document.getElementById(controlId);
+    control.value = new Number(control.value) + value;
+}
+
+function numberUtilAddAndSubmit(controlId, value) {
+    numberUtilAdd(controlId, value);
+    document.forms[0].submit();
+}
+
+function numberUtilGetNumber(controlId) {
+    var control = document.getElementById(controlId);
+    var number = control.value.replace(',', '');
+    return new Number(number);
+}
+
+function numberUtilSumTotalListColumn( event ){
+	var decimalComma = event.data.decimalComma == null ? true : event.data.decimalComma; 
+	var scaleValue = event.data.scale;
+	var columnIndex = event.data.columnIndex;
+	var sumCount = event.data.sumCount;
+	var total = 0;
+	var regEx = /(.*)\[(\d+)\](.*)/;
+	var inputName = $(this).attr('name');
+	var table = $(this).closest('table')[0];
+	
+	// var trs = $('tr.mojito-list-data-tr, tr.mojito-list-data-hover-tr');
+	var trs = $('tr', table);
+	
+	$(table).find(trs).each(function(i){
+		var newName = inputName.replace(regEx,'$1['+i+']$3');
+		
+		// Fernando (2018-01-11): lo cambio a id porque las celdas bloqueadas no tiene name.
+		var inputCell = $('input[id=\"'+newName+'\"]');
+		
+		if(sumCount) {
+			var valor = numberUtilParse($(inputCell).val(), decimalComma);
+			if(!isNaN(valor)){
+				total += valor;
+			}
+		} else {
+			if($(inputCell).val() != null && $(inputCell).val().trim() != '') {
+				total += 1;
+			}
+		}
+	});
+	var scale;
+	if(sumCount) {
+		scale = parseInt(scaleValue);
+		if(isNaN(scale)){
+			scale = 2;
+		}
+	} else {
+		scale = 0;
+	}
+	
+	var table = jqSelectId(table.id);
+	$(table).find('tbody > tr.mojito-list-total-tr').each(function(){
+	// $('#'+table.id+'> tbody > tr.mojito-list-total-tr').each(function(){
+		var totalCell = $(this).find('td:eq('+ columnIndex + ')');
+		
+		var totalText = total.toFixed(scale).toString();
+		if(decimalComma) {
+			totalText = totalText.replace('.',',');
+		}
+		$(totalCell).text(totalText);
+	});
+}
+
+function numberUtilDeformat(number) {
+    if (stringUtilNotEmpty(number)) {
+    	if(mGlobal.decimalComma) {
+    		number = stringUtilReplace(number, '.', '');
+    	} else {
+    		number = stringUtilReplace(number, ',', '');
+    	}
+    }
+    return number;
+}
+
+function numberUtilFormat(number, numberPrecision, numberScale) {
+	var decimalSeparator = mGlobal.decimalComma ? ',' : '.'; 
+    var groupSeparator = mGlobal.decimalComma ? '.' : ',';
+
+    if (stringUtilNotEmpty(number)) {
+        var hasMinus = number.indexOf('-') >= 0;
+        number = stringUtilReplace(number, groupSeparator, '');
+        number = stringUtilReplace(number, '-', '');
+
+        var comaIndex = number.indexOf(decimalSeparator);
+        var decimalPart = '';
+        var intPart = '';
+        if (comaIndex > 0) {
+            decimalPart = number.substring(comaIndex + 1);
+            intPart = number.substring(0, comaIndex);
+        }
+        else { 
+            intPart = number;
+        }
+        
+        var groupSeparatorIndex = intPart.length - 3;
+        
+        while (groupSeparatorIndex > 0) {
+            intPart = intPart.substring(0, groupSeparatorIndex) + groupSeparator + intPart.substring(groupSeparatorIndex);
+            groupSeparatorIndex = groupSeparatorIndex - 3;
+        }
+
+        if (numberScale > 0) {
+            if (decimalPart.length != numberScale) {
+                decimalPart = stringUtilPadRight(decimalPart, numberScale, '0');
+            }
+            number = intPart + decimalSeparator + decimalPart;
+        } else {
+            number = intPart;
+        }        
+
+        if (hasMinus) {
+            number = '-' + number;
+        }
+
+        return number;
+    }
+}
+
+function numberUtilParse(value, decimalComma) {
+	var result = null;
+	var decimalCommaAux = decimalComma == null ? true : decimalComma;
+	
+	if(value != null) {
+		var resultString;
+    	if(decimalCommaAux) {
+		    resultString = value.replace(/\./g, '').replace(/,/g, '.');
+    	} else {
+		    resultString = value.replace(/,/g, '');
+    	}
+	    result = parseFloat(resultString);
+	    if (isNaN(result)) {
+	    	result = 0;
+	    }
+	}
+	
+	return result;
+}
+
+function numberUtilSumValues(event) {
+	var total = 0;
+	var regExp = event.data.param;
+	var decimalComma = event.data.decimalComma == null ? true : event.data.decimalComma;
+	
+	$('*').filter(function() {
+		return regExp.test(this.id);
+	}).each(function() {
+		var value = numberUtilParse($(this).val(), decimalComma);
+		if (!isNaN(value)) {
+			total += value;
+		}
+	});
+	
+	var totalString = total.toString();
+	if(decimalComma) {
+		totalString = totalString.replace(".", ",");
+	}
+	
+	$('[id=\"' + event.data.result + '\"]').val(totalString);
+}
+
+Number.prototype.roundHalfToEven = function(placeToRound){
+	var fixed = placeToRound; // placeToRound.toString().split('.').length < 2 ? 0 : placeToRound.toString().split('.')[1].length,
+	placeToRoundAux = Math.pow(10, -1 * placeToRound);
+	numParts = {
+			mvDec : (this/placeToRoundAux).toFixed(this.toString().length).toString().split('.'),
+			wholeNum: function(){return parseInt(this.mvDec[0],10);},
+			dec: function(){return this.mvDec.length > 1 ? parseFloat('0.'+this.mvDec[1]) : 0;},
+				oddEven: function(){return (this.wholeNum() % 2 === 1) ? 1 : 0;}
+		};
+			      
+	if(numParts.dec() !== 0.5){
+		return(numParts.dec() > 0.5) ? parseFloat(((numParts.wholeNum()+1)*placeToRoundAux).toFixed(fixed)) : parseFloat((numParts.wholeNum()*placeToRoundAux).toFixed(fixed));
+	} else {
+		if(numParts.oddEven() === 1){
+			return parseFloat(((numParts.wholeNum()+1)*placeToRoundAux).toFixed(fixed));
+		} else {
+			return parseFloat((numParts.wholeNum()*placeToRoundAux).toFixed(fixed));
+		}
+	}
+};
+	
+Number.prototype.format = function(scale, decimalComma, useSeparator) {
+    // var re = '\\d(?=(\\d{' + ((useSeparator == null || useSeparator) ? 3 : 10000) + '})+' + (scale > 0 ? '.' : '$') + ')';
+	// var result = this.toFixed(Math.max(0, scale)).replace(new RegExp(re, 'g'), '$&,');
+    
+	var scaleReal = Math.max(0, scale);	
+	var value = scaleReal != 0?this.roundHalfToEven(scaleReal):this;
+	value = value.toFixed(scaleReal);
+	
+	// var scaleReal = Math.max(0, scale);
+	// var value = (Math.round(this * Math.pow(10, scaleReal)) / Math.pow(10, scaleReal)).toFixed(scaleReal); 
+    
+	// var value = Math.round(this, Math.max(0, scale)).toFixed(Math.max(0, scale));
+
+	var result = null;
+	try {
+		result = value.replace(/\d(?=(\d{3})+\.)/g, '$&,');  // 12,345.67
+	} catch(e) {
+		console.log(e);
+	}
+    
+    if(decimalComma == null || decimalComma) {
+    	result = result.replaceAll(',', '|').replaceAll('.', ',').replaceAll('|', '.');
+    }
+    
+    return result;
+};
+
+/**
+ * Busca en el documento todo control que tenga el atributo "data-formula"
+ * para registrar en los controles que intervienen en la fórmula que al darles
+ * "focusout" disparen el cálculo.
+ * innerPrefix: es el prefijo de los controles para cuando están en una
+ * página con Ajax.
+ */
+function numberFormula(innerPrefix, decimalComma) {
+	
+	repoLog.log(repoLogReversePolish, log_Info, 
+			  'Se pide buscar data-formula en ' + logDescription(innerPrefix) + '.');
+	
+	$("[data-formula]").each(
+		function() {
+			// if($(this).attr('data-formula-OK') == null) {
+				var formulaControlId = $(this).attr("id");
+				var withInnerPrefix = (innerPrefix != null && innerPrefix != '');
+				
+				if((!withInnerPrefix && formulaControlId.indexOf('/') < 0) || (withInnerPrefix && formulaControlId.startsWith(innerPrefix + '/'))) {
+					var formula = $(this).attr("data-formula");
+					var scale = parseFloat($(this).attr("data-scale"));
+					if(isNaN(scale)){
+						scale = 2;
+					}
+					var rp = new rpReversePolish(formulaControlId, formula, 'number', decimalComma, innerPrefix, function(value) {
+						
+						var valueAux = parseFloat(value);
+						if(isNaN(valueAux)) {
+							valueAux = null;
+						}
+						if(valueAux != null) {
+							valueAux = valueAux.format(scale, decimalComma);
+						}
+						
+						var formulaControl = jqSelectId(formulaControlId);
+						
+						if($(formulaControl).prop('mHandler') != null) {
+							var mHandler = $(formulaControl).prop('mHandler');
+							if(mHandler.prefix == 'lchi') {
+								mHandler.lchiSetValue(valueAux);
+							}
+							if(mHandler.prefix == 'innu') {
+								mHandler.innuSetValue(valueAux);
+							}
+						} else {
+							// Seteo del resultado y ejecución del "focusout" en el control.
+							if ('value' in document.getElementById(formulaControlId)) {
+								if($(formulaControl).val() != valueAux) {
+									$(formulaControl).val(valueAux);
+						        	
+						        	if($(formulaControl).attr('type') == "hidden") {
+						        		var tr = $(formulaControl).parent();
+						        		$(tr).contents().filter(function(){
+						        		    return this.nodeType === 3;
+						        		}).remove();
+						        		$(tr).append(valueAux);
+							        	$(formulaControl).trigger('change');
+						        	} else {
+							        	$(formulaControl).trigger('input');
+						        	}
+						        	
+								}
+						    } else {
+						        if($(formulaControl).html() != valueAux) {
+						        	$(formulaControl).html(valueAux);
+						        	$(formulaControl).trigger('input');
+						        }
+						    }
+						}
+					});
+					rp.init();
+					rp.executeAndGo('init');
+				}
+				
+			//	$(this).attr('data-formula-OK', true);
+			//}
+		}
+	);
+	
+}
+
+var numberLogging = true;
+function numberLog(log) {
+	if(numberLogging) {
+		console.log(log);
+	}
+}

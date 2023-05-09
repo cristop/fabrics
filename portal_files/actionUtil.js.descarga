@@ -1,0 +1,363 @@
+// Acciones reactivas.
+function actionSet(targetId, type, expression, decimalComma, innerPrefix, enabled) {
+	if (enabled == null || enabled) {
+		var resultType = 'string'
+		if(type == 'show') {
+			resultType = 'boolean';
+		}
+		
+		var rp = new rpReversePolish(targetId, expression, resultType, decimalComma, innerPrefix, actionExecute);
+		
+		var target = document.getElementById(targetId);
+		if(target == null) {
+			targetId = innerPrefix + '/' + targetId;
+		}
+		rp.addParameter(targetId);
+		
+		
+		rp.addParameter(type);
+		rp.init();
+	}
+	
+	// var result = rp.formulaExecute();
+	// console.log('result: ' + result);
+	
+//	var result = rp.resolve();
+//	
+//	actionProcess(targetId, type, result);
+}
+// ¿Reactivas?
+function actionExecute(result, parameters) {
+	var targetId = parameters[0];
+	var type = parameters[1];
+	
+	if(type == 'fill') {
+		var input = document.getElementById(targetId);
+		if(input != null) {
+			input.value = result;
+		}
+	}
+	if(type == 'show') {
+		var input = document.getElementById(targetId);
+		if(input != null) {
+			if(result == null || !result) {
+				// Input
+				if($(input).is("input") && $(input).attr("type") != 'hidden') {
+					$(input).hide();
+					
+					if($(input).prev().is("label") || $(input).prev().is("a")) {
+						$(input).prev().hide();
+					}
+				}
+				
+				// Checkbox
+				if($(input).is("input") && $(input).attr("type") == 'hidden') {
+					$(input).hide();
+					
+					if($(input).prev().is("div") || $(input).prev().prev().is("label")) {
+						$(input).prev().hide();
+						$(input).prev().prev().hide();
+					}
+				}
+				
+				// Select
+				if($(input).is("select")) {
+					$(input).hide();
+					
+					if($(input).prev().is("label") || $(input).prev().is("a")) {
+						$(input).prev().hide();
+					}
+				}
+				
+				// TextArea
+				if($(input).is("textarea")) {
+					$(input).hide();
+					$(input).prev().prev().hide();
+				}
+				
+				// Table
+				if($(input).is("table")) {
+					$(input).parent().hide();
+				}
+				
+				// Label
+				if($(input).is("label")) {
+					$(input).parent().hide();
+				}
+			} else {
+				if($(input).is("input") && $(input).attr("type") != 'hidden') {
+					$(input).show();
+					if($(input).prev().is("label") || $(input).prev().is("a")) {
+						$(input).prev().show();
+					}
+				}
+				
+				if($(input).is("input") && $(input).attr("type") == 'hidden') {
+					$(input).show();
+					if($(input).prev().is("div") || $(input).prev().prev().is("label")) {
+						$(input).prev().show();
+						$(input).prev().prev().show();
+					}
+				}
+				
+				if($(input).is("select")) {
+					$(input).show();
+					if($(input).prev().is("label") || $(input).prev().is("a")) {
+						$(input).prev().show();
+					}
+				}
+				
+				if($(input).is("textarea")) {
+					$(input).show();
+					$(input).prev().prev().show();
+				}
+
+				if($(input).is("table")) {
+					$(input).parent().show();
+				}
+				
+				if($(input).is("label")) {
+					$(input).parent().show();
+				}
+			}
+			
+			/*
+			if(result == null || !result) {
+				$(input).hide();
+				
+				if(stringToUpperCase($(input).prev().prop("tagName")) == "label".toUpperCase() || $(input).prev().hasClass('mojito-input-label-a')) {
+					$(input).prev().hide();
+				}
+			} else {
+				$(input).show();
+				
+				if(stringToUpperCase($(input).prev().prop("tagName")) == "label".toUpperCase()|| $(input).prev().hasClass('mojito-input-label-a')) {
+					$(input).prev().show();
+				}
+			}
+			*/
+		}
+	}
+}
+
+// Acción activa con origen en una llamada a Ajax (control con propiedad "method").
+function actionExecute2(data, targetId, type, value, expressionEnabled) {
+	var jsonData = null;
+	if(data != null && data.trim() != '') {
+		jsonData = JSON.parse(data);
+	}
+	
+	var enabled = true;
+	if(expressionEnabled != null) {
+		enabled = jsonData[expressionEnabled] == 'true';
+	}
+	
+	if(enabled) {
+		if(type == 'goTo') {
+			var valueData = jsonData[value];
+			
+			if(targetId != '_blank') {
+				window.location.href = valueData;
+			} else {
+				window.open(valueData, targetId);
+			}
+		}
+		if(type == 'fill') {
+			var input = document.getElementById(targetId);
+			var processed = false;
+			var control = $(input).attr('data-control');
+			
+			/* No funciona por ahora. */
+			if(!processed && control == 'inputEntity') {
+				$(input).prop('inen').setValue('"' + jsonData[value] + '"');
+				/*
+				var entity = $(input).attr('data-items');
+				var renderId = $(input).parent().attr('id'); // span padre
+				var sets = null;
+				var setsJson = $(input).attr('data-sets');
+				if(setsJson != null) {
+					sets = JSON.parse(setsJson);
+				}
+				utilDoAjaxCombo22(entity, "id", '"' + jsonData[value] + '"', renderId, null, sets);
+				*/
+				
+				/*
+				input.value = jsonData[value];
+				
+				if($(input).attr("type") == "hidden") {
+					$(input).trigger("input");
+					$(input).trigger("change");
+				}
+				if(tagUtilHasClass(input, 'mojito-inputentity-id-input')){
+					$(input).siblings('.mojito-inputentity-description-input').val(jsonData['description']);
+					$(input).siblings('.mojito-inputbase-disabled-input').val(jsonData['description']);
+				}
+				*/
+				
+				processed = true;
+			}
+			if(!processed && stringToUpperCase($(input).prop("tagName")) != "select".toUpperCase()) {
+				input.value = jsonData[value];
+				
+				if($(input).attr("type") == "hidden") {
+					$(input).trigger("input");
+				}
+				if(tagUtilHasClass(input, 'mojito-inputentity-id-input')){
+					$(input).siblings('.mojito-inputentity-description-input').val(jsonData['description']);
+					$(input).siblings('.mojito-inputbase-disabled-input').val(jsonData['description']);
+				}
+				
+				processed = true;
+			}
+			
+			if(!processed) {
+				input.options[input.selectedIndex].innerHTML = jsonData[value];
+			}
+		}
+		if(type == 'add' || type == 'addAndSelect') {
+			var input = document.getElementById(targetId);
+			if(stringToUpperCase($(input).prop("tagName")) == "select".toUpperCase()) {
+				var id = jsonData["id"];
+				var description = jsonData["description"];
+				
+				var option = document.createElement('OPTION');
+				option.value = id;
+				option.innerHTML = description;
+				input.options.add(option);
+			}
+		}
+		if(type == 'select' || type == 'addAndSelect') {
+			var input = document.getElementById(targetId);
+			if(stringToUpperCase($(input).prop("tagName")) == "select".toUpperCase()) {
+				var id = jsonData["id"];
+				input.value = id;
+			}
+		}
+		if(type == 'mapCenter') {
+			// Centra el mapa en base a un marker. Los parámetros son:
+			// Tipo de marker. Id de marker. Color al que cambia el marker para indicar que está seleccionado.
+			var valueData = jsonData[value];
+			var valueDataArray = valueData.split('|');
+			googleMapsCenterMarker(targetId, valueDataArray[0], valueDataArray[1], valueDataArray[2]);
+		}
+		if(type == 'mapRefresh') {
+			googleMapsRefreshGeoPoints(targetId);
+		}
+		if(type == 'mapZoom') {
+			var valueData = jsonData[value];
+			var valueDataArray = valueData.split('|');
+			googleMapsZoom(targetId, valueDataArray[0]);
+		}
+		if(type == 'mapStreetView') {
+			var valueData = jsonData[value];
+			googleMapsStreetView(targetId, valueData);
+		}
+		if(type == 'listSetRow') {
+			// Selecciona una fila de una lista.
+			// target: id de la lista.
+			// jsonData: id de la fila a seleccionar.
+			
+			// var id = jsonData["id"];
+			
+			var target = document.getElementById(targetId);
+			var tdId = targetId + '[{#}].id';
+			var valueData = jsonData[value];
+			
+			var target = document.getElementById(targetId);
+			$(target).closest('table').children('tbody').children('tr').each(
+			    function(index, element) {
+				    $(element).removeClass('mojito-list-selected-tr');
+			    }
+			  );
+			
+			var index = 0;
+			var inputId = document.getElementById(tdId.replace('{#}', index));
+			while(inputId != null) {
+				if(inputId.value == valueData) {
+					var tr = $(inputId).closest('tr'); 
+					tr.addClass('mojito-list-selected-tr');
+					if(tr.next().hasClass('mojito-internal')) {
+						tr.next().addClass('mojito-list-selected-tr');
+						
+						// Fernando (2018-10-14): parche, funciona hasta 3 filas, hay que hacer un while.
+						if(tr.next().next().hasClass('mojito-internal')) {
+							tr.next().next().addClass('mojito-list-selected-tr');
+							// Fernando (2019-06-27): parche, funciona hasta 4 filas, hay que hacer un while.
+							if(tr.next().next().next().hasClass('mojito-internal')) {
+								tr.next().next().next().addClass('mojito-list-selected-tr');
+							}
+						}
+					}
+				}
+				
+				index += 1;
+				inputId = document.getElementById(tdId.replace('{#}', index));
+			}
+		}
+		if(type == 'listScrollTo') {
+			// Scrollea la lista para que quede visible una fila.
+			// target: id de la lista.
+			// jsonData: id de la fila que debe quedar visible.
+			
+			// Falta hacerlo, se deja el código para scrollear:
+			// var top = $(selected).position().top;
+			// top = $('#divId').scrollTop() + top;
+			// $('#divId').scrollTop(top);
+		}
+		if(type == 'closeModal') {
+			tagUtilCloseModal();
+		}
+		
+		if(type == 'openModal') {
+			var valueData = jsonData[value];
+			tagUtilShowModal(valueData);
+		}
+		
+		if(type == 'close') {
+			var msgData = jsonData['msg'];
+			if(stringUtilNotEmpty(msgData)) {
+				vxConfirm(msgData, function(){ window.close();});
+			}else{
+				window.close();
+			}
+		}
+		if(type == 'ajaxLoad') {
+			var valueData = jsonData[value];
+			utilDoAjaxDirect(valueData, targetId, null, true, true, true);
+		}
+		if(type == 'vxAlert' ){
+			var msgData = jsonData['msg'];
+			if(stringUtilNotEmpty(msgData)) {
+				vxAlert(msgData);
+			}
+		}
+		if(type == 'callAgent' ){
+			communicationUtilOpenAgentPopUp(false);
+		}
+		if(type == 'setStateUi'){
+			tagUtilAddClassUi(targetId, jsonData['stateUiClass'])
+		}
+		
+		if(type == 'rerender'){
+			var valueData = jsonData[value];
+			var innerInfo = utilGetInnerInfo(this);
+			utilSetMethodToCall(innerInfo.methodName, targetId, true, null, null, null, null, null, null, null, valueData);
+		}
+		
+	}
+}
+
+// Acción activa con origen en la página.
+function actionExecute3(targetId, type, value, expressionEnabled) {
+	var data = '{ "data": ' + (value == null?'null':'"'+value+'"') + ' }';
+	actionExecute2(data, targetId, type, 'data', expressionEnabled);
+}
+
+function actionExecute3Json(parametersArray) {
+	if(parametersArray != null) {
+		for(var i = 0; i < parametersArray.length; i++) {
+			var parameters = parametersArray[i];
+			actionExecute3(parameters[0], parameters[1], parameters[2], parameters[3]);
+		}
+	}
+}

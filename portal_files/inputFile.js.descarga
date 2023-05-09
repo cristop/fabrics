@@ -1,0 +1,19 @@
+function infiReload(innerPrefix) {
+	reloadCheck('inputImage', innerPrefix, function(div) {
+		new infiInputFile(div);
+	});
+}
+
+function infiInputFile(div) {
+	var self = this;
+	this.root = div;
+	this.prefix = 'infi';
+	this.root.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	/*
+	$(this.root).croppie({
+	    url: 'https://media.ambito.com/p/620135fcc19f0afe0c79060301e1f7d3/adjuntos/239/imagenes/039/296/0039296398/banco-central-bcra-rem-tasas.jpg',
+	});
+	*/
+}

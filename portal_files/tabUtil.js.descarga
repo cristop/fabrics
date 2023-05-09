@@ -1,0 +1,43 @@
+function Tab(index, tabId, contentId, activeClassName){
+ 	this.index = index;
+ 	this.tabId = tabId;
+ 	this.contentId = contentId;
+ 	this.activeClassName = activeClassName;
+}
+
+Tab.prototype.toString = function() {
+	return this.index+'|||'+this.tabId+'|||'+this.contentId+'|||'+this.activeClassName; 
+}
+
+function manageTabs(selectedTab, selectedTabId, pageInstanceId, tabsId) {
+	
+	document.getElementById(selectedTabId).value = selectedTab;
+	
+	var ajaxRequest = 'toSession.ajax?' + pageInstanceId + '=' + selectedTab;
+	doAjax(ajaxRequest);
+	
+	// Layout horizontal lo usa, pero layout vertical no.
+	if(tabsId != null) {
+		var tabs = document.getElementById(tabsId).value.split(',');
+		for(var i = 0; i < tabs.length; i++) {
+			var tabString = tabs[i].split('|||');
+			var tab = new Tab(tabString[0],tabString[1],tabString[2],tabString[3]);
+			if(selectedTab == tab.index) { 
+				document.getElementById(tab.contentId).style.display = 'block';
+				document.getElementById(tab.tabId).className = tab.activeClassName;
+			} else { 
+				document.getElementById(tab.contentId).style.display = 'none';
+				document.getElementById(tab.tabId).className = '';
+			}
+		}
+	}
+}
+
+function manageTabsDropdown(selectedTab, selectedTabId, pageInstanceId, tabsId, button) {
+	
+	manageTabs(selectedTab, selectedTabId, pageInstanceId, tabsId);
+	$('.dropdown-menu li').removeClass("active");
+	$('.nav-tabs a[href="'+ $(button).attr("href")+'"]').tab("show");
+	$('.dropdown-menu li a[href="'+ $(button).attr("href")+'"]').tab("show");
+	$("#tab_button_selector").html($(button).html());
+}

@@ -1,0 +1,394 @@
+if (!String.prototype.trim) {
+  String.prototype.trim = function () {
+    return this.replace(/^\s+|\s+$/g, '');
+  };
+}
+
+/**
+ * Escapea un texto para poder mostrarse como texto dentro de un tag de HTML.
+ */
+function stringUtilEscapeHtml(value) {
+	var result = value;
+	if(result != null) {
+		result = result.replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll(' ', '&nbsp;');
+	}
+	return result;
+}
+
+function stringUtilCount(value, pattern) {
+	var result = 0;
+	if(value != null && pattern != null) {
+		for(var i = 0; i < value.length; i++) {
+			if(value.substring(i).startsWith(pattern)) {
+				result += 1;
+			}
+		}
+	}
+	return result;
+}
+
+function stringUtilIndexOfNth(value, pattern, index) {
+	return value.split(pattern, index).join(pattern).length;
+}
+
+function stringUtilToBool(value) {
+	var result = null;
+	if(value != null) {
+		if (typeof value === 'boolean') {
+			result = value;
+		} else {
+			if (typeof value === 'string') {
+				var valueAux = value.toLowerCase();
+				if(valueAux == 'true' || valueAux == 't' || valueAux == 'si' || valueAux == 'sí' || valueAux == 's' || valueAux == 'yes' || valueAux == 'y' || valueAux == '1') {
+					result = true;
+				} else {
+					result = false;
+				}
+			} else {
+				result = value ? true : false;
+			}
+		}
+	}
+	return result;
+}
+
+function stringUtilAbbreviate(value, length) {
+	var result = value;
+	if(result != null && result.length > length) {
+		result = result.substring(0, length - 3);
+		result += '...';
+	}
+	return result;
+}
+
+function stringUtilFirstCapital(value) {
+	var result = null;
+	if (typeof value === 'string') {
+		result = value.charAt(0).toUpperCase() + value.slice(1);
+	}
+	return result;
+}
+
+
+/**
+ * Resuelve una cadena que puede contener entre corchetes valores de controles de la página.
+ * Entre corchetes se puede indicar:
+ * - el id de un control,
+ * - el id de un control Mojito luego un punto y luego una propiedad de ese control.
+ * @param value Cadena a resolver.
+ * @param context Contexto que se va a tener en cuenta al buscar al control Mojito.
+ */
+function stringUtilResolve(value, context) {
+	// Gaston (2015-04-29) Agregué este reemplazo porque en algunas páginas (principalmente las que tienen el parámetro 
+	// de nueva ventana) esta codificando los corchetes y este método no procesa bien. Supongo que es mejor 
+	//resolverlo antes, pero no se bien donde.
+	// Fernando (2018-10-11): lo comenté el 10/7/2018 pero no puse comentario. En principio uno de los lugares donde
+	// sirve este reemplazo es cuando hay un link que tiene un parámetro entre corchetes, es decir que pertenece a un
+	// control de la página. Como es una URL suele pasar por el objeto Url de Mojito y ese objeto reemplaza los corchetes
+	// por %5B y %5D. La solución debiera ser reemplazar los corchetes luego de llamar al Url. Hoy lo hago en ButtonRender.
+	// Probablemente esto tampoco sirva para el caso
+	// value = value.replace(/%5B/g,'[');
+	// value = value.replace(/%5D/g,']');
+
+	var openBraceIndex = value.indexOf('[');
+	var closeBraceIndex;
+	var control;
+	var innerInfo = context != null ? utilGetInnerInfo(context) : utilGetInnerInfo(window);
+	
+	while(openBraceIndex >= 0) {
+
+		closeBraceIndex = value.indexOf(']', openBraceIndex);
+		
+		if(value.substring(openBraceIndex + 1, closeBraceIndex).indexOf('[') >= 0) {
+			closeBraceIndex = value.indexOf(']', closeBraceIndex + 1);
+		}
+		
+		var controlMojito = null;
+		var controlMojitoProperty = 'value';
+		var controlId = value.substring(openBraceIndex + 1, closeBraceIndex);
+		
+		// 1) Busca por id.
+		control = document.getElementById(innerInfo.getId(controlId));
+		if(control != null && (
+		  $(control).attr('data-control') == 'inputBoolean' ||
+		  $(control).attr('data-control') == 'hidden' ||
+		  $(control).attr('data-control') == 'listColumnHidden')) {
+			control = null;
+		}
+		
+		// 2) Busca por name.
+		if(control == null) {
+			var controls = document.getElementsByName(value.substring(openBraceIndex + 1, closeBraceIndex));
+			
+			if(controls != null && controls.length > 0) {
+				control = controls[0];
+				if(control != null && (
+				  $(control).attr('data-control') == 'inputBoolean' ||
+				  $(control).attr('data-control') == 'hidden')) {
+					control = null;
+				}
+			} 
+		}
+
+		// 3) Busca por control Mojito.
+		if(control == null) {
+			controlMojito = tagUtilGetControlMojito(controlId, context);
+			if(controlMojito == null) {
+				var controlArray = controlId.split('.');
+				if(controlArray.length > 1) {
+					var controlIdAux = controlId.substring(0, controlId.lastIndexOf('.'));
+					controlMojito = tagUtilGetControlMojito(controlIdAux, context);
+					if(controlMojito != null) {
+						controlMojitoProperty = controlArray[controlArray.length - 1];
+					}
+				}
+			}
+		}
+		
+		if(control != null) {
+			var controlValue = "";
+			
+			if(control.type != "select-multiple") {
+				controlValue = control.value;
+			} else {
+				var first = true;
+				
+				for (i = 0; i < control.length; i++) {
+					if(control.options[i].selected) {
+						if(!first) {
+							controlValue += ",";
+						} else {
+							first = false;
+						}
+						
+						controlValue += control.options[i].value;
+					}
+			    }
+			}
+			
+			value = value.substring(0, openBraceIndex) + controlValue + value.substring(closeBraceIndex + 1);
+			closeBraceIndex -= (controlId.length +1 - controlValue.length );
+		}
+		
+		if(controlMojito != null) {
+			if($(controlMojito).prop('mHandler')[controlMojitoProperty] == null) {
+				var prefix = $(controlMojito).prop('mHandler').prefix;
+				if(stringUtilNotEmpty(prefix)) {
+					controlMojitoProperty = prefix + stringUtilFirstCapital(controlMojitoProperty); 
+				}
+			}
+			
+			controlValue = $(controlMojito).prop('mHandler')[controlMojitoProperty]();
+			
+			value = value.substring(0, openBraceIndex) + controlValue + value.substring(closeBraceIndex + 1);
+			closeBraceIndex -= (controlId.length +1 - controlValue.length );
+		}
+		
+		if(control == null && controlMojito == null) {
+			if(window[controlId] != null && (typeof window[controlId] === 'function')) {
+				controlValue = window[controlId](context);
+				value = value.substring(0, openBraceIndex) + controlValue + value.substring(closeBraceIndex + 1);
+			}
+		}
+		
+		openBraceIndex = value.indexOf('[', closeBraceIndex);
+	}
+
+	return value;
+}
+
+/**
+ * Resuelve una cadena que puede contener entre corchetes valores de propiedades de un json.
+ * @param value Cadena a resolver.
+ * @param jsonObj Objeto json del que se extraerán los valores de las propiedades entre corchetes.
+ */
+function stringUtilResolveJson(value, jsonObj, mHandler) {
+	
+	var parser = new mParser('[', ']', function (input) {
+		// propertyPath = input;
+		// parameterValueAux = result
+			var result;
+			if(jsonObj != null && jsonObj.hasOwnProperty(input)) {
+				// Si hay respuesta Ajax y la respuesta tiene la propiedad, busco el valor.
+				result = $(jsonObj).prop(input);
+			} else {
+				// Ver en ActionParameterTag la definición de esta implementación.
+				// Si no hay respuesta Ajax o la respuesta no tiene esa propiedad, entonces...
+				if(input == 'self') {
+					// Si la propiedad es 'self' se refiere al valor por defecto del control.
+					if(mHandler['value'] != null) {
+						result = mHandler['value'](); 
+					} else {
+						if(mHandler[mHandler.prefix + 'Value'] != null) {
+							result = mHandler[mHandler.prefix + 'Value']();
+						}
+					}
+				}
+				if(input != 'self') {
+					if(window[input] != null) {
+						result = window[input](mHandler.root);
+					} else {
+						// Se buscó en la respuesta, en los controles y en el objeto window.
+						// Si no está en ningún lado se asume que en realidad no se informó
+						// por lo tanto su valor es nulo.
+						result = null;
+						
+						utilLog.log(utilLogMode4, log_Warn, 'No se encontró el parámetro ' + logDescription(input) +
+						  ' ni en la respuesta de Ajax, ni en los controles, ni en el objeto window. Se asume que es un parámetro no informado y se setea su valor a null.');
+					}
+				}
+			}
+			return result;
+		});
+	var result = parser.parse(value);
+	return result;
+	
+	/*
+	var openBraceIndex = value.indexOf('[');
+	var closeBraceIndex;
+	
+	while(openBraceIndex >= 0) {
+		closeBraceIndex = value.indexOf(']', openBraceIndex);
+		
+		if(value.substring(openBraceIndex + 1, closeBraceIndex).indexOf('[') >= 0) {
+			closeBraceIndex = value.indexOf(']', closeBraceIndex + 1);
+		}
+		
+		var propertyPath = value.substring(openBraceIndex + 1, closeBraceIndex);
+		{
+			var parameterValueAux;
+			if(jsonObj != null && jsonObj.hasOwnProperty(propertyPath)) {
+				// Si hay respuesta Ajax y la respuesta tiene la propiedad, busco el valor.
+				parameterValueAux = $(jsonObj).prop(propertyPath);
+			} else {
+				// Ver en ActionParameterTag la definición de esta implementación.
+				// Si no hay respuesta Ajax o la respuesta no tiene esa propiedad, entonces...
+				if(propertyPath == 'self') {
+					// Si la propiedad es 'self' se refiere al valor por defecto del control.
+					if(mHandler['value'] != null) {
+						parameterValueAux = mHandler['value'](); 
+					} else {
+						if(mHandler[mHandler.prefix + 'Value'] != null) {
+							parameterValueAux = mHandler[mHandler.prefix + 'Value']();
+						}
+					}
+				}
+				if(propertyPath != 'self') {
+					if(window[propertyPath] != null) {
+						parameterValueAux = window[propertyPath](mHandler.root);
+					} else {
+						// Se buscó en la respuesta, en los controles y en el objeto window.
+						// Si no está en ningún lado se asume que en realidad no se informó
+						// por lo tanto su valor es nulo.
+						parameterValueAux = null;
+						
+						utilLog.log(utilLogMode4, log_Warn, 'No se encontró el parámetro ' + logDescription(propertyPath) +
+						  ' ni en la respuesta de Ajax, ni en los controles, ni en el objeto window. Se asume que es un parámetro no informado y se setea su valor a null.');
+					}
+				}
+			}
+			var propertyValue = parameterValueAux != null ? parameterValueAux : '';
+			value = value.substring(0, openBraceIndex) + propertyValue + value.substring(closeBraceIndex + 1);
+			closeBraceIndex -= (propertyPath.length + 1 - propertyValue.length );
+			openBraceIndex = value.indexOf('[', closeBraceIndex);
+		}
+	}
+
+	return value;
+	*/
+}
+
+function stringUtilRemoveBraceIndex(value) {
+	let regex1 = RegExp(/\[\d+]/,'g');
+	let indexPage = regex1.exec(value);
+	let index = null;
+	if (indexPage !== null) {
+		index = indexPage[0];
+		index = index.replace('[','{');
+		index = index.replace(']','}');
+		value = value.replace(indexPage[0], index);
+	}
+	return [value, index];
+}
+
+function stringUtilTrim(value) {
+	return value.replace(/^\s*/, "").replace(/\s*$/, "");
+}
+
+function stringUtilEmpty(value) {
+	return value == null || (stringUtilTrim(value) == "");
+}
+
+function stringUtilNotEmpty(value) {
+	return value != null && (stringUtilTrim(value) != "");
+}
+
+function stringUtilEndsWith(value, pattern) {
+	var lastIndex = value.lastIndexOf(pattern);
+    return (lastIndex >= 0) && (lastIndex + pattern.length == value.length);
+}
+
+// Copiado de .net
+//Reemplaza todas las ocurrencias de pattern en la cadena value por replace.
+//Este método se armó porque el String.replace de Javascript solo reemplaza la primera ocurrencia.
+//Pattern en verdad se toma como una regular expression, pero en verdad lo ideal sería hacer lo siguiente:
+//- Verificar si pattern es una regular expression o una cadena.
+//- Si es una regular expression, usarla directamente.
+//- Si es una cadena, buscar los caracteres especiales para regular expressions y escapearlos, y luego usarla.
+function stringUtilReplace(value, pattern, replace) {
+ var result = value;
+
+ if (value != null && pattern != null && replace != null) {
+     var patternAux = pattern.replace(/\./g, "\\.");
+     result = value.replace(new RegExp(patternAux, "g"), replace);
+ }
+
+ return result;
+}
+
+function stringUtilPadRight(value, size, character) {
+    return value + Array(size - value.length + 1).join(character || " ");
+}
+
+function stringUtilPadLeft(value, size, character) {
+    return Array(size - value.length + 1).join(character || " ") + value;
+}
+
+function stringToUpperCase(value) {
+	var result = value;
+	if(value != null) {
+		result = value.toUpperCase();
+	}
+	return result;
+}
+
+function stringFirstUpperCase(value) {
+	var result = value;
+	if(value != null) {
+		result = value.charAt(0).toUpperCase() + value.slice(1)
+	}
+	return result;
+}
+
+function stringUtilIsUrl(value) {
+	var result = false;
+	if(stringUtilNotEmpty(value)) {
+		result = value.startsWith('http://') || value.startsWith('https://');
+	}
+	return result;
+	/*
+	var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+	  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+	  '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+	  '(\\:\\d+)?(\\/[#-a-z\\d%_.~+]*)*'+ // port and path
+	  '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+	  '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+	var result = !!pattern.test(value);
+	return result;
+	*/
+}
+
+function stringUtilIsMail(value) {
+	const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	return re.test(String(value).toLowerCase());
+}

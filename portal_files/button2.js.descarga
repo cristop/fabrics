@@ -1,0 +1,59 @@
+function but2Reload(innerPrefix) {
+	reloadCheck('button2', innerPrefix, function(input) {
+		new but2Button2(input);
+	});
+}
+
+function but2Button2(input) {
+	var self = this;
+	this.root = tagUtilGetControl(input);
+	this.prefix = 'butt';
+	this.root.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	this.method = $(this.root).attr('data-method');
+	this.linkModal = $(this.root).attr('data-link-modal');
+	this.confirmMessage = $(this.root).attr('data-confirm-message');
+	this.child = $(this.root).attr('data-child');
+	
+	if(stringUtilNotEmpty(this.method)) {
+		$(this.root).on('click', function() {
+			self.but2Click();
+		});
+	}
+	
+	if(stringUtilNotEmpty(this.linkModal)) {
+		$(this.root).on('click', function() {
+			utilSetCaller(self.root);
+			tagUtilShowModal(self.linkModal);
+		});
+	}
+	
+	var actions = $(this.root).attr('data-actions');
+	if(stringUtilEmpty(this.method) && stringUtilNotEmpty(actions) && stringUtilNotEmpty(this.linkModal)) {
+		$(this.root).on('click', function() {
+			utilMode4Process(self.root);
+		});
+	}
+}
+
+but2Button2.prototype.but2Click = function() {
+	if(stringUtilEmpty(this.confirmMessage)) {
+		this.but2ClickExecute();
+	} else {
+		var self = this;
+		vxConfirm(this.confirmMessage, function() {
+			self.but2ClickExecute();
+		});
+	}
+}
+
+but2Button2.prototype.but2ClickExecute = function() {
+	if(this.child == 'true') {
+		var parent = $(this.root).parent().closest("[data-control]");
+		var mHandler = $(parent).prop('mHandler');
+		mHandler['select'](this.root);
+	}
+	utilSetCaller(this.root);
+	utilMethodCall(this.root, this.method, null, null, null, this.root);
+}

@@ -1,0 +1,125 @@
+
+/**
+ * Charly (09-02-2022) Cambio de chartjs-plugin-datalabels 2.7 a 3.6
+ * {@link https://chartjs-plugin-datalabels.netlify.app/guide/getting-started.html#registration
+ * Registrar el pliguin}
+ */
+ Chart.register(ChartDataLabels);
+
+/**
+ * Charly (09-02-2022) Cambio de chartjs-plugin-datalabels 2.7 a 3.6
+ * {@link https://www.chartjs.org/docs/3.6.2/getting-started/v3-migration.html#renamed
+ * renombraron algunas caracteristivas del chart}
+ *
+ */
+if(Chart.pluginService != null || Chart.registry != null) {
+	Chart.register({
+		 //Charly (09-02-2022) Cambio de chartjs-plugin-datalabels 2.7 a 3.6
+		// no era necesario un id en la version 2.7
+		id: 'customText',
+		beforeDraw: function (chart) {
+			 //Charly (09-02-2022) Cambio de chartjs-plugin-datalabels 2.7 a 3.6
+			// if (chart.config.type == 'doughnut' && chart.config.subtype != 'gauge' && chart.config.writeTotal == true) {
+			// var ctx = chart.chart.ctx;
+			if (chart.config.type == 'doughnut' && chart.config.subtype != 'gauge' && chart.config._config.writeTotal == true) {
+				var ctx = chart.ctx;
+				//var centerConfig = chart.config.options.elements.center;
+				var txt = '';
+				
+				for(var i=0;i<chart.data.datasets.length;i++){
+					txt += numeral(chart.data.total[i]).format(chart.data.datasets[i].format)+'\n';
+				}
+				
+				var fontStyle = 'Arial';
+				var color = '#000';
+				var sidePadding = 20;
+				//var fontStyle = centerConfig.fontStyle || 'Arial';
+				//var color = centerConfig.color || '#000';
+				//var sidePadding = centerConfig.sidePadding || 20;
+				var sidePaddingCalculated = (sidePadding/100) * (chart.innerRadius * 2)
+				ctx.font = '20px ' + fontStyle;
+	
+				var stringWidth = ctx.measureText(txt).width;
+				var elementWidth = (chart.innerRadius * 2) - sidePaddingCalculated;
+	
+				var widthRatio = elementWidth / stringWidth;
+				//var newFontSize = Math.floor(30 * widthRatio);
+				//var elementHeight = (chart.innerRadius * 2);
+	
+				//var fontSizeToUse = Math.min(newFontSize, elementHeight);
+				var fontSizeToUse = '13';
+				
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				var centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
+				var centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
+				ctx.font = fontSizeToUse+'px ' + fontStyle;
+				ctx.fillStyle = color;
+				
+				fillTextMultiLine(ctx, txt, centerX, centerY);
+				//ctx.fillText(txt, centerX, centerY);
+			}
+			
+			if (false && chart.config.type == 'doughnut' && chart.config.subtype == 'gauge') {
+	    		var ctx = chart.chart.ctx;
+	    		var config = chart.chart.config;
+	    		var panel = {scaleOuterRadius:99,scaleInnerRadius:93,scaleTextRadius:80};
+	    		var ranges = chart.chart.data.ranges;
+	
+	    		var meta = chart.chart.getDatasetMeta(1);
+	            var pt0 = meta.data[0];
+	            var innerRadius = pt0._view.innerRadius;
+	            var outerRadius = pt0._view.outerRadius;
+	            
+	            var cx = pt0._view.x;
+	            var cy = pt0._view.y;
+	            
+	            var textRadius = outerRadius * panel.scaleTextRadius / 100;
+	            
+	            ctx.save();
+	            
+	            ctx.translate(cx, cy);
+	            ctx.font = "10px Arial";
+	            ctx.fillStyle = panel.scaleTextColor || 'rgba(0, 0, 0, 1)';
+	            
+	    		ranges.forEach(function(value, index, arr) {
+	    			var text = numeral(value).format('#,##0')
+	                var textWidth = ctx.measureText(text).width;
+	                var textAngle = config.options.circumference * index / (arr.length - 1) + config.options.rotation;
+	                var dy = textRadius * Math.sin(textAngle);
+	                var dx = textRadius * Math.cos(textAngle);
+	                ctx.fillText(text, dx - (textWidth / 2), dy);
+	                var oy = (outerRadius * panel.scaleOuterRadius / 100) * Math.sin(textAngle);
+	                var ox = (outerRadius * panel.scaleOuterRadius / 100) * Math.cos(textAngle);
+	                var iy = (outerRadius * panel.scaleInnerRadius / 100) * Math.sin(textAngle);
+	                var ix = (outerRadius * panel.scaleInnerRadius / 100) * Math.cos(textAngle);
+	                ctx.strokeStyle = panel.scaleColor || 'rgba(0, 0, 0, 1)';
+	                ctx.beginPath();
+	                ctx.moveTo(ix, iy);
+	                ctx.lineTo(ox, oy);
+	                ctx.stroke();
+	            });
+	            ctx.restore();
+	
+	            ctx.save();
+	    	}
+		},
+		beforeInit: function(chart) {
+			chart.data["total"] = new Array();
+			for(var i=0;i<chart.data.datasets.length;i++){
+				var data = chart.data.datasets[i].data;
+				var data_sum = data.reduce((a, b) => a + b, 0);
+				chart.data["total"].push(data_sum);
+			}
+	    }
+	});
+}
+
+function fillTextMultiLine(ctx, text, x, y) {
+	var lineHeight = ctx.measureText("M").width * 1.2;
+	var lines = text.split("\n");
+	for (var i = 0; i < lines.length; ++i) {
+		ctx.fillText(lines[i], x, y);
+		y += lineHeight;
+	}
+}

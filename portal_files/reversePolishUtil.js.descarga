@@ -1,0 +1,897 @@
+var rpReversePolishId = 1;
+// Cambiar a "repoLog.log(repoLogReversePolish, ..."
+// repoLog.log(repoLogReversePolish, log_Info, 
+//		  'Se pide buscar data-formula en ' + logDescription(innerPrefix) + '.');
+
+/**
+ * Constructor para resolver una fórmula utilizando polaca inversa.
+ * Se puede usar tanto asociada a un control (targetId con executeAndGo) como para resolver una fórmula
+ * aislada (targetId, innerPrefix, callback = null con execute).
+ */
+function rpReversePolish(targetId, formula, resultType, decimalComma, innerPrefix, callback) {
+	// loggingLevel 1: muestra 1 mensaje por cada data-formula procesado y luego muestra 1 mensaje cada vez que un input ejecuta la fórmula.
+	// loggingLevel 2: ídem 1 y agrega las dependencias.
+	// loggingLevel 3: ídem 2 y agrega cómo se resuelven los tokens que no son valores constantes y el stack que se forma para resolver la polaca inversa.
+	this.loggingLevel = 0;
+	
+	this.id = rpReversePolishId; // $(this.target).attr("id");
+	rpReversePolishId += 1;
+	
+	this.targetId = targetId;
+	this.target = jqSelect("#" + targetId);
+	this.formula = formula;
+	this.decimalComma = decimalComma;
+	this.innerPrefix = (innerPrefix != null ? innerPrefix : '');
+	this.resultType = resultType;
+	this.callback = callback;
+	this.callbackParameters = [];
+	
+	this.loadOperatorsArray();
+}
+
+rpReversePolish.prototype.loadOperatorsArray = function() {
+	if(this.resultType == 'string') {
+		// No puedo agregar "(" y ")" porque se los confunde con los literales.
+		// Habría que detectar cuando se abre y cierra un valor literal para poder ignorar esa porción.
+		// De todas formas funcionan los par�ntesis como operadores, no sé por qué.
+		this.operatorsArray = ["+", "-"];
+	}
+	if(this.resultType == 'boolean') {
+		this.operatorsArray = ["(", ")", "&&", "||", "!"];
+	}
+	if(this.resultType == 'number') {
+		this.operatorsArray = ["(", ")", "+", "-", "*", "/", "^", "||", "&&"];
+	}
+}
+
+rpReversePolish.prototype.init = function() {
+	
+	repoLog.log(repoLogReversePolish, log_Info, 
+			'init: comienza la inicialización (' + logDescription(this.targetId) + ' = ' + logDescription(this.formula) + ')...');
+	
+	var dependentIds = this.dependency();
+	var dependenciesFounded = 0;
+	
+	repoLog.log(repoLogReversePolish, log_Info, 
+			'init: comienza a enlazar el evento de recálculo a los controles dependientes...');
+	
+	for(var i = 0; i < dependentIds.length; i++) {
+		var dependentId = dependentIds[i].trim();
+		var dependentControl = document.getElementById(dependentId);
+		if(dependentControl == null) {
+			var innerId = this.innerPrefix + "/" + dependentId;
+			dependentControl = document.getElementById(innerId);
+		}
+		
+		if(dependentControl != null) {
+			var dataControl = $(dependentControl).attr('data-control');
+			
+			var idSource = $(dependentControl).attr('id');
+			if(dataControl == 'inputBoolean') {
+				dependentControl = $('input[type="hidden"]', dependentControl);
+			}
+			if(dataControl == 'listColumnHidden') {
+				dependentControl = $('input[type="hidden"]', dependentControl).get(0);
+			}
+			var eventName = ($(dependentControl).prop("type") == "hidden" ? "change" : "input");
+			
+			if(dependentControl.formulaHandlers == null) {
+				dependentControl.formulaHandlers = [];
+			}
+			for(var j = 0; j < dependentControl.formulaHandlers.length; j++) {
+				var formulaHandler = dependentControl.formulaHandlers[j];
+				if(formulaHandler.targetId == this.targetId) {
+					$(dependentControl).unbind(eventName, formulaHandler.handler);
+				}
+			}
+			
+			var self = this;
+			var handler = function() {
+				self.executeAndGo(idSource);
+			}
+			
+			$(dependentControl).bind(eventName, handler);
+			
+			dependentControl.formulaHandlers.push({ targetId: this.targetId, handler: handler });
+			
+			repoLog.log(repoLogReversePolish, log_Debug, 
+		      'init: control dependiente ' + logDescription(dependentId) + ' encontrado, se enlazó el evento de recálculo...');
+			
+			dependenciesFounded += 1;
+		} else {
+			if(isNaN(dependentId)) {
+				repoLog.log(repoLogReversePolish, log_Warn, 
+						'init: no se encontr� al control dependiente ' + logDescription(dependentId) + ' (this.innerPrefix: ' + logDescription(this.innerPrefix) + ')...');
+			}
+		}
+	}
+	this.rpLog(10, 'init: finaliza el enlace del evento de recálculo a los controles dependientes...', 3);
+	
+	this.rpLog(1, 'init: target  = "' + this.targetId + '" (' + dependenciesFounded + ' dependencias)', 'init: formula = "' + this.formula + '"');
+}
+
+rpReversePolish.prototype.executeAndGo = function(source) {
+	var result = this.execute();
+	var sourceAux = source != null ? source : '(unknown)';
+	
+	for(var i = 0; i < this.callbackParameters.length; i++) {
+		repoLog.log(repoLogReversePolish, log_Trace, 
+				'executeAndGo: enviando parámetro [' + i + '] \'' + this.callbackParameters[i] + '\'');
+	}
+	
+	repoLog.log(repoLogReversePolish, log_Debug, 
+			'executeAndGo: caller = "' + sourceAux + '"',
+			'executeAndGo: target = "' + this.targetId + '"',
+			'executeAndGo: formula = "' + this.formula + '"',
+			'executeAndGo: result = "' + result + '"');
+	
+	this.callback(result, this.callbackParameters);
+}
+
+rpReversePolish.prototype.isOperator = function(token) {
+	var result = false;
+	if(token != null && token != '') {
+		if(this.operatorsArray.includes(token)) {
+			result = true;
+		}
+	}
+	return result;
+}
+
+rpReversePolish.prototype.addParameter = function(parameter) {
+	this.rpLog(10, 'addParameter: agregando parámetro \'' + parameter + '\'');
+	this.callbackParameters.push(parameter);
+	
+	this.rpLog(10, 'addParameter: this.callbackParameters.size = \'' + this.callbackParameters.length + '\'');
+	for(var i = 0; i < this.callbackParameters.length; i++) {
+		this.rpLog(10, 'addParameter: par�metro [' + i + '] \'' + this.callbackParameters[i] + '\'');
+	}
+}
+
+/**
+ * Devuelve todas las dependencias de la fórmula de un control.
+ * Es decir los controles que forman parte de esa fórmula.
+ */
+rpReversePolish.prototype.dependency = function() {
+	repoLog.log(repoLogReversePolish, log_Info, 'dependency: calculando dependencias...');
+	
+	var result = [];
+	
+	var indexFormula = 0;
+	var indexResult = 0;
+	var regExList = /(.+)\[(.+)\]\.(.+)/;
+	
+	if(mString.equals(this.formula, 'costs[+].formulas.subtotal / 100')) {
+		debugger;
+	}
+	
+	while(indexFormula < this.formula.length) {
+		var firstOperatorResult = this.firstOperator(this.formula, indexFormula);
+		if(firstOperatorResult.index > indexFormula) {
+			var controlPart = this.formula.substring(indexFormula, firstOperatorResult.index).trim();
+			
+			var regExListResult = regExList.exec(controlPart);
+			if(regExListResult != null) {
+				
+				// var regEx = regExListResult[1] + '\\[\\d+\\]' + regExListResult[3];
+				// if(mString.isNotEmpty(this.innerPrefix)) {
+				//   regEx = this.innerPrefix + '\\/' + regEx;
+				// }
+				
+				var regExListResult1 = regExListResult[1];
+				var regExListOperator = regExListResult[2];
+				var isOperator = !mInt.isTranslatable(regExListOperator);
+				var regExListResult2 = regExListResult[3];
+				var idComplete = controlPart;
+				if(this.innerPrefix != null && this.innerPrefix != '') {
+					regExListResult1 = this.innerPrefix + '\\/' + regExListResult1;
+					idComplete = this.innerPrefix + '/' + idComplete;
+				}
+				
+				var self = this;
+				// utilitiesSaving[i].percentage
+				// utilitiesCost[cost].quantity -> utilitiesCost[cost].quantity this[].cost
+				$("[id^='" + regExListResult1 + "'][id$=" + jqEscape(regExListResult2) + "]").each(function(){
+					var alreadyDefined = false;
+					for(var i = 0; i < result.length && !alreadyDefined; i++) {
+						alreadyDefined = (result[i] == this.id);
+					}
+					
+					if(!alreadyDefined) {
+						if(isOperator || mString.equals(this.id, idComplete)) {
+							result[indexResult] = this.id;
+							repoLog.log(repoLogReversePolish, log_Trace, 
+									'dependency: newDependency[list][' + logDescription(indexResult) + '] = ' + logDescription(this.id));
+							indexResult += 1;
+						}
+					}
+				});
+			} else {
+				var isDependency = true;
+				if(this.resultType == 'string') {
+					if(controlPart.trim().startsWith('\'')) {
+						isDependency = false;
+					}
+				}
+				if(this.resultType == 'number') {
+					if(!isNaN(controlPart)) {
+						isDependency = false;
+					}
+				}
+				if(controlPart.trim() == '') {
+					isDependency = false;
+				}
+				
+				if(isDependency) {
+					var alreadyDefined = false;
+					for(var i = 0; i < result.length && !alreadyDefined; i++) {
+						alreadyDefined = (result[i] == controlPart);
+					}
+					
+					if(!alreadyDefined) {
+						result[indexResult] = controlPart;
+						repoLog.log(repoLogReversePolish, log_Trace, 
+								'dependency: newDependency[simple][' + logDescription(indexResult) + '] = ' + logDescription(controlPart));
+						indexResult += 1;
+					}
+				}
+			}
+			
+			indexFormula = firstOperatorResult.index + firstOperatorResult.length;
+		} else {
+			indexFormula += firstOperatorResult.length;
+		}
+	}
+	
+	repoLog.log(repoLogReversePolish, log_Info, 'dependency: se terminan de calcular dependencias...');
+	return result;
+}
+
+rpReversePolish.prototype.rpLog = function(loggingLevel, log1, log2, log3, log4, log5) {
+	if(this.loggingLevel >= loggingLevel) {
+		var log = log1 + (log2 != null ? '\n' + log2 : '') + (log3 != null ? '\n' + log3 : '') + (log4 != null ? '\n' + log4 : '') + (log5 != null ? '\n' + log5 : '');
+		console.log('ReversePolish ' + this.id + '\n' + log);
+	}
+}
+
+/**
+ * Devuelve el índice del primer operador que encuentra en <b>formula</b>
+ * comenzando desde el índice <b>start</b>.
+ */
+rpReversePolish.prototype.firstOperator = function(formula, start) {
+	// console.log('numberFirstOperator.formula: ' + formula);
+	// console.log('numberFirstOperator.start: ' + start);
+	
+	// (incomeApplications[+].amountToReceive + incomeStages[+].amountToReceive) / 100 * entity.bankApplication.financeCostPercentage
+	// 0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+	//           1         2         3         4         5         6         7         8
+	// result = formula.length
+	// indexOf = 39
+	
+	var result = { index: formula.length, length: 0 };
+	// var operatorsArray = this.operatorsArray.split("");
+	for (i = 0; i < this.operatorsArray.length; i++) {
+		var finded = false;
+		var indexOf = start;
+		while(indexOf >= 0 && !finded) {
+			indexOf = formula.indexOf(this.operatorsArray[i], indexOf);
+			if(indexOf >= 0) {
+				if(indexOf < result.index &&
+				  (i == 0 || !(formula.indexOf('[', indexOf - 1) == indexOf - 1 && formula.indexOf(']', indexOf + 1) == indexOf + 1))) {
+					var negativeNumber = false;
+					if(this.operatorsArray[i] == '-') {
+						var previousFormula = formula.substring(0, indexOf).trim();
+						var previousCharacter = previousFormula.substring(previousFormula.length - 1, previousFormula.length);
+						if(previousCharacter == '*' || previousCharacter == '/' || previousCharacter == '+' || previousCharacter == '-') {
+							negativeNumber = true;
+						}
+					}
+					
+					if(!negativeNumber) {
+						result = { index: indexOf, length: this.operatorsArray[i].length };
+						finded = true;
+					}
+				}
+				
+				indexOf += 1;
+			}
+		}
+	}
+	this.rpLog(10, 'firstOperator: "' + formula.substring(result.index, result.index + result.length) + '" (index: ' + result.index + '; length: ' + result.length + ')');
+	return result;
+}
+
+/**
+ * Ejecuta la fórmula presente en <b>controlId</b>, setea el valor al control
+ * y dispara su "focusout" por si está presente en otra fórmula.
+ * innerPrefix: es el prefijo de los controles para cuando están en una
+ * página con Ajax.
+ */  
+rpReversePolish.prototype.execute = function() {
+	
+	repoLog.log(repoLogReversePolish, log_Info, 
+			'execute: comienza la ejecución de la fórmula ("' + this.formula + '")...');
+	
+	var tokens = this.tokens();
+	
+	var rpnList = [];
+	var auxiliar = [];
+	var onParenthesis;
+	
+	// Paso de fórmula infix a postfix (https://es.wikipedia.org/wiki/Algoritmo_shunting_yard).
+	for(i = 0; i < tokens.length; i++) {
+		var token = tokens[i];
+		repoLog.log(repoLogReversePolish, log_Trace, 'execute: token: ' + token);
+		
+		if(this.isOperator(token)) {
+			this.toPostfix(token, rpnList, auxiliar); 
+		} else {
+			// Si el token es un número, entonces agreg�elo a la cola de salida.
+			var value = this.formulaValue(token);
+			repoLog.log(repoLogReversePolish, log_Trace, 'execute: token = ' + token, 'execute: token.value = ' + value);
+			rpnList.push(value);
+		}
+	}
+	
+	while(auxiliar.length > 0) {
+		rpnList.push(auxiliar.pop());
+	}
+	
+	var rpnListString = '';
+	for(i = 0; i < rpnList.length; i++) {
+		if(rpnListString != '') {
+			rpnListString += ', ';
+		}
+		rpnListString += (rpnList[i] != null ? '\'' + rpnList[i] + '\'' : 'NULL');
+	}
+	repoLog.log(repoLogReversePolish, log_Debug, 'execute: rpnList = ' + rpnListString);
+	
+	// Resolución de la polaca inversa.
+	var rpn = [];
+	for (i = 0; i < rpnList.length; i++) {
+		var token = rpnList[i];
+		// if(token == '+' || token == '-' || token == '*' || token == '/') {
+		
+		repoLog.log(repoLogReversePolish, log_Trace, 'execute: token ' + i + ': ' + (token != null ? '\'' + token + '\'' : 'NULL'));
+		
+		if(this.isOperator(token)) {
+			this.resolve(token, rpn);
+		} else {
+			rpn.push(token);
+		}
+		
+		repoLog.log(repoLogReversePolish, log_Trace, 'execute: *** step ' + i);
+		for(j = 0; j < rpn.length; j++) {
+			repoLog.log(repoLogReversePolish, log_Trace, 'execute: ' + this.targetId + '.rpn[' + j + ']: ' + (rpn[j] != null ? '\'' + rpn[j] + '\'' : 'NULL') + '');
+		}
+		repoLog.log(repoLogReversePolish, log_Trace, 'execute: step ' + i + ' ***');
+	}
+	
+	var result = null;
+	if(this.resultType == 'number') {
+		var resultNumber = rpn.pop();
+		if(resultNumber != null) {
+			result = resultNumber.roundHalfToEven(2); // Math.round(rpn.pop() * 100) / 100;
+		} else {
+			result = null; // Math.round(resultNumber * 100) / 100;
+		}
+	}
+	if(this.resultType == 'boolean') {
+		result = rpn.pop();
+	}
+	if(this.resultType == 'string') {
+		result = rpn.pop();
+	}
+	
+	this.rpLog(10, 'execute: "' + this.targetId + '" = "' + result + '"');
+	
+	return result;
+}
+
+rpReversePolish.prototype.resolve = function(token, rpn) {
+	if(this.resultType == 'string') {
+		this.resolveString(token, rpn); 
+	}
+	if(this.resultType == 'boolean') {
+		this.resolveBoolean(token, rpn);
+	}
+	if(this.resultType == 'number') {
+		this.resolveNumber(token, rpn);
+	}
+}
+
+rpReversePolish.prototype.resolveNumber = function(token, rpn) {
+	var value1 = rpn.pop();
+	var value2 = rpn.pop();
+	
+	var result = 0;
+	if(token == '+') {
+		result = value1 + value2;
+		this.rpLog(10, 'resolveNumber: operation: ' + value1 + '+' + value2);
+	}
+	if(token == '-') {
+		result = value2 - value1;
+		this.rpLog(10, 'resolveNumber: operation: ' + value2 + '-' + value1);
+	}
+	if(token == '*') {
+		result = value1 * value2;
+		this.rpLog(10, 'resolveNumber: operation: ' + value1 + '*' + value2);
+	}
+	if(token == '/') {
+		result = value2 / value1;
+		this.rpLog(10, 'resolveNumber: operation: ' + value2 + '/' + value1);
+	}
+	if(token == '^') {
+		result = Math.pow(value2, value1);
+		this.rpLog(10, 'resolveNumber: operation: ' + value2 + '^' + value1);
+	}
+	if(token == '||') {
+		result = value1 > value2 ? value1 : value2;
+		this.rpLog(10, 'resolveNumber: operation: ' + value2 + '||' + value1);
+	}
+	if(token == '&&') {
+		result = value1 < value2 ? value1 : value2;
+		this.rpLog(10, 'resolveNumber: operation: ' + value2 + '&&' + value1);
+	}
+	this.rpLog(10, 'resolveNumber: result: ' + result);
+	if(isNaN(result) || result == Infinity) {
+		result = null;
+	}
+	rpn.push(result);
+}
+
+rpReversePolish.prototype.resolveString = function(token, rpn) {
+	var value1 = rpn.pop();
+	var value2 = rpn.pop();
+	
+	var result = '';
+	if(token == '+') {
+		result = value2 + value1;
+	}
+	if(token == '-') {
+		if(value1 != null && value1 != '' && value2 != null && value2 != '') {
+			result = value2 + value1;
+		} else {
+			result = '';
+		}
+	}
+	rpn.push(result);
+	
+	this.rpLog(10, 'resolveString: operation: ' + (value2 != null ? '\'' + value2 + '\'' : 'NULL') + '+' + (value1 != null ? '\'' + value1 + '\'' : 'NULL'));
+	this.rpLog(10, 'resolveString: result: ' + result);
+}
+
+rpReversePolish.prototype.resolveBoolean = function(token, rpn) {
+	var result = false;
+	if(token == '&&') {
+		var value1 = rpn.pop();
+		var value2 = rpn.pop();
+		result = value2 && value1;
+		this.rpLog(10, 'resolveBoolean: operation: ' + (value1 != null ? value1 : 'NULL') + '&&' + (value2 != null ? value2 : 'NULL'));
+	}
+	if(token == '||') {
+		var value1 = rpn.pop();
+		var value2 = rpn.pop();
+		if(value1 != null && value2 != null) {
+			result = value2 || value1;
+		} else {
+			result = false;
+		}
+		this.rpLog(10, 'resolveBoolean: operation: ' + (value1 != null ? value1 : 'NULL') + '||' + (value2 != null ? value2 : 'NULL'));
+	}
+	if(token == '!') {
+		var value1 = rpn.pop();
+		result = !value1;
+		this.rpLog(10, 'resolveBoolean: operation: !' + (value1 != null ? value1 : 'NULL'));
+	}
+	rpn.push(result);
+	this.rpLog(10, 'resolveBoolean: result: ' + result);
+}
+
+rpReversePolish.prototype.toPostfix = function(token, rpnList, auxiliar) {
+	if(this.resultType == 'string') {
+		this.toPostfixString(token, rpnList, auxiliar); 
+	}
+	if(this.resultType == 'boolean') {
+		this.toPostfixBoolean(token, rpnList, auxiliar);
+	}
+	if(this.resultType == 'number') {
+		this.toPostfixNumber(token, rpnList, auxiliar);
+	}
+}
+
+rpReversePolish.prototype.getPrecedenceNumber = function(token) {
+	// predencia: ^ | * / | + - | || &&
+	var result = 0;
+	if(token == '^') {
+		result = 4;
+	}
+	if(token == '*' || token == '/') {
+		result = 3;
+	}
+	if(token == '+' || token == '-') {
+		result = 2;
+	}
+	if(token == '||' || token == '&&') {
+		result = 1;
+	}
+	return result;
+}
+
+rpReversePolish.prototype.isRightAssociativeNumber = function(token) {
+	var result = (token == '+' || token == '*' || token == '||' || token == '&&');
+	return result;
+}
+
+rpReversePolish.prototype.toPostfixNumber = function(token, rpnList, auxiliar) {
+	// Asociativo a izquierda: (a + b) + c | (a - b) - c | (a * b) * c | (a / b) / c | (a ^ b) ^ c
+	// Asociativo a derecha: a + (b + c) | a * (b * c)
+	// predencia: ^ | * / | + -
+	
+	var stackTop = auxiliar[auxiliar.length - 1];
+	var stackTopPrecedence = this.getPrecedenceNumber(stackTop);
+	var tokenPrecedence = this.getPrecedenceNumber(token);
+	var tokenRightAssociative = this.isRightAssociativeNumber(token);
+	
+	if(token != '(' && token != ')') {
+		// mientras que haya un operador, o2, en el tope de la pila (esto excluye el par�ntesis abierto), y
+		// o1 es asociativo izquierdo y su precedencia es menor que (una precedencia m�s baja) o igual a la de o2, �
+		// o1 es asociativo derecho y su precedencia es menor que (una precedencia m�s baja) que la de o2,
+		while(this.isOperator(stackTop) && stackTop != '(' &&
+		  (
+		    (tokenPrecedence <= stackTopPrecedence) ||
+	        (tokenRightAssociative && tokenPrecedence < stackTopPrecedence)
+		  )) {
+			// retire (pop) de la pila el o2, y p�ngalo en la cola de salida;
+			var auxiliarTop = auxiliar.pop();
+			rpnList.push(auxiliarTop);
+			
+			stackTop = auxiliar[auxiliar.length - 1];
+			stackTopPrecedence = this.getPrecedenceNumber(stackTop);
+		}
+		// ponga (push) o1 en el tope de la pila.
+		auxiliar.push(token);
+	}
+	// Si el token es un par�ntesis abierto, entonces p�ngalo en la pila.
+	if(token == '(') {
+		auxiliar.push(token);
+	}
+	// Si el token es un par�ntesis derecho:
+	if(token == ')') {
+		// Hasta que el token en el tope de la pila sea un par�ntesis abierto, retire (pop) a los operadores de la pila y col�quelos en la cola de salida.
+		var auxiliarTop = auxiliar.pop();
+		while(auxiliarTop != '(' && auxiliar.length > 0) {
+			rpnList.push(auxiliarTop);
+			auxiliarTop = auxiliar.pop();
+		}
+		// Retire (pop) el par�ntesis abierto de la pila, pero no lo ponga en la cola de salida.
+	}
+}
+
+rpReversePolish.prototype.toPostfixString = function(token, rpnList, auxiliar) {
+	if(token == '+') {
+		var top = auxiliar[auxiliar.length - 1];
+		while((top == '+' || top == '-') && auxiliar.length > 0) {
+			rpnList.push(auxiliar.pop());
+			top = auxiliar[auxiliar.length - 1];
+		}
+		auxiliar.push(token);
+	}
+	if(token == '-') {
+		var top = auxiliar[auxiliar.length - 1];
+		while((top == '-') && auxiliar.length > 0) {
+			rpnList.push(auxiliar.pop());
+			top = auxiliar[auxiliar.length - 1];
+		}
+		auxiliar.push(token);
+	}
+}
+
+rpReversePolish.prototype.toPostfixBoolean = function(token, rpnList, auxiliar) {
+	if(token == '&&') {
+		var top = auxiliar[auxiliar.length - 1];
+		while((top == '&&' || top == '||') && auxiliar.length > 0) {
+			rpnList.push(auxiliar.pop());
+			top = auxiliar[auxiliar.length - 1];
+		}
+		auxiliar.push(token);
+	}
+	if(token == '||') {
+		var top = auxiliar[auxiliar.length - 1];
+		while((top == '||') && auxiliar.length > 0) {
+			rpnList.push(auxiliar.pop());
+			top = auxiliar[auxiliar.length - 1];
+		}
+		auxiliar.push(token);
+	}
+	if(token == '!') {
+		auxiliar.push(token);
+	}
+	if(token == '(') {
+		auxiliar.push(token);
+	}
+	if(token == ')') {
+		var top = auxiliar[auxiliar.length - 1];
+		while(top != '(' && auxiliar.length > 0) {
+			rpnList.push(auxiliar.pop());
+			top = auxiliar[auxiliar.length - 1];
+		}
+		auxiliar.pop();
+	}
+}
+
+/**
+ * Devuelve todos los tokens de la fórmula de un control.
+ */
+rpReversePolish.prototype.tokens = function() {
+	var result = [];
+	var formula = this.formula;
+	
+	var indexFormula = 0;
+	var indexResult = 0;
+	var regExList = /(.+)\[([\+#\*])\]\.(.+)/; // detalles[+].monto - detalles[3].monto
+	while(indexFormula < formula.length) {
+		var firstOperatorResult = this.firstOperator(formula, indexFormula);
+		if(firstOperatorResult.index > indexFormula) {
+            var controlPart = formula.substring(indexFormula, firstOperatorResult.index).trim();
+            this.rpLog(10, 'tokens: analizando token: ' + controlPart);
+            
+			var regExListResult = regExList.exec(controlPart);
+			if(regExListResult != null) {
+				
+				result[indexResult] = '(';
+				indexResult += 1;
+				var previousResult = indexResult; 
+				
+				var regExListResult1 = regExListResult[1]; 
+				if(this.innerPrefix != null && this.innerPrefix != '') {
+					regExListResult1 = this.innerPrefix + '\\/' + regExListResult[1];
+				}
+				
+				var self = this;
+				$("[id^='" + regExListResult1 + "\\['][id$=" + jqEscape('].' + regExListResult[3]) + "]").each(function(){
+					if(regExListResult[2] != '#') {
+						result[indexResult] = this.id;
+						self.rpLog(10, 'tokens: recentAdd1.result[' + indexResult + ']: ' + result[indexResult]);
+						indexResult += 1;
+						
+						result[indexResult] = regExListResult[2];
+						self.rpLog(10, 'tokens: recentAdd2.result[' + indexResult + ']: ' + result[indexResult]);
+						indexResult += 1;
+					} else {
+						if($(this).val() != null && $(this).val().trim() != '') {
+							result[indexResult] = '1';
+							self.rpLog(10, 'tokens: recentAdd3.result[' + indexResult + ']: ' + result[indexResult]);
+							indexResult += 1;
+							
+							result[indexResult] = '+';
+							self.rpLog(10, 'tokens: recentAdd4.result[' + indexResult + ']: ' + result[indexResult]);
+							indexResult += 1;
+						}
+					}
+				});
+				
+				// Si no hay ning�n elemento crea un cero.
+				if(previousResult == indexResult) {
+					result[indexResult] = '0';
+					this.rpLog(10, 'tokens: recentAdd5.result[' + indexResult + ']: ' + result[indexResult]);
+					indexResult += 1;
+					
+					result[indexResult] = regExListResult[2];
+					this.rpLog(10, 'tokens: recentAdd6.result[' + indexResult + ']: ' + result[indexResult]);
+					indexResult += 1;
+				}
+				
+				// esto es para sacar el �ltimo operador
+				result[indexResult-1] = ')';
+				
+			} else {
+				if(controlPart != null && controlPart.trim() != '') {
+					result[indexResult] = controlPart;
+					this.rpLog(10, 'tokens: recentAdd7.result[' + indexResult + ']: ' + result[indexResult]);
+					
+					indexResult += 1;
+				}
+			}
+			indexFormula = firstOperatorResult.index;
+		} else {
+			var finded = false;
+			for(var i = 0; i < this.operatorsArray.length && !finded; i++) {
+				var operator = this.operatorsArray[i];
+				
+				if(formula.substring(indexFormula, indexFormula + operator.length) == operator) {
+					result[indexResult] = operator;
+					this.rpLog(10, 'tokens: recentAdd.result[' + indexResult + ']: ' + result[indexResult]);
+					indexResult += 1;
+					indexFormula += operator.length;
+					finded = true;
+				}
+			}
+		}
+	}
+	
+	for(var i = 0; i < result.length; i++) {
+		this.rpLog(10, 'tokens: result[' + i + ']: ' + result[i]);
+	}
+	
+	return result;
+}
+
+/**
+ * Resuelve el valor de un token.
+ * Para esto, primero se fija si es un número, en cuyo caso lo utiliza.
+ * Después se fija si es el nombre de un control (con <b>token</b> y si
+ * es necesario con <b>innerPrefix</b>) en cuyo caso toma el valor y lo
+ * convierte a un número.
+ */
+rpReversePolish.prototype.formulaValue = function(token) {
+	var result = null;
+	
+	if(this.resultType == 'string') {
+		result = this.formulaValueString(token); 
+	}
+	if(this.resultType == 'boolean') {
+	 	result = this.formulaValueBoolean(token);
+	}
+	if(this.resultType == 'number') {
+		result = this.formulaValueNumber(token);
+	}
+	
+	return result;
+}
+
+rpReversePolish.prototype.formulaValueNumber = function(token) {
+	var result = parseFloat(token, 10);
+	if (isNaN(result)) {
+		repoLog.log(repoLogReversePolish, log_Trace, 'formulaValueNumber: token: ' + logDescription(token));
+		repoLog.log(repoLogReversePolish, log_Trace, 'formulaValueNumber: innerPrefix: ' + logDescription(this.innerPrefix));
+		
+		var regExList = /(.+)\[(.+:.+)\]\.(.+)/;
+		var regExListResult = regExList.exec(token);
+		
+		if(regExListResult == null) {
+		    var control = document.getElementById(token);
+		    if(control == null && this.innerPrefix != null) {
+		    	control = document.getElementById(this.innerPrefix + "/" + token);
+		    }
+		    
+		    if(control != null) {
+			    var mHandler = $(control).prop('mHandler');
+			    if(mHandler != null && mHandler.prefix == 'lchi') {
+			    	control = mHandler.input;
+			    }
+		    }
+		    
+		    
+		    if(control != null) {
+			    var resultString = control.value;
+			    
+			    // if(resultString == '1' || resultString == 'true' || resultString == 't' || resultString == 'sí' || resultString == 'si' || resultString == 's') {
+			    if(resultString == '1' || resultString == 'true' || resultString == 't' || resultString.substring(0, 1) == 's') {
+			    	resultString = '1';
+			    }
+			    if(resultString == '0' || resultString == 'false' || resultString == 'f' || resultString == 'no' || resultString == 'n') {
+			    	resultString = '0';
+			    }
+			    
+			    if(resultString != null && resultString.trim() != '') {
+			    	result = numberUtilParse(resultString, this.decimalComma);
+			    } else {
+			    	result = 0;
+			    }
+		    } else {
+		    	console.log('Control no encontrado: "' + token + '" (si está buscando un valor en una lista recuerde usar la notación list[i].property).');
+		    	result = 0;
+		    }
+		} else {
+			// utilitiesCost[id:17].total
+			var listName = regExListResult[1];
+			var parameters = regExListResult[2].split(':');
+			var propertyToMatch = parameters[0];
+			var valueToMatch = parameters[1];
+			var propertyToTotalize = regExListResult[3];
+			
+		    if(this.innerPrefix != null) {
+		    	listName =  this.innerPrefix + '/' + listName;
+		    }
+			
+		    var value = 0;
+		    $("[id^='" + listName + "\\['][id$=" + jqEscape(propertyToMatch) + "]").each(function (index) {
+				if($(this).val() == valueToMatch) {
+					var controlToTotalize = jqSelectId(listName + '[' + index + '].' + propertyToTotalize);
+					if(controlToTotalize != null) {
+						
+						var valueString = $(controlToTotalize).val();
+				    	if(this.decimalComma) {
+				    		valueString = valueString.replace('.', '').replace(',', '.');
+				    	} else {
+				    		valueString = valueString.replace(',', '');
+				    	}
+				    	value = parseFloat(valueString);
+					    if (isNaN(value)) {
+					    	value = 0;
+					    }
+						// value += parseFloat($(controlToTotalize).val());
+					}
+				}
+		    });
+			
+			result = value;
+		}
+	}
+	return result;
+}
+
+rpReversePolish.prototype.formulaValueString = function(token) {
+	var result = token.trim();
+	if (result.indexOf('\'') != 0) {
+		this.rpLog(10, 'formulaValueString: token: ' + token);
+		this.rpLog(10, 'formulaValueString: innerPrefix: ' + this.innerPrefix);
+		
+	    var control = document.getElementById(token);
+	    if(control == null && this.innerPrefix != null) {
+	    	control = document.getElementById(this.innerPrefix + "/" + token);
+	    }
+	    if(control != null) {
+			if(control.nodeName != "SELECT")  {
+			    result = control.value;
+			} else {
+				if(control.selectedIndex != null) {
+					result = control.options[control.selectedIndex].innerHTML.trim();
+				} else {
+					result = '';
+				}
+			}
+	    } else {
+	    	result = "";
+	    }
+	    
+		this.rpLog(10, 'formulaValueString: token.' + token + ': ' + (result != null ? '\'' + result + '\'' : 'NULL'));
+	} else {
+		result = result.slice(1, result.length - 1);
+	}
+	
+	return result;
+}
+
+rpReversePolish.prototype.formulaValueBoolean = function(token) {
+	var result = token.trim();
+	if (result.indexOf('\'') != 0) {
+		this.rpLog(10, 'formulaValueBoolean: token: ' + token);
+		this.rpLog(10, 'formulaValueBoolean: innerPrefix: ' + this.innerPrefix);
+		
+	    var control = document.getElementById(token);
+	    if(control == null && this.innerPrefix != null) {
+	    	control = document.getElementById(this.innerPrefix + "/" + token);
+	    }
+	    if(control != null) {
+			if(control.nodeName != "SELECT")  {
+				if($(control).attr('data-control') == 'inputBoolean') {
+				    result = $('input[type="hidden"]', control).val();
+				} else {
+				    result = control.value;
+				}
+			} else {
+				if(control.selectedIndex != null) {
+					result = control.options[control.selectedIndex].innerHTML.trim();
+				} else {
+					result = '';
+				}
+			}
+	    } else {
+	    	result = "";
+	    }
+	    
+		this.rpLog(10, 'formulaValueBoolean: token.' + token + ': ' + (result != null ? '\'' + result + '\'' : 'NULL'));
+	} else {
+		result = result.slice(1, result.length - 1);
+	}
+	
+	if(result != null && result.toUpperCase() == "TRUE") {
+		result = true;
+	} else {
+		result = false;
+	}
+	
+	return result;
+}

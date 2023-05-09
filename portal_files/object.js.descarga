@@ -1,0 +1,66 @@
+// IMPORTANTE: si cambian estas descripciones modificarlas en todos los tipos de dato (bool, float, int, string, date y object).
+// translate(value, defaultValue, tryFlag): loQueSea (esperando formato de programación) a este tipo de dato. Si value está vacío se devuelve null (o defaultValue).
+// translateLocale(value, defaultValue, tryFlag): loQueSea (esperando formato según configuración regional) a este tipo de dato
+// format: este tipo de dato a String según la configuración regional. En el caso de float se usa separador de miles. En el caso de int, no.
+// toString: este tipo de dato a String en modo programación. En ningún caso se usa separador de miles.
+// is[Type]: chequea si una variable es del tipo de dato de la utilería. Cuidado porque para float-int existe isNumber porque Javascript no diferencia
+// entre entero y punto flotante. Y el isFloat da true si el número tiene decimales.
+
+class mObjectClass {
+	
+	convNull(...params) {
+		var result = null;
+		if(params != null) {
+			for(var i = 0; i < params.length; i++) {
+				if(result == null) {
+					result = params[i];
+				}
+			}
+		}
+		return result;
+	}
+	
+	isArray(value) {
+		var result = Array.isArray(value);
+		return result;
+	}
+	
+	format(value) {
+		var result = null;
+		if(mString.isString(value)) {
+			result = mString.format(value);
+		}
+		if(mInt.isInt(value)) {
+			result = mInt.format(value);
+		}
+		if(mFloat.isFloat(value)) {
+			result = mFloat.format(value);
+		}
+		return result;
+	}
+	
+	/**
+	 * Convierte <b>param</b> en un array. De la siguiente manera:
+	 * - si <b>param</b> es un array lo devuelve.
+	 * - Si <b>param</b> es un valor simple crea un array con este único valor y lo devuelve.
+	 * - Si <b>param</b> es null devuelve un array vacío.
+	 */
+	toArray(param) {
+		var result = [];
+		if(param != null) {
+			if(mObject.isArray(param)) {
+				result = param;
+			} else {
+				result = [ param ];
+			}
+		}
+		return result;
+	}
+	
+	toString(value) {
+		var result = value.toString();
+		return result;
+	}
+}
+
+var mObject = new mObjectClass();

@@ -1,0 +1,127 @@
+// IMPORTANTE: si cambian estas descripciones modificarlas en todos los tipos de dato (bool, float, int, string, date y object).
+// translate(value, defaultValue, tryFlag): loQueSea (esperando formato de programación) a este tipo de dato. Si value está vacío se devuelve null (o defaultValue).
+// translateLocale(value, defaultValue, tryFlag): loQueSea (esperando formato según configuración regional) a este tipo de dato
+// format: este tipo de dato a String según la configuración regional. En el caso de float se usa separador de miles. En el caso de int, no.
+// toString: este tipo de dato a String en modo programación. En ningún caso se usa separador de miles.
+// is[Type]: chequea si una variable es del tipo de dato de la utilería. Cuidado porque para float-int existe isNumber porque Javascript no diferencia
+// entre entero y punto flotante. Y el isFloat da true si el número tiene decimales.
+
+class mIntClass {
+	
+	format(number, useGroupSeparator) {
+		var result = '';
+		if(number != null) {
+			result = number.toString();
+		}
+		return result;
+	}
+	
+	isEven(number) {
+		var result = number % 2 == 0;
+		return result;
+	}
+
+	isInt(number) {
+		var result = Number.isInteger(number);
+		return result;
+	}
+	
+	isNumber(number) {
+		var result = mFloat.isNumber(number);
+		return result;
+	}
+	
+	isOdd(number) {
+		var result = Math.abs(number % 2) == 1;
+		return result;
+	}		
+	
+	isTranslatable(value, nullDefault) {
+		var result;
+		if(value != null) {
+			result = (mInt.translate(value, null, true) != null);
+		} else {
+			result = nullDefault == null ? true : nullDefault;
+		}
+		return result;
+	}
+	
+	/**
+	 * Devuelve el número sin ningún separador, ni decimal, ni de grupo.
+	 */
+	toString(number) {
+		var result = number.toString();
+		return result;
+	}
+	
+	translate(number, defaultValue, tryFlag) {
+		var result = number;
+		
+		if(number != null) {
+			if(!this.isNumber(number)) {
+				if(mString.isString(number)) {
+					number = mString.stripAll(number, ' $' + String.fromCharCode(8364) + this.groupSeparator);
+					if(mString.isNotEmpty(number)) {
+						try {
+							result = parseInt(number);
+							
+							if(isNaN(result)) {
+								if(!tryFlag) {
+									throw 'Se intentó transformar un String a int pero no fue posible parsearlo (String: ' + logDescription(number) + '). El parse devolvió Nan.';
+								} else {
+									result = null;
+								}
+							}
+						} catch(error) {
+							if(!tryFlag) {
+								throw 'Se intentó transformar un String a int pero no fue posible parsearlo (String: ' + logDescription(number) + '). El error fue: "' + logDescription(number) + '".';
+							} else {
+								result = null;
+							}
+						}
+					} else {
+						result = null;
+					}
+				} else {
+					if(!tryFlag) {
+						throw 'Se intentó transformar a int algo que no era un número ni un string interpretable como número.';
+					} else {
+						result = null;
+					}
+				}
+			} else {
+				result = parseInt(number);
+			}
+		} else {
+			result = null;
+		}
+		
+		if(result == null) {
+			result = defaultValue;
+		}
+		
+		return result;
+	}
+	
+	translateLocale(number, defaultValue, tryFlag) {
+		var result;
+		
+		var numberAux = number;
+		if(mString.isString(numberAux)) {
+			numberAux = mString.stripAll(numberAux, ' $kgKG' + String.fromCharCode(8364));
+			
+			if(reloadDecimalComma) {
+				result = numberAux.replace('.', '');
+			} else {
+				result = numberAux.replace(',', '');
+			}
+			result = mInt.translate(result, defaultValue, tryFlag);
+		} else {
+			result = mInt.translate(numberAux, defaultValue, tryFlag);
+		}
+		
+		return result;
+	}
+}
+
+var mInt = new mIntClass();

@@ -1,0 +1,87 @@
+function innuReload(innerPrefix) {
+	reloadCheck('inputNumber', innerPrefix, function(input) {
+		new innuInputNumber(input);
+	});
+}
+
+function innuInputNumber(input) {
+	var self = this;
+	this.root = $(input);
+	this.prefix = 'innu';
+	input.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	this.precision = $(this.root).attr('data-precision');
+	this.scale = $(this.root).attr('data-scale');
+	this.allowNegative = mBool.translate($(this.root).attr('data-allow-negative'));
+	
+	$(this.root).on('keypress', function() {
+		var result = true;
+
+		if(event.keyCode != 61) { // "=" para activar la fórmula
+			result = numberUtilIsNumber(event, $(self.root).attr('id'), self.precision, self.scale, self.allowNegative, mGlobal.decimalComma);
+		} else {
+			if(!$(self.root).is('[readonly]')) {
+				// var self = $(this);
+				vxPrompt('Input formula', null, function(value) {
+					$(self.root).attr('data-formula-input', value);
+					var rp = new rpReversePolish(null, value, 'number', mGlobal.decimalComma, null, function(value) {
+						var length = value.toString().length;
+						var maxLength = $(self.root).attr('maxlength');
+						if(maxLength == null || length <= maxLength) {
+							$(self.root).val(value);
+							$(self.root).focus();
+						} else {
+							vxAlert('Incorrect result');
+						}
+					});
+					rp.executeAndGo($(self).attr('id'));
+				});
+				result = false;
+			}
+		}
+
+		return result;
+	});
+	$(this.root).on('keyup', function() {
+		if(!$(self.root).val().startsWith('=')) {
+			if(!$(self.root).is('[readonly]')) {
+				numberUtilCheck($(self.root).attr('id'), self.precision, self.scale, self.allowNegative, mGlobal.decimalComma);
+			}
+		}
+	});
+	
+	if(reloadIsLayoutHorizontalNew()) {
+		$(this.root).on('blur', function() {
+			var number = $(self.root).val();
+			numberFormatted = numberUtilFormat(number, self.precision, self.scale);
+			$(self.root).val(numberFormatted);
+		});
+		$(this.root).on('focus', function() {
+			var number = $(self.root).val();
+			numberFormatted = numberUtilDeformat(number);
+			$(self.root).val(numberFormatted);
+		});
+	}
+	
+	var actions = $(this.root).attr('data-actions');
+	if(stringUtilEmpty($(this.root).attr('oninput')) && stringUtilNotEmpty(actions)) {
+		$(this.root).on('input', function() {
+			utilMode4Process(self.root);
+		});
+	}
+}
+
+// NO USAR. El correcto es "innuGetValue".
+innuInputNumber.prototype.innuValue = function() {
+	return $(this.root).val();
+}
+
+innuInputNumber.prototype.innuGetValue = function() {
+	return $(this.root).val();
+}
+
+innuInputNumber.prototype.innuSetValue = function(value) {
+	$(this.root).val(value);
+	$(this.root).trigger('input');
+}

@@ -1,0 +1,91 @@
+var buttDisabled = [ ];
+
+function buttReload(innerPrefix) {
+	reloadCheck('button', innerPrefix, function(div) {
+		new buttButton(div);
+	});
+}
+
+function buttButton(element) {
+	var self = this;
+	this.root = tagUtilGetControl(element);
+	this.prefix = 'butt';
+	this.root.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	this.modal = $(this.root).attr('data-modal');
+	this.modalWidth = $(this.root).attr('data-modal-width');
+	this.repeatable = $(this.root).attr('data-repeatable');
+	this.disabledByTime = false;
+	
+	if(stringUtilNotEmpty(this.modal)) {
+		$(this.root).on('click', function() {
+			utilSetCaller(self.root);
+			tagUtilShowModal(stringUtilResolve(self.modal, self.root), self.modalWidth, self.root);
+		});
+	}
+	var actions = $(this.root).attr('data-actions');
+	if(stringUtilEmpty($(this.root).attr('onclick')) && stringUtilNotEmpty(actions) && stringUtilEmpty(this.modal)) {
+		$(this.root).on('click', function() {
+			utilMode4Process(self.root);
+		});
+	}
+	if(this.repeatable != null && this.repeatable > 0) {
+		var idVirtual = this.getIdVirtual();
+		$(this.root).on('click', function() {
+			buttDisabled.push(idVirtual);
+			self.disabledByTime = true;
+			mMojito.tagDisabledByTime(self.root, self.repeatable, self.disabledByTimeOff);
+		});
+		
+		var index = buttDisabled.indexOf(idVirtual);
+		if(index >= 0) {
+			this.disabledByTime = true;
+			mMojito.tagDisabledByTime(this.root, this.repeatable, this.disabledByTimeOff);
+			buttDisabled[index] = '[emptyValue]';
+		}
+	}
+	
+	/*
+	// No funciona porque el botón ya se pone onclick y esto viene a duplicar ese onclick.
+	var rerender = $(this.root).attr('data-rerender');
+	if(stringUtilNotEmpty(rerender)) {
+		$(this.root).click(function() {
+			var rerenderArray = rerender.split(':');
+			var method = rerenderArray.length <= 1 ? null : rerenderArray[0];
+			var ids = rerenderArray.length <= 1 ? rerenderArray[0] : rerenderArray[1];
+			
+			utilMethodCall(self.root, method, ids, null, null, self.root);
+		});
+	}
+	*/
+}
+
+buttButton.prototype.disabledByTimeOff = function() {
+	this.disabledByTime = false;
+}
+
+buttButton.prototype.getIdVirtual = function() {
+	var result = mString.convEmpty(this.repeatable, '(empty)') + '|' +
+	  mString.convEmpty(this.root.className, '(empty)') + '|' +
+	  mString.convEmpty(this.root.value, '(empty)');
+	return result;
+}
+	
+buttButton.prototype.buttClipboardCopy = function(text) {
+	utilCopyToClipboard(text);
+	
+	// tagUtilCall('messageList', 'showInfo', 'Clipboard (' + textAbbreviate + ')', 2);
+	var messageListId = this.innerInfo.getId('messageList');
+	var messageList = jqSelectId(messageListId);
+	var messageListHandler = $(messageList).prop('mHandler');
+	
+	var textAbbreviate = stringUtilAbbreviate(text, 30);
+	messageListHandler.meslShowInfo('Clipboard (' + textAbbreviate + ')', 2);
+}
+
+buttButton.prototype.buttShowModal = function(url, width, par1, val1) {
+	var urlAux = url + '?' + par1 + '=' + val1;
+	var widthAux = width != null ? width : 500;
+	tagUtilShowModal(stringUtilResolve(urlAux), widthAux, this.root);
+}

@@ -1,0 +1,140 @@
+function meslReload(innerPrefix) {
+	reloadCheck('messageList', innerPrefix, function(div) {
+		new meslMessageList(div);
+	});
+}
+
+function meslMessageList(div) {
+	var self = this;
+	this.root = $(div);
+	this.prefix = 'mesl';
+	div.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	this.contentDiv = $(this.root).children('.mojito-messagelist-div');
+	this.messageDiv = $(this.contentDiv).children('div');
+	
+	var modal = $(this.contentDiv).attr('data-modal');
+	if(modal != null && modal.trim() != '') {
+		vxAlert(modal);
+	}
+	
+	this.meslInit();
+}
+
+meslMessageList.prototype.meslShowInfo = function(message, fade) {
+	$(this.contentDiv).attr('data-info', message);
+	$(this.contentDiv).attr('data-warning', null);
+	$(this.contentDiv).attr('data-error', null);
+	if(fade != null) {
+		$(this.contentDiv).attr('data-fade', fade);
+	}
+	this.meslInit();
+}
+
+meslMessageList.prototype.meslShowWarning = function(message, fade) {
+	$(this.contentDiv).attr('data-info', null);
+	$(this.contentDiv).attr('data-warning', message);
+	$(this.contentDiv).attr('data-error', null);
+	if(fade != null) {
+		$(this.contentDiv).attr('data-fade', fade);
+	}
+	this.meslInit();
+}
+
+meslMessageList.prototype.meslShowError = function(message, fade) {
+	$(this.contentDiv).attr('data-info', null);
+	$(this.contentDiv).attr('data-warning', null);
+	$(this.contentDiv).attr('data-error', message);
+	$(this.contentDiv).attr('data-fade', fade);
+	this.meslInit();
+}
+
+meslMessageList.prototype.meslInit = function() {
+	var fade = $(this.contentDiv).attr('data-fade');
+	var sound = mBool.isTrue($(this.contentDiv).attr('data-sound'), false);
+	var type;
+	
+	var message = $(this.contentDiv).attr('data-error');
+	if(stringUtilNotEmpty(message)) {
+		type = 'error';
+		if(sound) {
+			mMojito.mmdSoundNok();
+		}
+	} else {
+		message = $(this.contentDiv).attr('data-warning');
+		if(stringUtilNotEmpty(message)) {
+			type = 'warning';
+		} else {
+			message = $(this.contentDiv).attr('data-info');	
+			if(stringUtilNotEmpty(message)) {
+				type = 'info';
+				if(sound) {
+					mMojito.mmdSoundOk();
+				}
+			}
+		}
+	}
+	this.meslLoad(message, type, fade);
+	
+	$(this.contentDiv).removeClass('hidden');
+}
+
+meslMessageList.prototype.meslLoad = function(message, type, fade) {
+	if(stringUtilNotEmpty(message)) {
+		var messageDiv = document.createElement('div');
+		messageDiv.setAttribute('class', 'mojito-messagelist-' + type + '-div');
+		messageDiv.setAttribute('id', 'mojito-messagelist-' + type + '-div');
+		messageDiv.setAttribute('style', 'cursor: pointer;');
+		messageDiv.setAttribute("title", (mGlobal.language == 'es' ? 'Click para cerrar' : 'Click to close'));
+	
+		var messageUl = document.createElement('ul');
+	
+		var messages = message.split('\n');
+		for (var i = 0; i < messages.length; i++) {
+			var messageSingle = messages[i];
+			if (stringUtilNotEmpty(messageSingle)) {
+				var messageLi = document.createElement('li');
+				var text = document.createTextNode(messageSingle);
+				messageLi.appendChild(text);
+				messageUl.appendChild(messageLi);
+			}
+		}
+		
+		messageDiv.appendChild(messageUl);
+		
+		var copyI = document.createElement('i');
+		copyI.className = 'cis-copy';
+		copyI.title = 'Click to copy';
+		$(copyI).on('click', function(event) {
+			utilCopyToClipboard(message);
+			var previousDisplay = this.style.display;
+			this.style.display = 'none';
+			setTimeout(function() { this.style.display = previousDisplay; }.bind(this), 1000);
+			event.stopPropagation();
+		});
+		messageDiv.appendChild(copyI);
+		
+		$(this.contentDiv).append(messageDiv);
+		
+		var self = this;
+		$(messageDiv).on('click', function() {
+			$(this).remove();
+			$(self.contentDiv).addClass('hidden');
+		});
+		
+		$(this.contentDiv).show();
+		
+		if(fade != null && fade.trim() != '') {
+			var fadeInt = parseInt(fade);
+			
+			setTimeout(function() {
+				$(messageDiv).fadeOut(1000, function() {
+					$(this).remove();
+				});
+			}, fadeInt * 1000);
+		}
+	} else {
+		$(this.contentDiv).hide();
+	}
+}

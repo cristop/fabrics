@@ -1,0 +1,1506 @@
+/**
+ * Link: [texto:http://link.com]
+ * Imagen: {http://link.a.la.imagen} (toda la línea) (solo en docs)
+ * Título 1: *Título 1* (toda la línea)
+ * Título 2: **Título 2* (toda la línea)
+ * Título 3: ***Título 3* (toda la línea)
+ * Título 4: ****Título 4* (toda la línea)
+ * Negrita: *negrita*
+ * Literal/resaltar: ^literal^ (se puede usar dentro del código para resaltar)
+ * Código: [barra]* (código) *[barra] (ambas marcas en toda la línea) (no funciona ningún otro marcador dentro excepto el de resaltar)
+ * Tabla: |col1|col2|col3| (toda la línea)
+ * Lista: -[espacio] o --[espacio] o ---[espacio] (siempre al empezar la línea)
+ *
+ * Shortcuts:
+ * CTRL+G: guardar (solo en docs)
+ * CTRL+B: negrita (tab para salir) | si hay texto seleccionado se aplica la negrita al texto
+ * CTRL+H: resaltar (tab para salir) | si hay texto seleccionado se aplica el resaltado al texto
+ * CTRL+L: si hay texto seleccionado lo convierte en link, si no pega el formato de links
+ * CTRL+Enter: sale del modo edición.
+ * Escape: sale del modo edición y deshace todos los cambios hechos.
+ * Doble click en una palabra: entra en modo edición seleccionando esa palabra.
+ * Click en literales o código: copia el texto literal o el código (se pinta de verde por 1 segundo)
+ * 
+ * Paste especiales:
+ * Desde Excel se puede pegar y se genera una tabla.
+ * Si hay una imagen en el portapapeles se pega y se sube la imagen y se genera el texto para visualizarla.
+ */
+/**
+ * saveCallback: método que se llama después que el usuario indicó aceptar los cambios. Tiene un parámetro que es el control en el que aceptó los cambios.
+ * cancelCallback: método que se llama después que el usuario indicó cancelar los cambios. Tiene un parámetro que es el control en el que canceló los cambios.
+ */
+
+class doc_Doc {
+	
+	constructor(div, textArea, editDblClickCallback, saveCallback, cancelCallback) {
+		var self = this;
+		this.div = jqControl(div);
+		this.divContainer = $(div).parent().parent().get(0);
+		this.textArea = jqControl(textArea);
+		this.editDblClickCallback = editDblClickCallback;
+		this.saveCallback = saveCallback;
+		this.cancelCallback = cancelCallback;
+
+		// this.boldChar = '*';
+		this.boldChar = '\u2736';
+		this.titleChar = '\u21d2'; // '\u25b6';
+		// this.highlightChar = '^';
+		// '\u23F6', \u25B4', '\u25FE', '\u2605', '\u2726', '\u2981', '\u29D7', '\u2BC5'
+		this.highlightChar = '\u2666'; // diamante negro (monospace) *****
+		
+		this.linkOpenChar = '\u00AB'; // '\u25D6';
+		this.linkCloseChar = '\u00BB'; // '\u25D7';
+		this.linkSeparatorChar = '\u275A'; // '\u2503'; '\u2759'; '\u275A'; 
+		this.linkSeparatorChar = '\u2016';
+		if(stringUtilEmpty($(this.textArea).val())) {
+			this.edit();
+		}
+		
+		this.closeCopy = false; // señal para cerrar el botón que copia bloques code.
+		
+		$(this.textArea).on('keyup', function() {
+			self.renderDiv();
+			self.syncScroll();
+		});
+		
+		this.textArea.addEventListener("scroll", this.scrollCorrectionOn.bind(this));
+		this.textArea.addEventListener("input", this.scrollCorrectionOnInput.bind(this));
+		this.prevScrollPos = 0;
+		this.scrollCorrection = false;
+		this.caretCorrection = 0;
+		
+		var undoButton = $('>span.mojito-docs-buttons-panel i.cis-action-undo,' +
+				  '>span.mojito-docs-buttons-panel i.fa-undo', this.divContainer);
+		var redoButton = $('>span.mojito-docs-buttons-panel i.cis-action-redo,' +
+		  '>span.mojito-docs-buttons-panel i.fa-repeat', this.divContainer);
+				
+		var titleButton = $('>span.mojito-docs-buttons-panel i.cis-text-size,' +
+		  '>span.mojito-docs-buttons-panel i.fa-header', this.divContainer);
+		var boldButton = $('>span.mojito-docs-buttons-panel i.cis-bold,' +
+		  '>span.mojito-docs-buttons-panel i.fa-bold', this.divContainer);
+		
+		var listButton = $('>span.mojito-docs-buttons-panel i.cis-list,' +
+		  '>span.mojito-docs-buttons-panel i.fa-list', this.divContainer);
+		var listNumberedButton = $('>span.mojito-docs-buttons-panel i.cis-list-numbered,' +
+		  '>span.mojito-docs-buttons-panel i.fa-list-ol', this.divContainer);
+		
+		var outdentButton = $('>span.mojito-docs-buttons-panel i.cis-caret-left,' +
+		  '>span.mojito-docs-buttons-panel i.fa-caret-left', this.divContainer);
+		var indentButton = $('>span.mojito-docs-buttons-panel i.cis-caret-right,' +
+		  '>span.mojito-docs-buttons-panel i.fa-caret-right', this.divContainer);
+
+		$(undoButton).on('click', function() {
+			self.undo();
+		});
+		$(redoButton).on('click', function() {
+			self.redo();
+		});
+		$(boldButton).on('click', function() {
+			self.bold();
+		});
+		$(titleButton).on('click', function() {
+			self.title();
+		});
+		$(listButton).on('click', function() {
+			self.list();
+		});
+		$(listNumberedButton).on('click', function() {
+			self.listNumbered();
+		});
+		$(outdentButton).on('click', function() {
+			self.listOutdent();
+		});
+		$(indentButton).on('click', function() {
+			self.listIndent();
+		});
+		
+	}
+	
+	addEnter() {
+		var result = false;
+		var value = this.textArea.value;
+		var selectionStart = this.textArea.selectionStart;
+		var selectionEnd = this.textArea.selectionEnd;
+		var lineStart = value.substring(0, selectionStart).lastIndexOf('\n') + 1;
+		
+		if(selectionStart != selectionEnd || lineStart != selectionStart) {
+			result = true;
+			var lineEnd = value.indexOf('\n', lineStart);
+			if(lineEnd == -1) {
+				lineEnd = value.length;
+			}
+			var line = value.substring(lineStart, lineEnd);
+			// console.log('line: ' + line);
+			
+			if(!mString.in(line.trim(), '-', '--', '---', '#', '##', '###')) {
+				// console.log('no es un ítem de lista vacío');
+				
+				var text = '\n';
+				if(mString.startsWith(line, '-', '#') && !mString.startsWith(line, '--', '##')) {
+					// console.log('lista de 1er nivel anterior, se repite');
+					
+					text += line.substring(0, 1);
+				}
+				if(mString.startsWith(line, '--', '##') && !mString.startsWith(line, '---', '###')) {
+					// console.log('lista de 2do nivel anterior, se repite');
+					
+					text += line.substring(0, 2);
+				}
+				if(mString.startsWith(line, '---', '###')) {
+					// console.log('lista de 3er nivel anterior, se repite');
+					
+					text += line.substring(0, 3);
+				}
+				this.paste(text);
+			} else {
+				// console.log('ítem de lista vacío, hay que eliminarlo');
+				
+				this.textArea.selectionStart = lineStart;
+				this.textArea.selectionEnd = lineEnd + 1;
+				document.execCommand("delete", null, false);
+			}
+			var self = this;
+			setTimeout(function() { self.textArea.blur(); self.textArea.focus(); }, 100);
+			// console.log('blur y focus');
+		} else {
+			document.execCommand("insertText", null, '\n');
+			var self = this;
+			// Este foco hace que si el cursor no se ve (porque se dio enter al final) entonces vuelva a verse.
+			// Si se hace directo no funciona por eso el timeout.
+			setTimeout(function() { self.textArea.blur(); self.textArea.focus(); }, 100);
+			result = true;
+			// console.log('blur y focus');
+		}
+		
+		return result;
+	}
+	
+	bold() {
+		var selectedChunks = this.getSelectedChunks();
+		var valueMiddle = '';
+		
+		var rightRemoved = false; // ¿se quitó un asterisco a derecha?
+		for(var i = 0; i < selectedChunks.chunks.length; i++) {
+			var chunk = selectedChunks.chunks[i];
+			
+			var valueMiddleAdd = chunk.chunk;
+			
+			// Ignora las marcas para lista común o numerada.
+			// Quita las marcas al principio y luego se las vuelve a poner.
+			// Hace esto aprovechando que se procesa siempre una línea entera.
+			var start = '';
+			var startIndex = 0;
+			if(mString.startsWith(valueMiddleAdd, '-', '#') && !mString.startsWith(valueMiddleAdd, '--', '##')) {
+				startIndex = 2;
+			}
+			if(mString.startsWith(valueMiddleAdd, '--', '##') && !mString.startsWith(valueMiddleAdd, '---', '###')) {
+				startIndex = 3;
+			}
+			if(mString.startsWith(valueMiddleAdd, '---', '###')) {
+				startIndex = 4;
+			}
+			if(startIndex > 0) {
+				start = valueMiddleAdd.substring(0, startIndex);
+				valueMiddleAdd = valueMiddleAdd.substring(startIndex);
+			}
+			
+			if(!mString.startsWith(valueMiddleAdd, this.boldChar) || !mString.endsWith(valueMiddleAdd, this.boldChar)) {
+				valueMiddleAdd = valueMiddleAdd.replaceAll(this.boldChar, '');
+				valueMiddleAdd = this.boldChar + valueMiddleAdd + this.boldChar;
+				
+				var leftBold = mString.count(chunk.left, this.boldChar);
+				if(mInt.isOdd(leftBold)) {
+					var leftAdded = chunk.toLeft(chunk.left.lastIndexOf(this.boldChar));
+					leftAdded = leftAdded.substring(1);
+					valueMiddleAdd = leftAdded + valueMiddleAdd;
+					if(selectedChunks.selectionStart != selectedChunks.selectionEnd) {
+						chunk.parent.selectionStart -= 1;
+					}
+				}
+				
+				var rightBold = mString.count(chunk.right, this.boldChar);
+				if(mInt.isOdd(rightBold)) {
+					var rightAdded = chunk.toRight(chunk.right.indexOf(this.boldChar));
+					rightAdded = rightAdded.substring(0, rightAdded.length - 1);
+					valueMiddleAdd = valueMiddleAdd + rightAdded;
+					if(selectedChunks.selectionStart != selectedChunks.selectionEnd) {
+						chunk.parent.selectionEnd += 1;
+					} else {
+						rightRemoved = true;
+					}
+				}
+			} else {
+				valueMiddleAdd = valueMiddleAdd.replaceAll(this.boldChar, '');
+			}
+			
+			valueMiddle += start + valueMiddleAdd;
+			if(selectedChunks.chunks.length > 1 && i < selectedChunks.chunks.length - 1) {
+				valueMiddle += '\n';
+			}
+		}
+		
+		if(selectedChunks.selectionStart == selectedChunks.selectionEnd) {
+			selectedChunks.selectionStartApply = selectedChunks.selectionStart + 1 + (rightRemoved ? -1 : 0);
+			selectedChunks.selectionEndApply = selectedChunks.selectionStartApply;
+		}
+		
+		
+		selectedChunks.apply(valueMiddle);
+		
+		// this.renderDiv();
+	}
+	
+	edit(text, count) {
+		// $(this.div).hide();
+		$(this.textArea).show();
+		
+		if(text != null && count != null) {
+			var selectionStart = stringUtilIndexOfNth($(this.textArea).val(), text, count);
+			
+			$(this.textArea).prop('selectionStart', selectionStart);
+			$(this.textArea).blur();
+			$(this.textArea).focus();
+			$(this.textArea).prop('selectionEnd', selectionStart + text.length);
+			console.log('scrollIntoView');
+			$(this.textArea).parent().get(0).scrollIntoView();
+			var y = $(window).scrollTop();
+			$(window).scrollTop(y - 100);
+		}
+		
+		$(this.textArea).prop('previousText', $(this.textArea).val());
+	}
+	
+	editEnds(cancel) {
+		if(cancel == null || !cancel) {
+			this.renderDiv();
+		} else {
+			$(this.textArea).val($(this.textArea).prop('previousText'));
+		}
+		
+		$(this.textArea).hide();
+		// $(this.div).show();
+		
+		if(cancel == null || !cancel) {
+			if(this.saveCallback != null) {
+				this.saveCallback(this.textArea);
+			}
+		} else {
+			if(this.cancelCallback != null) {
+				this.cancelCallback(this.textArea);
+			}
+		}
+	}
+	
+	getLine(line, renderInfo) {
+		var result = '';
+		var chars = line.split('');
+		var processed = false;
+		var numbered = false; // indica si la línea ya está numerada (para sincronización con scroll)
+		
+		// Primera prioridad. Si la línea es '*/' se está cerrando un bloque de código. No puede procesarse nada más.
+		if(!processed && renderInfo.inCode && line != '*/') {
+			var lineAux = '';
+			var chars = stringUtilEscapeHtml(line.replaceAll('\t', '  ')).split('');
+			var onHighlight = false;
+			// Procesado únicamente del highlight:
+			for(var i = 0; i < chars.length; i++) {
+				var charElement = chars[i];
+				if(charElement == this.highlightChar) {
+					if(!onHighlight) {
+						lineAux += '<span style="background-color: yellow;">';
+					} else {
+						lineAux += '</span>';
+					}
+					onHighlight = !onHighlight;
+				} else {
+					lineAux += charElement;
+				}
+			}
+			renderInfo.text += lineAux + '<br>\n';
+			
+			result = null;
+			processed = true;
+		}
+		
+		// Segunda prioridad. Si estoy renderizando una lista y la nueva línea no es un ítem. Corto la renderización.
+		if(!processed && renderInfo.listLevel != null &&
+          !mString.startsWith(line, '-', '--', '---', '#', '##', '###')) {
+			result = renderInfo.text;
+			for(var i = 0; i < renderInfo.listLevel; i++) {
+				result += '</' + renderInfo.listType + '>';
+			}
+			renderInfo.listLevel = null;
+			renderInfo.goBack = true;
+			processed = true;
+		}
+		
+		// Tercera prioridad. Si estoy renderizando una tabla y la nueva línea no es una fila de la tabla. Corto la renderización.
+		if(!processed && renderInfo.onTable && (!line.startsWith('|') || !line.endsWith('|'))) {
+			result = renderInfo.text;
+			result += '</table>';
+			renderInfo.onTable = false;
+			renderInfo.goBack = true;
+			processed = true;
+		}
+		
+		if(!processed && mString.startsWith(line, '-', '#') && !mString.startsWith(line, '--', '##')) {
+			var lineAux = this.getLine(line.substring(1), this.getRenderInfo(true));
+			var listType = mString.startsWith(line, '-') ? 'ul' : 'ol';
+			renderInfo.listType = listType;
+			if(renderInfo.listLevel == 1) {
+				renderInfo.text += '<li data-line="' + renderInfo.lineNumber + '">' + lineAux + '</li>';
+			}
+			if(renderInfo.listLevel == 2) {
+				renderInfo.text += '</' + listType + '><li data-line="' + renderInfo.lineNumber + '">' + lineAux + '</li>';
+				renderInfo.listLevel = 1;
+			}
+			if(renderInfo.listLevel == 3) {
+				renderInfo.text += '</' + listType + '></' + listType + '><li data-line="' + renderInfo.lineNumber + '">' + lineAux + '</li>';
+				renderInfo.listLevel = 1;
+			}
+			if(renderInfo.listLevel == null) {
+				renderInfo.text = '<' + listType + '><li data-line="' + renderInfo.lineNumber + '">' + lineAux + '</li>';
+				renderInfo.listLevel = 1;
+			}
+			processed = true;
+		}
+		
+		if(!processed && mString.startsWith(line, '--', '##') && !mString.startsWith(line, '---', '###')) {
+			var lineAux = this.getLine(line.substring(3), this.getRenderInfo(true));
+			var listType = mString.startsWith(line, '--') ? 'ul' : 'ol';
+			renderInfo.listType = listType;
+			if(renderInfo.listLevel == 2) {
+				renderInfo.text += '<li data-line="' + renderInfo.lineNumber + '">' + lineAux + '</li>';
+			}
+			if(renderInfo.listLevel == 3) {
+				renderInfo.text += '</' + listType + '><li data-line="' + renderInfo.lineNumber + '">' + lineAux + '</li>';
+				renderInfo.listLevel = 2;
+			}
+			if(renderInfo.listLevel == 1) {
+				renderInfo.text += '<' + listType + '><li data-line="' + renderInfo.lineNumber + '">' + lineAux + '</li>';
+				renderInfo.listLevel = 2;
+			}
+			if(renderInfo.listLevel == null) {
+				renderInfo.text = '<' + listType + '><' + listType + '><li data-line="' + renderInfo.lineNumber + '">' + lineAux + '</li>';
+				renderInfo.listLevel = 2;
+			}
+			processed = true;
+		}
+		
+		if(!processed && mString.startsWith(line, '---', '###')) {
+			var lineAux = this.getLine(line.substring(4), this.getRenderInfo(true));
+			var listType = mString.startsWith(line, '---') ? 'ul' : 'ol';
+			renderInfo.listType = listType;
+			if(renderInfo.listLevel == 3) {
+				renderInfo.text += '<li data-line="' + renderInfo.lineNumber + '">' + lineAux + '</li>';
+			}
+			if(renderInfo.listLevel == 2) {
+				renderInfo.text += '<' + listType + '><li data-line="' + renderInfo.lineNumber + '">' + lineAux + '</li>';
+				renderInfo.listLevel = 3;
+			}
+			if(renderInfo.listLevel == null) {
+				renderInfo.text = '<' + listType + '><' + listType + '><' + listType + '><li data-line="' + renderInfo.lineNumber + '">' + lineAux + '</li>';
+				renderInfo.listLevel = 3;
+			}
+			processed = true;
+		}
+		
+		if(!processed && line.startsWith('|') && line.endsWith('|')) {
+			var header = false;
+			if(!renderInfo.onTable) {
+				renderInfo.text = '<table style="border: solid 1px black; border-collapse: collapse;" data-line="' + renderInfo.lineNumber + '">';
+				renderInfo.onTable = true;
+				header = true;
+			}
+			
+			var cellElement = header ? 'th' : 'td';
+			renderInfo.text += '<tr data-line="' + renderInfo.lineNumber + '">';
+			var cols = line.split('|');
+			for(var i = 1; i < cols.length - 1; i++) {
+				renderInfo.text += '<' + cellElement + ' style="border: solid 1px black; padding: 2px 5px' + (header ? '; background-color: #ddd; font-weight: bold;' : '') + '">';
+				var lineAux = this.getLine(cols[i], this.getRenderInfo(true));
+				renderInfo.text += lineAux;
+				renderInfo.text += '</' + cellElement + '>';
+			}
+			renderInfo.text += '</tr>';
+			
+			processed = true;
+		}
+		
+		if(!processed && line.startsWith(this.titleChar + this.titleChar + this.titleChar + this.titleChar)) {
+			result = '<h4 data-line="' + renderInfo.lineNumber + '">' + line.substring(4, line.length) + '</h4>';
+			processed = true;
+		}
+		
+		if(!processed && line.startsWith(this.titleChar + this.titleChar + this.titleChar)) {
+			result = '<h3 data-line="' + renderInfo.lineNumber + '">' + line.substring(3, line.length) + '</h3>';
+			processed = true;
+		}
+		
+		if(!processed && line.startsWith(this.titleChar + this.titleChar)) {
+			result = '<h2 data-line="' + renderInfo.lineNumber + '">' + line.substring(2, line.length) + '</h2>';
+			processed = true;
+		}
+		
+		if(!processed && line.startsWith(this.titleChar)) {
+			var letter = renderInfo.titleFirstNext();
+			result = '<h1 data-line="' + renderInfo.lineNumber + '">' + letter + '. ' + line.substring(1, line.length) + '</h1>';
+			processed = true;
+		}
+		
+		if(!processed && chars[0] == '{' && chars[chars.length - 1] == '}') {
+			var imageLink = line.substring(1, line.length - 1);
+			result = '<img src="' + imageLink + '" width="400px" onclick="window.open(\'' + imageLink + '\', \'_blank\');" data-line="' + renderInfo.lineNumber + '" />\n';
+			processed = true;
+		}
+		
+		if(!processed && line == '/*') {
+			renderInfo.inCode = true;
+			renderInfo.text = '<div style="position: relative;"><code style="padding: 0px;" data-line="' + renderInfo.lineNumber + '">';
+			result = null;
+			processed = true;
+		}
+		
+		if(!processed && line == '*/') {
+			renderInfo.inCode = false;
+			result = renderInfo.text + '</code></div><br>';
+			processed = true;
+		}
+		
+		if(!processed) {
+			var onAsterisk = false;
+			var onQuote = false;
+			var onLink = false;
+			var link = null;
+			for(var i = 0; i < chars.length; i++) {
+				var charProcessed = false;
+				
+				if(!charProcessed && chars[i] == this.boldChar && (i == 0 || chars[i - 1] != '\\')) {
+					onAsterisk = !onAsterisk;
+					if(onAsterisk) {
+						result += '<b>';
+					} else {
+						result += '</b>';
+					}
+					charProcessed = true;
+				}
+				
+				if(!charProcessed && chars[i] == this.highlightChar && (i == 0 || chars[i - 1] != '\\')) {
+					onQuote = !onQuote;
+					if(onQuote) {
+						result += '<code style="color: blue;">';
+					} else {
+						result += '</code>';
+					}
+					charProcessed = true;
+				}
+				
+				if(!charProcessed && chars[i] == this.linkOpenChar && (i == 0 || chars[i - 1] != '\\')) {
+					onLink = true;
+					link = '';
+					charProcessed = true;
+				}
+				
+				if(!charProcessed && onLink && chars[i] == this.linkCloseChar && (i == 0 || chars[i - 1] != '\\')) {
+					onLink = false;
+					var elements = link.split(this.linkSeparatorChar);
+					if(elements.length > 1) {
+						var href = elements[1];
+						var text = stringUtilNotEmpty(elements[0])?elements[0]:href;
+						result += '<a href="' + href + '" target="_blank">' + text + '</a>';
+					} else {
+						result += '<a href="' + link + '" target="_blank">' + link + '</a>';
+					}
+					charProcessed = true;
+				}
+				
+				if(!charProcessed) {
+					if(!onLink) {
+						result += chars[i];
+					} else {
+						link += chars[i];
+					}
+				}
+			}
+			if(onAsterisk) {
+				result += '</b>';
+			}
+			if(onQuote) {
+				result += '</code>';
+			}
+			if(!renderInfo.innerText) {
+				if(stringUtilNotEmpty(result)) {
+					result = '<p data-line="' + renderInfo.lineNumber + '">' + result + '</p>';
+					renderInfo.onBr = false;
+				} else {
+					if(renderInfo.onBr) {
+						result = '<br>';
+					} else {
+						renderInfo.onBr = true;
+					}
+				}
+			} else {
+				renderInfo.onBr = false;
+			}
+			processed = true;
+		} else {
+			renderInfo.onBr = false;
+		}
+		
+		return result;
+	}
+	
+	//innerText: indica que se está renderizando texto interno  de un elemento. Por lo tanto no hay que encerrarlo en <p></p>.
+	getRenderInfo(innerText) {
+		var result = {
+		  inCode: false,
+		  lineNumber: 0,
+		  listLevel: null,
+		  inTable: false,
+		  innerText: (innerText == null ? false : innerText),
+		  text: null,
+		  goBack: false,
+		  // En el caso que el primer nivel de titulos requiera un orden, en esta variable
+		  // se guarda el orden actual.
+		  // Ademas se utiliza para saber si hay que identar los parrafos porque se está
+		  // Dentro de un título.
+		  titleFirstOrder: null,
+		  titleFirstNext() {
+			var letter = mString.nextLetter(this.titleFirstOrder);
+			this.titleFirstOrder = letter;
+			var result = mString.toUpperCase(this.titleFirstOrder);
+			return result;
+		  }
+		};
+		return result;
+	}
+	
+	getSelectedChunks() {
+		// Esto es u[]na prueba
+		// Esto es []una prueba
+		// Esto es una[] prueba
+		// Esto es una[ ]prueba
+		// Esto es [una] prueba
+		// Esto es [una ]prueba
+		
+		// Esto e[s un]a prueba
+		// Esto [es un]a prueba
+		// Esto e[s una] prueba
+		// Esto e[s una ]prueba
+		// Esto [es una] prueba
+		// Esto [es una ]prueba
+		
+		// [Esto es una prueb]a
+		// E[sto es una prueba]
+		// [Esto es una prueba]
+		var value = this.textArea.value;
+		
+		var selectionStart = this.textArea.selectionStart;
+		var selectionEnd = this.textArea.selectionEnd;
+		
+		var result = {
+			selectionStart: selectionStart,
+			selectionEnd: selectionEnd
+		};
+		var chunks = [];
+		var lines = this.textArea.value.split('\n');
+		var lineSelectionStart = 0;
+		var lineSelectionEnd = -1;
+		var first = true;
+		for(var i = 0; i < lines.length; i++) {
+			var line = lines[i];
+			lineSelectionEnd += line.length + 1;
+			// Esto debe devolver la línea completa que se está analizando. Sin enter.
+			// value.substring(lineSelectionStart, lineSelectionEnd)
+			if(
+			  (selectionStart >= lineSelectionStart && selectionStart <= lineSelectionEnd) ||
+			  (selectionEnd >= lineSelectionStart && selectionEnd <= lineSelectionEnd) ||
+			  (selectionStart < lineSelectionStart && selectionEnd > lineSelectionEnd)
+			  ) {
+				var last = selectionEnd >= lineSelectionStart && selectionEnd <= lineSelectionEnd;
+				var chunk = {
+					line: line,
+					chunk: line,
+					selectionStart: lineSelectionStart,
+					selectionEnd: lineSelectionEnd,
+					toLeft(index) {
+						// Sí o sí es la primera línea.
+						var leftPrevious = this.left;
+						this.left = this.left.substring(0, index);
+						var result = leftPrevious.substring(index);
+						this.chunk = result + this.chunk;
+						this.parent.selectionStartPaste -= result.length;
+						return result;
+					},
+					toRight(index) {
+						// Sí o sí es la última línea.
+						var rightPrevious = this.right;
+						this.right = this.right.substring(index + 1);
+						var result = rightPrevious.substring(0, index + 1);
+						this.chunk = this.chunk + result;
+						this.parent.selectionEndPaste += result.length;
+						return result;
+					}
+				}
+				if(first && !last) {
+					chunk.chunk = line.substring(selectionStart - lineSelectionStart);
+					chunk.selectionStart = selectionStart - lineSelectionStart;
+				}
+				if(!first && last) {
+					chunk.chunk = line.substring(0, selectionEnd - lineSelectionStart);
+					chunk.selectionEnd = selectionEnd - lineSelectionStart;
+				}
+				if(first && last) {
+					chunk.chunk = line.substring(selectionStart - lineSelectionStart, selectionEnd - lineSelectionStart);
+					chunk.selectionStart = selectionStart - lineSelectionStart;
+					chunk.selectionEnd = selectionEnd - lineSelectionStart;
+				}
+				first = false;
+				
+				chunk.left = line.substring(0, chunk.selectionStart);
+				chunk.right = line.substring(chunk.selectionEnd);
+				
+				// Esto debe devolver la línea que se está agregando. Sin enter.
+				// chunk.line
+				// Esto debe devolver la parte de la línea que seleccionó el usuario. Sin enter.
+				// chunk.chunk
+				// Parte de la línea que queda a la izquierda del chunk.
+				// chunk.left
+				// Parte de la línea que queda a la derecha del chunk.
+				// chunk.right
+				// Esto debe devolver lo mismo que chunk.chunk, pero se usa para verificar que
+				// selectionStart y selectionEnd estén correctos.
+				// chunk.line.substring(chunk.selectionStart, chunk.selectionEnd)
+				chunks.push(chunk);
+			}
+			lineSelectionStart += line.length + 1;
+		}
+		
+		var self = this;
+		var result = {
+			textArea: this.textArea,
+			chunks: chunks,
+			// foco al finalizar el paste
+			selectionStart: selectionStart,
+			selectionEnd: selectionEnd,
+			// paste
+			selectionStartPaste: selectionStart,
+			selectionEndPaste: selectionEnd,
+			apply(value) {
+				this.textArea.selectionStart = this.selectionStartPaste;
+				this.textArea.selectionEnd = this.selectionEndPaste;
+				var previousLength = this.selectionEndPaste - this.selectionStartPaste;
+				var actualLength = value.length;
+				self.paste(value, null, this.selectionStart, this.selectionEnd + (actualLength - previousLength));
+
+				if(this.selectionStartApply != null) {
+					this.textArea.selectionStart = this.selectionStartApply;
+				}
+				if(this.selectionEndApply != null) {
+					this.textArea.selectionEnd = this.selectionEndApply;
+				}
+				
+				this.textArea.focus();
+				self.renderDiv();
+			}
+		};
+		
+		for(var i = 0; i < result.chunks.length; i++) {
+			result.chunks[i].parent = result;
+		}
+		
+		return result;
+	}
+	
+	getSelectedLines() {
+		// Esto es u[]na prueba
+		// Esto es []una prueba
+		// Esto es una[] prueba
+		// Esto es una[ ]prueba
+		// Esto es [una] prueba
+		// Esto es [una ]prueba
+		
+		// Esto e[s un]a prueba
+		// Esto [es un]a prueba
+		// Esto e[s una] prueba
+		// Esto e[s una ]prueba
+		// Esto [es una] prueba
+		// Esto [es una ]prueba
+		
+		// [Esto es una prueb]a
+		// E[sto es una prueba]
+		// [Esto es una prueba]
+		var value = this.textArea.value;
+		
+		var selectionStart = this.textArea.selectionStart;
+		var selectionEnd = this.textArea.selectionEnd;
+		
+		var enterBegin = this.textArea.selectionStart > 0 ? this.textArea.selectionStart - 1 : 0;
+		while(enterBegin > 0 && value[enterBegin] != '\n') {
+			enterBegin -= 1;
+		}
+		if(enterBegin > 0 || value[enterBegin] == '\n') {
+			enterBegin += 1;
+		}
+		
+		var enterEnd = selectionStart == selectionEnd ? this.textArea.selectionEnd : this.textArea.selectionEnd - 1;
+		while(enterEnd < this.textArea.value.length && value[enterEnd] != '\n') {
+			enterEnd += 1;
+		}
+		
+		var valueBegin = value.substring(0, enterBegin);
+		var valueEnd = value.substring(enterEnd);
+		
+		var valueMiddleArray = value.substring(enterBegin, enterEnd).split('\n');
+		var valueMiddle = '';
+		
+		var self = this;
+		var result = {
+				textArea: this.textArea,
+				
+				// selectionStart original
+				selectionStart: selectionStart,
+				// selectionEnd original
+				selectionEnd: selectionEnd,
+				
+				// selectionStart a aplicar luego de modificar el texto
+				selectionStartApply: null,
+				// selectionEnd a aplicar luego de modificar el texto
+				selectionEndApply: null,
+				
+				enterBegin: enterBegin,
+				enterEnd: enterEnd,
+				valueBegin: valueBegin,
+				valueEnd: valueEnd,
+				valueMiddleArray: valueMiddleArray,
+				apply(valueMiddle) {
+					this.textArea.selectionStart = enterBegin;
+					this.textArea.selectionEnd = enterEnd;
+					self.paste(valueMiddle, null, valueBegin.length, (valueBegin + valueMiddle).length);
+					
+					if(this.selectionStartApply != null) {
+						this.textArea.selectionStart = this.selectionStartApply;
+					}
+					if(this.selectionEndApply != null) {
+						this.textArea.selectionEnd = this.selectionEndApply;
+					}
+					
+					this.textArea.focus();
+					self.renderDiv();
+				}
+			};
+		return result;
+	}
+
+	indentIncrease() {
+		this.listIncrease();
+	}
+	
+	indentDecrease() {
+		this.listDecrease();
+		this.renderDiv();
+	}
+	
+	list() {
+		this.listSwap('-', '#');
+	}
+	
+	listNumbered() {
+		this.listSwap('#', '-');
+	}
+	
+	listIndent() {
+		this.listIncrease();
+	}
+	
+	listOutdent() {
+		this.listDecrease();
+	}
+	
+	listSwap(typeChar, noTypeChar) {
+		var selectedLines = this.getSelectedLines();
+		var valueMiddleArray = selectedLines.valueMiddleArray;
+		var valueMiddle = '';
+		
+		// Inicialmente la selección debería ser la misma que la actual.
+		selectedLines.selectionStartApply = selectedLines.selectionStart;
+		selectedLines.selectionEndApply = selectedLines.selectionEnd;
+		
+		var firstAdd = false; // Indica si ya se agregó un bullet en una línea.
+		var firstRemove = false; // Indica si ya se quitó un bullet en una línea.
+		for(var i = 0; i < valueMiddleArray.length; i++) {
+			var valueMiddleAdd = valueMiddleArray[i].trim();
+			
+			var open = 0;
+			
+			if(valueMiddleAdd[open] != noTypeChar) {
+				// No abre con el caracter opuesto.
+				
+				// Cuento cuántos caracteres correctos hay al inicio.
+				while(valueMiddleAdd[open] == typeChar && open < valueMiddleAdd.length) {
+					open += 1;
+				}
+				
+				if(open == 0) {
+					valueMiddleAdd = typeChar + '' + valueMiddleAdd;
+					if(!firstAdd) {
+						selectedLines.selectionStartApply += 1;
+						firstAdd = true;
+					}
+					selectedLines.selectionEndApply += 1;
+				}
+				if(open >= 1) {
+					valueMiddleAdd = valueMiddleAdd.substring(open);
+					if(!firstRemove) {
+						selectedLines.selectionStartApply -= open;
+						firstRemove = true;
+					}
+					selectedLines.selectionEndApply -= open;
+				}
+			} else {
+				// Abre con el caracter opuesto.
+				
+				var valueMiddleBegin = '';
+				while(valueMiddleAdd[open] == noTypeChar && open < valueMiddleAdd.length) {
+					valueMiddleBegin += typeChar;
+					open += 1;
+				}
+				valueMiddleAdd = valueMiddleBegin + valueMiddleAdd.substring(valueMiddleBegin.length);
+			}
+			
+			valueMiddle += valueMiddleAdd;
+			if(valueMiddleArray.length > 1 && i < valueMiddleArray.length - 1) {
+				valueMiddle += '\n';
+			}
+			
+		}
+		
+		selectedLines.apply(valueMiddle);
+	}
+
+	listDecrease() {
+		var selectedLines = this.getSelectedLines();
+		var valueMiddleArray = selectedLines.valueMiddleArray;
+		var valueMiddle = '';
+		
+		// Inicialmente la selección debería ser la misma que la actual.
+		selectedLines.selectionStartApply = selectedLines.selectionStart;
+		selectedLines.selectionEndApply = selectedLines.selectionEnd;
+		
+		// Defino la lista en la que estoy parado. Por defecto es lista sin numerar.
+		var typeChar = '-';
+		var noTypeChar = '#';
+		if(valueMiddleArray.length > 0) {
+			var first = valueMiddleArray[0].substring(0, 1);
+			if(first == '#') {
+				typeChar = '#';
+				noTypeChar = '-';
+			}
+		}
+		
+		var first = true;
+		for(var i = 0; i < valueMiddleArray.length; i++) {
+			// ¿Va trim? Con trim si dice "## " y pasa a "#" no deja el espacio que es necesario.
+			var valueMiddleAdd = valueMiddleArray[i];
+			
+			var open = 0;
+			
+			if(valueMiddleAdd[open] != noTypeChar) {
+				// No abre con el caracter opuesto.
+				
+				while(valueMiddleAdd[open] == typeChar && open < valueMiddleAdd.length) {
+					open += 1;
+				}
+				
+				if(open > 0) {
+					valueMiddleAdd = valueMiddleAdd.substring(1);
+					// ¿Va trim? Con trim si dice "## " y pasa a "#" no deja el espacio que es necesario.
+					// valueMiddleAdd = valueMiddleAdd.trim();
+					if(first) {
+						selectedLines.selectionStartApply -= 1;
+					}
+					selectedLines.selectionEndApply -= 1;
+				}
+			} else {
+				// Abre con el caracter opuesto.
+				
+				var valueMiddleBegin = '';
+				while(valueMiddleAdd[open] == noTypeChar && open < valueMiddleAdd.length) {
+					valueMiddleBegin += typeChar;
+					open += 1;
+				}
+				valueMiddleAdd = valueMiddleBegin + valueMiddleAdd.substring(valueMiddleBegin.length);
+			}
+			
+			valueMiddle += valueMiddleAdd;
+			if(valueMiddleArray.length > 1 && i < valueMiddleArray.length - 1) {
+				valueMiddle += '\n';
+			}
+			
+			if(first) {
+				first = false;
+			}
+		}
+		
+		selectedLines.apply(valueMiddle);
+	}
+	
+	listIncrease() {
+		var selectedLines = this.getSelectedLines();
+		var valueMiddleArray = selectedLines.valueMiddleArray;
+		var valueMiddle = '';
+		
+		// Inicialmente la selección debería ser la misma que la actual.
+		selectedLines.selectionStartApply = selectedLines.selectionStart;
+		selectedLines.selectionEndApply = selectedLines.selectionEnd;
+		
+		// Defino la lista en la que estoy parado. Por defecto es lista sin numerar.
+		var typeChar = '-';
+		var noTypeChar = '#';
+		if(valueMiddleArray.length > 0) {
+			var first = valueMiddleArray[0].substring(0, 1);
+			if(first == '#') {
+				typeChar = '#';
+				noTypeChar = '-';
+			}
+		}
+		
+		var first = true;
+		for(var i = 0; i < valueMiddleArray.length; i++) {
+			// ¿Va trim? Con trim si dice "# " y pasa a "##" no deja el espacio que es necesario.
+			var valueMiddleAdd = valueMiddleArray[i];
+			
+			var open = 0;
+			
+			if(valueMiddleAdd[open] != noTypeChar) {
+				// No abre con el caracter opuesto.
+				
+				// Cuento cuántos caracteres correctos hay al inicio.
+				while(valueMiddleAdd[open] == typeChar && open < valueMiddleAdd.length) {
+					open += 1;
+				}
+				
+				// Si son menos que 3 entonces puedo aumentar la identación en 1.
+				if(open < 3) {
+					if(open == 0) {
+						valueMiddleAdd = typeChar + '' + valueMiddleAdd;
+						// El start solo se mueve cuando se agregan caracteres a la primera línea.
+						if(first) {
+							selectedLines.selectionStartApply += 1;
+						}
+						// El end se mueve siempre que se agregan caracteres.
+						selectedLines.selectionEndApply += 1;
+					} else {
+						valueMiddleAdd = typeChar + valueMiddleAdd;
+						if(first) {
+							selectedLines.selectionStartApply += 1;
+						}
+						selectedLines.selectionEndApply += 1;
+					}
+				}
+			} else {
+				// Abre con el caracter opuesto.
+				
+				var valueMiddleBegin = '';
+				while(valueMiddleAdd[open] == noTypeChar && open < valueMiddleAdd.length) {
+					valueMiddleBegin += typeChar;
+					open += 1;
+				}
+				valueMiddleAdd = valueMiddleBegin + valueMiddleAdd.substring(valueMiddleBegin.length);
+			}
+			
+			valueMiddle += valueMiddleAdd;
+			if(valueMiddleArray.length > 1 && i < valueMiddleArray.length - 1) {
+				valueMiddle += '\n';
+			}
+			
+			if(first) {
+				first = false;
+			}
+		}
+		
+		selectedLines.apply(valueMiddle);
+	}
+	
+	numberedIncrease() {
+		this.listIncrease('#', '-');
+	}
+	
+	numberedDecrease() {
+		this.listDecrease('#', '-');
+	}
+	
+	paste(text, focusOffset, focusSelectionStart, focusSelectionEnd) {
+		// Usar document.execCommand("insertText", false, text); para que funcione el undo
+		// supongo que inserta donde está el cursor y me imagino que si hay texto seleccionado
+		// también lo borra. Así que hasta es más fácil de usar.
+
+		var previousSelectionStart = this.textArea.selectionStart;
+		// var textAll = this.textArea.value.substring(0, this.textArea.selectionStart) +
+		//   text + this.textArea.value.substring(this.textArea.selectionStart);
+		// this.textArea.value = textAll;
+		
+		$(this.textArea).focus();
+		// OJO: no se puede usar isEmpty porque puede venir un enter y es válido. Es un empty real.
+		if(text != null && text != '') {
+			document.execCommand("insertText", false, text);
+		} else {
+			document.execCommand("delete", false, text);
+		}
+		
+		if(focusOffset == null && focusSelectionStart == null) {
+			this.textArea.selectionStart = previousSelectionStart + text.length;
+		}
+		if(focusOffset != null && focusSelectionStart == null) {
+			this.textArea.selectionStart = previousSelectionStart + focusOffset;
+		}
+		if(focusSelectionStart != null) {
+			this.textArea.selectionStart = focusSelectionStart;
+		}
+		
+		if(focusOffset == null && focusSelectionEnd == null) {
+			this.textArea.selectionEnd = previousSelectionStart + text.length;
+		}
+		if(focusOffset != null && focusSelectionEnd == null) {
+			this.textArea.selectionEnd = previousSelectionStart + focusOffset;
+		}
+		if(focusSelectionEnd != null) {
+			this.textArea.selectionEnd = focusSelectionEnd;
+		}
+		
+		$(this.textArea).focus();
+	}
+	
+	/**
+	 * Pega un link con el formato correspondiente.
+	 * Si check es true, antes de pegar el link chequea que el texto sea efectivamente un link, si no es un link no hace nada.
+	 */
+	pasteLink(link, check) {
+		var result = false;
+		var linkAux = link;
+		if((check == null || !check) || stringUtilIsUrl(linkAux)) {
+			var re = /(https:\/\/mail\.google\.com\/mail\/u\/0\/#).*(\/[a-zA-Z0-9]{32})/;
+			if(re.test(linkAux)) {
+				linkAux = linkAux.replace(re, '$1all$2');
+			}
+			
+			this.paste(this.linkOpenChar + this.linkSeparatorChar + linkAux + this.linkCloseChar, 1);
+			event.preventDefault();
+			result = true;
+		}
+		return result;
+	}
+	
+	redo() {
+		document.execCommand('redo');
+	}
+	
+	recursive(root, info) {
+		if(!info.find) {
+			for(var node = root.firstChild; node != null && !info.find; node = node.nextSibling){
+			    if(node.nodeType == Node.TEXT_NODE) {
+			    	if(node == info.node) {
+			    		var subText = node.textContent.substring(0, info.offsetStart);
+			    		info.count += stringUtilCount(subText, info.text) + 1;
+			    		info.find = true;
+			    	} else {
+			    		info.count += stringUtilCount(node.textContent, info.text);
+			    	}
+			    } else {
+			    	this.recursive(node, info);
+			    }
+			}
+		}
+	}
+	
+	render() {
+		this.renderDiv();
+		
+		var self = this;
+		$(this.textArea).get(0).keyHCount = 0;
+		$(this.textArea).on('keydown', function(e) {
+			if(e.shiftKey) {
+				// var nextChar = this.value.substring(this.selectionStart, this.selectionStart + 1);
+				if(e.which == 9) { // tab
+					// if(nextChar == '\n' || this.selectionEnd == self.textArea.value.length) {
+						self.listOutdent();
+					// }
+					event.preventDefault();
+				}
+			}
+			if(e.ctrlKey) {
+				if(e.which == 13) { // enter
+					self.editEnds();
+					event.preventDefault();
+				}
+				if(e.which == 72 || e.which == 104) { // h
+					if(this.selectionStart == this.selectionEnd) {
+						self.paste(self.highlightChar + self.highlightChar, 1);
+					} else {
+						var text = self.highlightChar + this.value.substring(this.selectionStart, this.selectionEnd) + self.highlightChar;
+						self.paste(text, text.length);
+					}
+					event.preventDefault();
+				}
+				if(e.which == 66 || e.which == 98) { // b
+					self.bold();
+					// if(this.selectionStart == this.selectionEnd) {
+					// 	self.paste(self.boldChar + self.boldChar, 1);
+					// } else {
+					// 	var text = self.boldChar + this.value.substring(this.selectionStart, this.selectionEnd) + self.boldChar;
+					// 	self.paste(text, text.length);
+					// }
+					event.preventDefault();
+				}
+				if(e.which == 76 || e.which == 108) { // l
+					var link = this.value.substring(this.selectionStart, this.selectionEnd);
+					self.pasteLink(link);
+					event.preventDefault();
+				}
+			}
+			if(!e.shiftKey && !e.ctrlKey) {
+				if(e.which == 27) { // escape
+					self.editEnds(true);
+					event.preventDefault();
+				}
+				if(e.which == 9) { // tab
+					var nextChar = this.value.substring(this.selectionStart, this.selectionStart + 1);
+					if(nextChar == self.boldChar || nextChar == self.highlightChar) {
+						this.selectionStart = this.selectionStart + 1;
+					}
+					if(nextChar == self.linkSeparatorChar) {
+						var nextCloseBrackets = this.value.substring(this.selectionStart).indexOf(self.linkCloseChar);
+						if(nextCloseBrackets >= 0) {
+							this.selectionStart += nextCloseBrackets + 1;
+						}
+					} else {
+						// if(nextChar == '\n' || this.selectionEnd == self.textArea.value.length) {
+							self.listIndent();
+						// }
+					}
+					event.preventDefault();
+				}
+				if(e.which == 13) { // enter
+					if(self.addEnter()) {
+						event.preventDefault();
+					}
+				}
+			}
+		});
+		$(this.textArea).on('paste', function(e) {
+			var text = e.originalEvent.clipboardData.getData('text');
+			if(stringUtilNotEmpty(text)) {
+				var processed = false;
+				
+				var lines = text.split('\n');
+				if(!processed && lines.length >= 2) {
+					var tabCount = stringUtilCount(lines[0], '\t');
+					if(tabCount >= 1) {
+						var isTable = true;
+						for(var i = 1; isTable && i < lines.length - 1; i++) {
+							if(tabCount != stringUtilCount(lines[i], '\t')) {
+								isTable = false;
+							}
+						}
+						if(isTable) {
+							var textAux = text.replaceAll('\t', '|').replaceAll('\r', '');
+							var linesAux = textAux.split('\n');
+							textAux = '';
+							for(var i = 0; i < lines.length - 1; i++) {
+								textAux += '|' + linesAux[i] + '|\n';
+							}
+							self.paste(textAux);
+							event.preventDefault();
+							processed = true;
+						}
+					}
+				}
+				
+				if(!processed && stringUtilIsUrl(text)) {
+					processed = self.pasteLink(text, true);
+				}
+			}
+			/*
+			if(event.clipboardData.types[0] == 'Files') {
+				var items = event.clipboardData.items;
+			    // console.log(JSON.stringify(items)); // will give you the mime types
+			    var blob = items[0].getAsFile();
+			    var reader = new FileReader();
+			    reader.onload = function(event)
+			    {
+			    	var hidden = tagUtilGetControlMojito('image', self.root, 'hidden');
+			    	$(hidden).val(event.target.result);
+			    	utilMethodCall(self.root, 'saveImage', null, self.docsAddImage.bind(self.root.mHandler), [textArea]);
+			    }; // data url  
+			    reader.readAsDataURL(blob); 
+			}
+			*/
+		});
+		$(this.textArea).on('mouseup', function() {
+			self.syncScroll();
+		})
+	}
+	
+	renderDiv() {
+		var self = this;
+		
+		$(this.div).empty();
+		var text = $(this.textArea).val();
+		var lines = text.split('\n');
+		var renderInfo = this.getRenderInfo();
+		
+		for(var i = 0; i < lines.length; i++) {
+			renderInfo.lineNumber = i;
+			var renderLine = this.getLine(lines[i], renderInfo);
+			if(stringUtilNotEmpty(renderLine)) {
+				$(renderLine).appendTo(this.div);
+			}
+			
+			if(renderInfo.goBack) {
+				i -= 1;
+				renderInfo.goBack = false;
+			}
+		}
+		
+		// Envío de útima línea genérica para que cierre todo lo que haya que cerrar.
+		var renderLine = this.getLine(' ', renderInfo);
+		if(stringUtilNotEmpty(renderLine)) {
+			$(renderLine).appendTo(this.div);
+		}
+		
+		/*
+		// Para cerrar la lista si es el último elemento.
+		if(renderInfo.listLevel != null) {
+			var renderLine = this.getLine('', renderInfo);
+			if(renderLine != null) {
+				$(renderLine).appendTo(div);
+			}
+		}
+		*/
+		$('code', this.div).on('mouseover', function() {
+			self.closeCopy = false;
+			
+			if($('i.mojito-doc-copy-i').length <= 0) {
+				var selfControl = this;
+				
+				$(this).before('<i class="cis-copy mojito-doc-copy-i" style="position: absolute; top: 0px; left: 0px;" />');
+				$('i.mojito-doc-copy-i').on('click', function() {
+					if(selfControl.style.color != 'rgb(0, 170, 0)') {
+						selfControl.previousColor = selfControl.style.color;
+						utilCopyToClipboard($(selfControl).text()); 
+						selfControl.style.color = 'rgb(0, 170, 0)';
+						setTimeout(function() {
+							selfControl.style.color = selfControl.previousColor;
+						}.bind(this), 1000);
+					}
+				} );
+				
+				$('i.mojito-doc-copy-i').on('mouseover', function() { self.closeCopy = false; });
+				$('i.mojito-doc-copy-i').on('mouseout', function() { self.closeCopy = true; });
+				
+				// Fernando (2021-09-27): para probar aumentar el intervalo y descomentar los console.log.
+				var closeCount = 0;
+				var intervalId = setInterval(function() {
+					if(self.closeCopy) {
+						closeCount += 1;
+						// console.log('closeCount + ' + closeCount);
+						if(closeCount >= 3) {
+							$('i.mojito-doc-copy-i').remove();
+					        clearInterval(intervalId);
+						}
+					} else {
+						// console.log('closeCount = 0');
+						closeCount = 0;
+					}
+				}, 50);
+			}
+		});
+		$('code', this.div).on('mouseout', function() {
+			self.closeCopy = true;
+		});
+		
+		// dblclick
+		$(this.div).on('dblclick', function() {
+			var focusNode = window.getSelection().focusNode;
+			if(focusNode != null && focusNode.nodeType == Node.TEXT_NODE) {
+				var info = { node: focusNode,
+						offsetStart: window.getSelection().baseOffset,
+						offsetEnd: window.getSelection().focusOffset,
+						text: window.getSelection().toString(),
+						count: 0,
+						find: false};
+				
+				if(info.offsetEnd > info.offsetStart) {
+					// console.log('guarda offsetinfo');
+					// self.offsetInfo = info;
+					// setTimeout(function() { self.offsetInfo = null; console.log('eliminó offsetinfo'); }, 1000);
+					
+					self.recursive(this, info);
+					
+					if(stringUtilNotEmpty(info.text)) {
+						self.edit((info.find ? info.text : null), (info.find ? info.count : null));
+						if(self.editDblClickCallback != null) {
+						 	self.editDblClickCallback(this);
+						}
+					}
+				}
+			}
+		});
+		/*
+		$(this.div).on('click', function() {
+			var info = self.offsetInfo;
+			self.offsetInfo = null;
+			if(info != null) {
+				self.recursive(this, info);
+				
+				if(stringUtilNotEmpty(info.text)) {
+					self.edit((info.find ? info.text : null), (info.find ? info.count : null));
+					if(self.editDblClickCallback != null) {
+						self.editDblClickCallback(this);
+					}
+				}
+			}
+		});
+		*/
+	}
+	
+	scrollCorrectionOn(evt) {
+		if (this.scrollCorrection) {
+			// Reset this right off so it doesn't get retriggered by the correction.
+			this.scrollCorrection = false;
+			this.textArea.scrollTop = this.prevScrollPos + this.caretCorrection;
+			this.caretCorrection = 0;
+		}
+		
+		this.prevScrollPos = this.textArea.scrollTop;
+	}
+	
+	scrollCorrectionOnInput() {
+		this.scrollCorrection = true;
+		this.scrollCorrectionSetCaret();
+	}
+	
+	scrollCorrectionSetCaret(evt) {
+		let caretPos = this.textArea.selectionStart;
+		let scrollingNeeded;
+		let amountToScroll;
+		
+		var cursor = getCursorXY(this.textArea, this.textArea.selectionStart);
+		if(cursor.y > $(this.textArea).height()) {
+			this.textArea.blur();
+			this.textArea.focus();
+		} 
+	}
+	
+	singleClick() {
+		console.log('singleClick');
+		var focusNode = window.getSelection().focusNode;
+		if(focusNode != null && focusNode.nodeType == Node.TEXT_NODE) {
+			var info = { node: focusNode,
+					offsetStart: window.getSelection().baseOffset,
+					offsetEnd: window.getSelection().focusOffset,
+					text: window.getSelection().toString(),
+					count: 0,
+					find: false};
+			
+			if(info.offsetEnd > info.offsetStart) {
+				this.recursive(this, info);
+				
+				if(stringUtilNotEmpty(info.text)) {
+					console.log('edit');
+					this.edit((info.find ? info.text : null), (info.find ? info.count : null));
+					if(this.editDblClickCallback != null) {
+						this.editDblClickCallback(this);
+					}
+				}
+			}
+		}
+	}
+	
+	syncScroll() {
+		// console.log('syncScroll');
+		var line = mString.count($(this.textArea).val().substring(0, this.textArea.selectionStart), '\n');
+		if(this.lineLastSync != line) {
+			var lineElement = $('[data-line="' + line + '"]').get(0);
+			if(lineElement != null) {
+				var cursor = getCursorXY(this.textArea, this.textArea.selectionStart);
+				this.div.scrollTop = lineElement.offsetTop - cursor.y- 30; 
+				this.lineLastSync = line;
+			}
+		}
+	}
+	
+	title() {
+		var selectedLines = this.getSelectedLines();
+		var valueMiddleArray = selectedLines.valueMiddleArray;
+		var valueMiddle = '';
+		
+		for(var i = 0; i < valueMiddleArray.length; i++) {
+			var valueMiddleAdd = valueMiddleArray[i].trim();
+			
+			var open = 0;
+			
+			while(valueMiddleAdd[open] == this.titleChar && open < valueMiddleAdd.length) {
+				open += 1;
+			}
+			
+			if(open > 2) {
+				valueMiddleAdd = valueMiddleAdd.replaceAll(this.titleChar, '');
+			} else {
+				valueMiddleAdd = this.titleChar + valueMiddleAdd;
+			}
+			
+			valueMiddle += valueMiddleAdd;
+			if(valueMiddleArray.length > 1 && i < valueMiddleArray.length - 1) {
+				valueMiddle += '\n';
+			}
+		}
+		
+		selectedLines.selectionStartApply = selectedLines.enterBegin + valueMiddle.length;
+		selectedLines.selectionEndApply = selectedLines.selectionStartApply;
+		
+		selectedLines.apply(valueMiddle);
+		this.renderDiv();
+	}
+	
+	titleBackUp() {
+		var selectedLines = this.getSelectedLines();
+		var valueMiddleArray = selectedLines.valueMiddleArray;
+		var valueMiddle = '';
+		
+		for(var i = 0; i < valueMiddleArray.length; i++) {
+			var valueMiddleAdd = valueMiddleArray[i].trim();
+			
+			var open = 0;
+			var close = 0;
+			
+			while(valueMiddleAdd[open] == this.boldChar && open < valueMiddleAdd.length) {
+				open += 1;
+			}
+			while(valueMiddleAdd[valueMiddleAdd.length - 1 - close] == this.boldChar && close < valueMiddleAdd.length) {
+				close += 1;
+			}
+			
+			if(open != close || open > 2 || close > 2) {
+				valueMiddleAdd = valueMiddleAdd.replaceAll(this.boldChar, '');
+			} else {
+				valueMiddleAdd = this.boldChar + valueMiddleAdd + this.boldChar;
+			}
+			
+			valueMiddle += valueMiddleAdd;
+			if(valueMiddleArray.length > 1 && i < valueMiddleArray.length - 1) {
+				valueMiddle += '\n';
+			}
+		}
+		
+		selectedLines.selectionStartApply = selectedLines.enterBegin + valueMiddle.length;
+		selectedLines.selectionEndApply = selectedLines.selectionStartApply;
+		
+		selectedLines.apply(valueMiddle);
+		this.renderDiv();
+	}
+	
+	undo() {
+		document.execCommand('undo');
+	}
+}

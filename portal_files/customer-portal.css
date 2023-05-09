@@ -1,0 +1,194 @@
+@import url('https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@100;300;400;500;700;800&display=swap');
+
+:root{
+	--c-green: #4DBC15;
+	--c-red: #ff0000;
+}
+
+body{
+	font-family: 'Kumbh Sans', sans-serif;
+}
+
+nav.navbar.navbar-inverse{
+    background-color: #000 !important;
+    border: 0;
+    margin: 0;
+    padding-top: 2px;
+    padding-bottom: 1px;
+}
+
+@media screen and (min-width: 900px) {
+	nav.navbar.navbar-inverse div.container-fluid {
+	    display: flex;
+	    justify-content: space-between;
+	}
+	
+	nav.navbar.navbar-inverse div.container-fluid:before,
+	nav.navbar.navbar-inverse div.container-fluid:after{
+		display: none;
+	}
+}
+
+
+.navbar-inverse .navbar-brand{
+    padding-top: 0;
+    padding-bottom: 0;
+    display: flex;
+    align-items: center;
+    border: 0 !important;
+}
+
+.navbar .container-fluid > div{
+    border: 0 !important;
+    float: none;
+}
+
+.navbar-inverse .navbar-nav>li>a{
+    color: #fff;
+    font-size: 16px;
+    height: 100%;
+}
+
+.navbar-inverse .navbar-nav>li>a span {
+    transform: translateY(5px);
+    line-height: 0;
+}
+
+.navbar-inverse .navbar-nav>li>a:hover{
+    opacity: 0.7;
+}
+
+.nav>li>a.portalPerson {
+    display: flex !important;
+    font-size: 15px !important;
+    line-height: 1 !important;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.nav>li>a.portalPerson p {
+    margin: 0;
+}
+
+.nav>li>a.portalPerson span {
+    transform: none;
+}
+
+.navbar-right li{
+	border-left: 1px solid #3C3C3C;
+	/* border-right: 1px solid #3C3C3C; */
+}
+.navbar-right li a{
+	height: 100%;
+    display: inline-block;
+}
+
+footer{
+	font-size: 11px;
+	padding-top: 40px;
+	padding-bottom: 40px;
+}
+
+footer a{
+	text-decoration: underline;
+}
+
+.dragdealer.red-bar+.value.complet{
+	color: var(--c-green);
+}
+
+.dragdealer.red-bar .handle{
+	background-color: #000;
+	width: 10px;
+	height: 10px;
+}
+
+.dragdealer,
+.dragdealer .completed{
+	height: 1px;
+}
+
+.dragdealer.red-bar .completed{
+	background-color: #000;
+}
+
+.dragdealer.red-bar .completed[style="width: 100%;"]{
+	background-color: var(--c-green);
+}
+
+.dragdealer.red-bar .completed[style="width: 100%;"] + .handle{
+	background-color: var(--c-green);
+}
+
+.label-bar{
+	line-height: 1.4;
+	font-size: 13px;
+	color: #000
+}
+
+.panel1 div[class*="col-sm"] {
+    text-align: center;
+    /* border: 1px solid #D9D9D9; */
+    padding-bottom: 20px;
+}
+
+.panel1 div[class*="col-sm"] > div {
+    border: 1px solid #D9D9D9;
+    padding-bottom: 34px;
+    padding-top: 34px;
+}
+
+.panel1 div[class*="col-sm"] > div .fgreen {
+    padding-bottom: 10px;
+}
+
+#elements .column2 {
+    border-left: 0;
+}
+
+.fgreen {
+    color: var(--c-green) !important;
+}
+
+.btn{
+	background-color: #000;
+	color: #fff;
+	border: 0;
+}
+
+.btn-danger{
+	background-color: var(--c-red);
+}
+
+.btn-success{
+	background-color: var(--c-green);
+}
+
+table td,
+table th{
+	text-align:center;
+}
+
+table td:first-child,
+table th:first-child{
+	text-align:left;
+}
+
+table td:last-child,
+table th:last-child{
+	text-align:right;
+}
+
+.tabla-finance{
+	background-color: transparent;
+	padding: 0;
+	color: #000
+}
+
+.tabla-finance table td{
+	padding-top: 15px;
+	padding-bottom: 15px;
+}

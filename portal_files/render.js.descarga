@@ -1,0 +1,63 @@
+// Fernando (2020-03-31): función gemela de MojitoRender.getPageInstanceId.
+function rendGetPageInstanceId(renderId, encodeQueryStringParameter) {
+	var result = window.location.href;
+	var slashLastIndex = result.lastIndexOf('/');
+	result = result.substring(slashLastIndex);
+	
+	if(result.endsWith('?isBack=true') || result.endsWith('&isBack=true')) {
+		result = result.substring(0, result.length - 12);
+	}
+	
+	result += '|' + renderId;
+	
+	if(encodeQueryStringParameter != null && encodeQueryStringParameter) {
+		result = encodeURIComponent(result);
+	}
+	
+	return result;
+}
+
+// Fernando (2020-03-31): si fueran muchos valores a guardar considerar que value sea un
+// Json o agregar "renderId2, value2, renderId3, value3,...".
+function rendSessionPut(renderId, value) {
+	var url = window.location.href;
+	var id = rendGetPageInstanceId(renderId, url);
+	var toSession = 'toSession.ajax?' + rendGetPageInstanceId(renderId, url) + '=' + value;
+	
+	rendLog.log(rendLogSessionState, log_Debug, 'rendSessionPut starts', 'renderId: ' + renderId, 'value: ' + value, 'toSession: ' + toSession);
+	doAjax(toSession);
+	rendLog.log(rendLogSessionState, log_Debug, 'rendSessionPut ends (' + renderId + ')');
+}
+
+function rendSectionsShow() {
+	var sections = $('[data-control="section"][data-url]');
+	
+	var result = '';
+	for(var i = 0; i < sections.length; i++) {
+		var section = $(sections).get(i);
+		
+		result += '<b>' + $('div > div.panel-heading > a', section).html() + '</b>';
+		result += ':<br>';
+		result += $(section).attr('data-url');
+		result += '<br>';
+	}
+	
+	var tabs = $('a[data-toggle="tab"]');
+	for(var i = 0; i < tabs.length; i++) {
+		var tab = $(tabs).get(i);
+		
+		var url = $(tab).attr('data-url');
+		if(url != null) {
+			result += '<b>' + $(tab).html() + '</b>';
+			result += ':<br>';
+			result += url;
+			result += '<br>';
+		}
+	}
+	
+	if(result != '') {
+		vxAlertHtml(result);
+	} else {
+		vxAlert('Sections not found.');
+	}
+}

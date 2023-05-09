@@ -1,0 +1,44 @@
+function retaReload(innerPrefix) {
+	reloadCheck('reportTable', innerPrefix, function(div) {
+		new retaReportTable(div);
+	});
+}
+
+function retaReportTable(div){
+	var self = this;
+	this.root = tagUtilGetControl(div);
+	this.prefix = 'reta';
+	this.root.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	try {
+		$(this.root).stickyTableHeader({
+			zIndex: 9999
+		});
+	} catch(e) {		
+	}
+	
+	//Parche de Cristo para que funcione el stickyTable dentro de #mojito-container-div
+	if($(this.root).length){
+		$(this.root).each(function(){
+			init=$(this).offset().top;
+			$(this).attr('posInit',init);
+		});
+	}
+	$('#mojito-container-div').scroll(function() {
+		if($(self.root).length){
+			var pos=$(this).scrollTop();
+			
+			$(self.root).each(function(){
+				var posInit = $(this).attr('posInit');
+				if(posInit<pos){
+					$(self.root).addClass('is-scrolling');
+					console.log('posInit: '+posInit+' - pos:'+pos);
+				}else{
+					$(self.root).removeClass('is-scrolling');
+				}
+			});
+		}
+	});
+	//Fin Parche
+}

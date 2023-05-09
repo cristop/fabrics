@@ -1,0 +1,161 @@
+function formReload(innerPrefix) {
+	reloadCheck('form', innerPrefix, function(formOrDiv) {
+		new formForm(formOrDiv);
+	});
+}
+
+class formForm {
+	constructor(formOrDiv) {
+		var self = this;
+		this.root = tagUtilGetControl(formOrDiv);
+		this.root.mHandler = this;
+		this.prefix = 'form';
+		this.innerInfo = utilGetInnerInfo(this.root);
+		this.script = $(this.root).attr('data-script');
+		
+		if(mString.isNotEmpty(this.script)) {
+			var founded = false; 
+			$('script').each(function() {
+				if(this.srcReal == self.script) {
+					founded = true;
+				}
+			});
+			
+			var loaderName = this.script.substring(this.script.lastIndexOf('/') + 1, this.script.lastIndexOf('.js')) + 'Loader';
+			if(!founded) {
+				var script = document.createElement('script');
+				script.setAttribute("src", this.script);
+				script.setAttribute("type", "text/javascript");
+				script.srcReal = this.script;
+				document.body.appendChild(script);
+				
+				script.addEventListener("load", function() {
+					if(window[loaderName] != null) {
+						window[loaderName](self.root);
+					}
+				});
+			} else {
+				if(window[loaderName] != null) {
+					window[loaderName](this.root);
+				}
+			}
+		}
+	}
+
+	alert(message) {
+		vxAlert(message);
+	}
+	
+	clipboardCopy(text) {
+		utilCopyToClipboard(text);
+		
+		// tagUtilCall('messageList', 'showInfo', 'Clipboard (' + textAbbreviate + ')', 2);
+		var messageListId = this.innerInfo.getId('messageList');
+		var messageList = jqSelectId(messageListId);
+		var messageListHandler = $(messageList).prop('mHandler');
+		
+		var textAbbreviate = stringUtilAbbreviate(text, 30);
+		messageListHandler.meslShowInfo('Clipboard (' + textAbbreviate + ')', 2);
+	}
+
+	closeModal(resultJson) {
+		tagUtilCloseModal(true, null, resultJson);
+	}
+
+	confirm(message, method) {
+		var self = this;
+		vxConfirm(message, function() { utilMethodCall(self.root, method) });
+	}
+
+	goTo(url, urlMobile) {
+		mMojito.navGoTo(url, urlMobile);
+	}
+	
+	methodCall(method, rerender) {
+		utilMethodCall(this.root, method, rerender);
+	}
+
+	onLoad() {
+		var response = $(this.root).attr('data-actionresponse');
+		utilMode4Process(this.root, response);
+	}
+	
+	openModal(url, width, close) {
+		var closeValue = mBool.translate(close, false);
+		var widthValue = mInt.translate(width);
+		
+		if(closeValue) {
+			// Habría que cerra la última. Por ahora lo dejo así que cierra todas.
+			tagUtilCloseModal(true);
+		}
+		// utilCaller = this.root;
+		tagUtilShowModal(url, width);
+	}
+
+	openTab(url, urlMobile) {
+		mMojito.navOpenTab(url, urlMobile);
+	}
+
+	refresh(method, rerender, timeout) {
+		if(timeout == null) {
+			utilMethodCall(this.root, method, rerender);
+		} else {
+			clearTimeout(this.refreshTimeout);
+			var self = this;
+			this.refreshTimeout = setTimeout(function() { utilMethodCall(self, method, rerender); }, timeout);
+		}
+	}
+
+	rerender(ids, method) {
+		var methodAux = stringUtilNotEmpty(method) ? method : 'doNothing';
+		utilMethodCall(this.root, methodAux, ids);
+	}
+
+	prompt(message, placeholder, name, method, rerender) {
+		var self = this;
+		vxPrompt(message, placeholder, function(value) {
+			utilMethodCallFormCustom(method, rerender, [name, value], null, null, self.root);
+		});
+	}
+	
+	// Forma anterior
+	formRerender(ids, method) {
+		this.rerender(ids, method);
+	}
+
+	formOnLoad() {
+		this.onLoad();
+	}
+
+	formOpenTab(url, urlMobile) {
+		this.openTab(url, urlMobile);
+	}
+
+	formRefresh(method, rerender) {
+		this.openTab(method, rerender);
+	}
+
+	formMethodCall(method, rerender) {
+		this.methodCall(method, rerender);
+	}
+
+	formCloseModal() {
+		this.closeModal();
+	}
+
+	formConfirm(message, method) {
+		this.confirm(message, method);
+	}
+
+	formClipboardCopy(text) {
+		this.clipboardCopy(text);
+	}
+
+	formPrompt(message, placeholder, method, rerender) {
+		this.prompt(message, placeholder, method, rerender);
+	}
+
+	formAlert(message) {
+		this.alert(message);
+	}
+}

@@ -1,0 +1,226 @@
+function caleReload(innerPrefix) {
+	reloadCheck('calendar', innerPrefix, function(span) {
+		new caleCalendar(span);
+	});
+}
+
+function caleCalendar(span) {
+	var self = this;
+	this.root = tagUtilGetControl(span);
+	this.prefix = 'cale';
+	this.root.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	$(this.root).attr('data-actions', '{ "array": [ {"target":"' + $(this.root).attr('id') + '","method":"refetchEvents","result":"ok"} ] }')
+	
+	this.data = $(this.root).attr('data-data');
+	this.from = $(this.root).children().get(0);
+	this.to = $(this.root).children().get(1);
+	this.initialData = $(this.root).children().get(2);
+	this.calendars = $(this.root).children().get(3);
+	this.calendar = $(this.root).children().get(4);
+	
+	this.fullCalendar = new FullCalendar.Calendar(this.calendar, {
+		headerToolbar: {
+			left: 'prev,next today',
+			center: 'title',
+			right: 'dayGridMonth,timeGridWeek,timeGridDay'
+		},
+		slotMinTime: '08:00',
+		locale: 'es',
+		initialView: 'timeGridWeek',
+		// plugins: [ 'dayGrid', 'timeGrid' ],
+		height: 'auto',
+		aspectRatio: 3,
+		editable: true,
+		eventStartEditable: true,
+		eventDurationEditable: true,
+		events: function(parameters, callback) {
+			var initialData = $(self.initialData).val();
+			if(stringUtilEmpty(initialData)) {
+				$(self.from).val(moment(parameters.start).format(mGlobal.dateFormatCapital));
+				$(self.to).val(moment(parameters.end).format(mGlobal.dateFormatCapital));
+				var methodName = 'get' + stringUtilFirstCapital(self.data);
+				
+				utilMethodCall(self.root, methodName, null, self.caleRefresh.bind(self), [ callback ]);
+			} else {
+				self.caleRefresh(initialData, callback);
+				$(self.initialData).val('');
+			}
+		},
+		eventResize: function(eventResizeInfo) {
+			self.caleUpdate(eventResizeInfo);
+		},
+		eventDrop: function(eventResizeInfo) {
+			self.caleUpdate(eventResizeInfo);
+		},
+		eventClick: function(info) {
+			utilSetCaller(self.root);
+			// utilCaller = self.root;
+			tagUtilShowModal(info.event.extendedProps["link"]);
+		},
+		dateClick: function(dateClickInfo) {
+			utilSetCaller(self.root);
+			// utilCaller = self.root;
+			
+			var start = moment(dateClickInfo.date).format(mGlobal.dateFormatCapital + (dateClickInfo.allDay ? '' : ' HH:mm:ss'));
+			
+			tagUtilShowModal('taskComponentRecord.htm?dueDate=' + start + "&allDay=" + dateClickInfo.allDay);
+			// dateClickInfo.dateStr;
+		}
+	});
+	
+	this.fullCalendar.render();
+}
+
+caleCalendar.prototype.caleRefetchEvents = function() {
+	this.fullCalendar.refetchEvents();
+}
+
+caleCalendar.prototype.caleUpdate = function(eventResizeInfo) {
+	var event = eventResizeInfo.event;
+	var id = event.id;
+	var start = moment(event.start).format(mGlobal.dateFormatCapital + (event.allDay ? '' : ' HH:mm:ss'));
+	var end = '';
+	if(event.end != null) {
+		end = moment(event.end).format(mGlobal.dateFormatCapital + (event.allDay ? '' : ' HH:mm:ss'));
+	}
+	utilDoAjax('calendar.ajax?id=' + encodeURIComponent(id) + '&' +
+			'start=' + encodeURIComponent(start) + '&' +
+			'end=' + encodeURIComponent(end) + '&' +
+			'allDay=' + encodeURIComponent(event.allDay), null, this.caleAfterUpdate.bind(this));
+}
+
+caleCalendar.prototype.caleAfterUpdate = function(xml) {
+	if(xml.getElementsByTagName('OK').length != 1) {
+		var messageList = tagUtilGetControlMojito('messageList');
+		if(messageList != null) {
+			$(messageList).prop('mHandler').meslShowError('Ha ocurrido un error al intentar sincronizar el calendario.', 2);
+		}
+		this.caleRefetchEvents();
+	}
+}
+
+caleCalendar.prototype.caleRefresh = function(events, callback) {
+	this.events = JSON.parse(events);
+	this.calePaint(this.events);
+	this.caleAddCalendarButtons(this.events);
+	callback(this.events);
+}
+
+caleCalendar.prototype.calePaint = function(events) {
+	var colors = {};
+	var index = 0;
+	var self = this;
+	
+	events.forEach(function(event) {
+		if(colors[event.calendar] == null) {
+			colors[event.calendar] = self.calePickColor(index);
+			index += 1;
+		}
+		event.color = colors[event.calendar];
+	});
+}
+
+caleCalendar.prototype.caleAddCalendarButtons = function(events) {
+	var colors = {};
+	var index = 0;
+	var self = this;
+	
+	$(this.calendars).empty();
+	events.forEach(function(event) {
+		if(colors[event.calendar] == null) {
+			colors[event.calendar] = event.color;
+			var button = $('<button style="background-color: ' + colors[event.calendar] + '; color: #ffffff; font-weight: bold;"></button>').text(event.calendar);
+			$(self.calendars).append(button);
+			
+			$(button).click(function() {
+				if($(button).prop('events') == null) {
+					var eventsToRemove = [];
+					var calendar = $(button).html();
+					for(var i = 0; i < self.fullCalendar.getEvents().length; i++) {
+						var event = self.fullCalendar.getEvents()[i];
+						if(event.extendedProps.calendar == calendar) {
+							eventsToRemove.push(event);
+						}
+					}
+					
+					$(button).prop('events', eventsToRemove);
+					
+					for(var i = 0; i < eventsToRemove.length; i++) {
+						eventsToRemove[i].remove();
+					}
+					$(button).css('background-color', 'rgba('+ convertHex(colors[$(button).html()], 0.3 ) + ')').css('color', '#000000');
+				} else {
+					for(var i = 0; i < $(button).prop('events').length; i++) {
+						self.fullCalendar.addEvent($(button).prop('events')[i]);
+					}
+					$(button).prop('events', null);
+					self.fullCalendar.render();
+					
+					$(button).css('background-color', colors[$(button).html()]).css('color', '#ffffff');
+				}
+				return false;
+			});
+			
+			index += 1;
+		}
+	});
+}
+
+caleCalendar.prototype.calePickColor = function(index) {
+	var result = null;
+	var indexAux = index % 10;
+	if(indexAux == 0) {
+		result = '#F94144';
+	}
+	if(indexAux == 1) {
+		result = '#90BE6D';
+	}
+	if(indexAux == 2) {
+		result = '#F3722C';
+	}
+	if(indexAux == 3) {
+		result = '#43AA8B';
+	}
+	if(indexAux == 4) {
+		result = '#F8961E';
+	}
+	if(indexAux == 5) {
+		result = '#4D908E';
+	}
+	if(indexAux == 6) {
+		result = '#F9844A';
+	}
+	if(indexAux == 7) {
+		result = '#577590';
+	}
+	if(indexAux == 8) {
+		result = '#F9C74F';
+	}
+	if(indexAux == 9) {
+		result = '#277DA1';
+	}
+	return result
+}
+
+caleCalendar.prototype.caleClipboardCopy = function(text) {
+	utilCopyToClipboard(text);
+	
+	// tagUtilCall('messageList', 'showInfo', 'Clipboard (' + textAbbreviate + ')', 2);
+	var messageListId = this.innerInfo.getId('messageList');
+	var messageList = jqSelectId(messageListId);
+	var messageListHandler = $(messageList).prop('mHandler');
+	
+	var textAbbreviate = stringUtilAbbreviate(text, 30);
+	messageListHandler.meslShowInfo('Clipboard (' + textAbbreviate + ')', 2);
+}
+
+function convertHex(hex,opacity){
+    hex = hex.replace('#','');
+    r = parseInt(hex.substring(0,2), 16);
+    g = parseInt(hex.substring(2,4), 16);
+    b = parseInt(hex.substring(4,6), 16);
+    result = 'rgba('+r+','+g+','+b+','+opacity+')';
+    return result;
+}

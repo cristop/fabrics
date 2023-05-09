@@ -1,0 +1,813 @@
+/**
+ * Utilerías para controles Mojito o controles HTML en general.
+ * - Registración de eventos (onXxx).
+ * - Manejo de la sesión (sessionXxx).
+ * - Navegación (navXxx).
+ * - Reflection (llamado a funciones) (refXxx).
+ * -- CUIDADO: recordar que para manejo de variables existe object.js.
+ * - Tag (utilerías para tags) (tagXxx).
+ * - Multimedia (mmdXxx).
+ */
+class mMojitoClass {
+
+	mmdSoundNok() {
+		mMojito.mmdSoundPlay('jar/mojito/utils/web/sounds/nok.mp3');
+	}
+	
+	mmdSoundOk() {
+		mMojito.mmdSoundPlay('jar/mojito/utils/web/sounds/ok.mp3');
+	}
+	
+	mmdSoundPlay(soundUrl) {
+		var audio = new Audio(soundUrl);
+		audio.play();		
+	}
+	
+	/**
+	 * Agrega un parámetro a una URL dada y la devuelve. Si la url viene nula o vacía devuelve el parámetro sin modificarle nada.
+	 * El valor del parámetro debe venir tal cual se quiere mandar ya que esta función hace la codificación necesaria.
+	 * url: URL a la que se le agregará el parámetro.
+	 * name: nombre del parámetro a agregar.
+	 * value: valor del parámetro a agregar. Debe venir sin codificar.
+	 */
+	navAddParameter(url, name, value) {
+		var result = url;
+		if(mString.isNotEmpty(url)) {
+			if(url.indexOf(name + '=') < 0) {
+				if(result.indexOf('?') < 0) {
+					result += '?';
+				} else {
+					result += '&';
+				}
+				result += name + '=';
+				result += encodeURIComponent(value);
+			} else {
+				// Sobreescribir el parámetro.
+			}
+		}
+		return result;
+	}
+	
+	navGetUrl(url, urlMobile) {
+		var result = url;
+		if(reloadIsLayoutMobile() && stringUtilNotEmpty(urlMobile)) {
+			result = urlMobile;
+		}
+		
+		if(mString.isNotEmpty(result)) {
+			var parser = new mParser('[', ']', function (input) {
+				var result = '[' + input + ']';
+				var control = mMojito.tagGet(input);
+				if(control != null) {
+					result = mMojito.tagVal(control);
+				}
+				return result;
+			});
+			result = parser.parse(result);
+		} else {
+			result = window.location.href;
+		}
+		
+		return result;
+	}
+	
+	navGetUrlAjax(url, ajax, modal) {
+		if(mBool.isTrue(ajax, true) && stringUtilNotEmpty(url)) {
+			if(url.indexOf('_jx=1') < 0) {
+				if(url.indexOf('?') >= 0) {
+					url += '&';
+				} else {
+					url += '?';
+				}
+				url += '_jx=1';
+			}
+			if(mBool.isTrue(modal, false)) {
+				url += '&_mdl=1';
+			}
+		}
+		
+		return url;
+	}
+	
+	navGetUrlParameter(name) {
+	    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+	    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+	    var result = results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	    
+	    return result;
+	}
+	
+	navGetPage() {
+		var result = window.location.href.substring(window.location.origin.length);
+		return result;
+	}
+	
+	navGoTo(url, urlMobile) {
+		var url = mMojito.navGetUrl(url, urlMobile);
+		window.location.href = url;
+		// Evita que se siga ejecutando cualquier script.
+		throw new Error('Redirecting');
+	}
+	
+	navOpenTab(url, urlMobile) {
+		var url = mMojito.navGetUrl(url, urlMobile);
+		window.open(url, '_blank');
+	}
+
+	onBlur(selector, func, parameters) {
+		var hash = mString.hash(func.toString());
+		
+		$(selector).each(function() {
+			if ($(this).prop('mMojitoBlurHash') == null) {
+				$(this).prop('mMojitoBlurHash', [ ]);
+			}
+			
+			var hashes = $(this).prop('mMojitoBlurHash');
+			if(hashes.indexOf(hash) < 0) {
+				$(this).on('blur', function() {
+					mMojito.refCall(func, this, parameters);
+					return false;
+				});
+				$(this).prop('mMojitoBlurHash').push(hash);
+			}
+		});
+		
+		/*
+		$(selector).each(function() {
+			if ($(this).prop('onBlurLoaded') == null) {
+				$(this).prop('onBlurLoaded', true);
+				$(this).on('blur', function() {
+					var caller = func.bind(this);
+					caller();
+					return false;
+				})
+			}
+		});
+		*/
+	}
+	
+	/**
+	 * Permite enlazar contra el evento onclick chequeando que no haya una carga previa.
+	 * Sirve para utilizar con los métodos que hacen el reload de Javascript de las
+	 * secciones Ajax.
+	 * Las opciones disponibles son:
+	 * - returnFalse: indica si el efecto del click debe cortarse. Por defecto este valor es true.
+	 */ 
+	onClick(selector, func, parameters, options) {
+		$(selector).each(function() {
+			if ($(this).prop('onClickLoaded') == null) {
+				$(this).prop('onClickLoaded', true);
+				$(this).on('click', function() {
+					
+					var returnFalse = (options != null && options.returnFalse != null) ? options.returnFalse : true;
+					
+					// ¿Vale la pena? Esto sirve para ejecutar el modo 4 del botón llamador de modales.
+					// Pero el modo 4 en principio no se usa en páginas no estándar y esto es para
+					// páginas no estándar.
+					// utilCaller = this; 
+					
+					// ¿Sirve? Sería ideal encontrar una estrategia cross que pueda usarse en el modo
+					// estándar y no-estándar. Pero si no se encuentra tal vez sea mejor que en
+					// no-estándar cada sistema maneje el bloqueo de botón como crea conveniente.
+					// Se agrega como potencial solución cross el método mMojito.tagDisabledOnClick.
+					// mMojito.tagDisabledOnClick(this);
+					
+					mMojito.refCall(func, this, parameters);
+					if(returnFalse) {
+						return false;
+					}
+				})
+			}
+		});
+	}
+	
+	onChange(selector, func, parameters) {
+		var hash = mString.hash(func.toString());
+		
+		$(selector).each(function() {
+			if ($(this).prop('mMojitoChangeHash') == null) {
+				$(this).prop('mMojitoChangeHash', [ ]);
+			}
+			
+			var hashes = $(this).prop('mMojitoChangeHash');
+			if(hashes.indexOf(hash) < 0) {
+				$(this).on('change', function() {
+					mMojito.refCall(func, this, parameters);
+					return false;
+				});
+				$(this).prop('mMojitoChangeHash').push(hash);
+			}
+		});
+	}
+	
+	/**
+	 * Registra un evento que se dispara luego que el usuario ingresa un valor en un input.
+	 * Solo puede agregarse un evento por control porque el timer para disparar el evento se registra en una propiedad única del input.
+	 * Las opciones disponibles son:
+	 * - millis: milisegundos de espera para disparar el evento luego de la última tecla presionada por el usuario. Por defecto este valor es 500.
+	 */
+	onKeyTimer(selector, func, parameters, options) {
+		var hash = mString.hash(func.toString());
+		
+		$(selector).each(function() {
+			var millis = (options != null && options.millis != null) ? options.millis : 500;
+			
+			if ($(this).prop('mMojitoKeyTimerHash') == null) {
+				$(this).prop('mMojitoKeyTimerHash', [ ]);
+			}
+			
+			var hashes = $(this).prop('mMojitoKeyTimerHash');
+			if(hashes.indexOf(hash) < 0) {
+				$(this).on('keyup', function() {
+					var timerId = $(this).prop('mOnKeyTimer');
+					if(timerId != null) {
+						clearInterval(timerId);
+					}
+					
+					var self = this;
+					timerId = setTimeout(function() {
+						mMojito.refCall(func, self, parameters);
+					}, millis);
+					$(this).prop('mOnKeyTimer', timerId);
+					
+					return false;
+				});
+				$(this).prop('mMojitoKeyTimerHash').push(hash);
+			}
+		});
+	}
+	
+	onKeyUp(selector, func, parameters) {
+		$(selector).each(function() {
+			if ($(this).prop('onKeyUpLoaded') == null) {
+				$(this).prop('onKeyUpLoaded', true);
+				$(this).on('keyup', function() {
+					mMojito.refCall(func, this, parameters);
+					return false;
+				})
+			}
+		});
+	}
+	
+	/**
+	 * Llama a una función pudiéndole bindear el contexto y pasarle parámetros.
+	 * funcParameter: puede ser un string o una función. Si es un string se buscará en window si existe la función.
+	 * bind: objeto a bindear como contexto de la función.
+	 * parameters: array de parámetros a enviarle a la función.
+	 */
+	refCall(funcParameter, bind, parameters) {
+		var result = null;
+		var funcParameterAux = funcParameter;
+		if(mString.isString(funcParameterAux)) {
+			if(window[funcParameterAux] != null) {
+				funcParameterAux = window[funcParameterAux];
+			} else {
+				funcParameterAux = null;
+			}
+		}
+		
+		if(funcParameterAux != null) {
+			var funcAux = funcParameterAux;
+			if(bind != null) {
+				funcAux = funcParameterAux.bind(bind);
+			}
+			
+			if(parameters != null && parameters.length > 0) {
+				if(parameters.length == 1) { result = funcAux(parameters[0]); }
+				if(parameters.length == 2) { result = funcAux(parameters[0], parameters[1]); }
+				if(parameters.length == 3) { result = funcAux(parameters[0], parameters[1], parameters[2]); }
+				if(parameters.length == 4) { result = funcAux(parameters[0], parameters[1], parameters[2], parameters[3]); }
+				if(parameters.length == 5) { result = funcAux(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]); }
+			} else {
+				result = funcAux();
+			}
+		}
+		
+		return result;
+	}
+	
+	sessionPut(name, value) {
+		var toSession = 'toSession.ajax?' + name + '=' + value;
+		mojiLog.log(mojiLogSession, log_Debug, 'mMojito.sessionPut starts', 'name: ' + name, 'value: ' + value, 'toSession: ' + toSession);
+		doAjax(toSession);
+		mojiLog.log(mojiLogSession, log_Debug, 'rendSessionPut ends (' + name + ')');
+	}
+	
+	/**
+	 * Chequea si tag es del tipo tagType y si es así lo devuelve. Si no devuelve null.
+	 * En el caso de los inputs se puede enviar "input.radio" por ejemplo en cuyo caso
+	 * chequea que el tipo del tag sea input y además que su atributo "type" sea radio.
+	 */
+	tagAs(tag, tagType) {
+		var result = null;
+		
+		if(!mObject.isArray(tagType)) {
+			var tagTypeArray = tagType.split('.');
+			
+			var tagLength = $(tag).length;
+			var resultArray = [ ];
+			for(var i = 0; i < tagLength; i++) {
+				var tagObj = $(tag).get(i);
+				
+				if(mString.equals(tagObj.tagName, tagTypeArray[0])) {
+					result = tag;
+					if(tagTypeArray.length > 1 && !mString.equals($(tag).attr('type'), tagTypeArray[1])) {
+						result = null;
+					}
+				}
+				
+				if(result != null) {
+					resultArray.push(result);
+				}
+			}
+			
+			if(resultArray.length > 1) {
+				result = resultArray;
+			}
+		} else {
+			for(var i = 0; i < tagType.length; i++) {
+				if(result == null) {
+					result = mMojito.tagAs(tag, tagType[i]);
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Inactiva un botón por 2 segundos para evitar un doble click de parte del usuario.
+	 */
+	tagDisabledByTime(tag, wait, callback) {
+		$(tag).each(function() {
+			
+			$(this).attr('disabled', 'true');
+			$(this).css('pointer-events', 'none');
+			
+			if(wait != null && wait > 0) {
+				var self = this;
+				setTimeout(function() {
+					$(self).removeAttr('disabled');
+					$(self).css('pointer-events', 'auto');
+					mMojito.refCall(callback, self);
+				}, wait);
+			}
+		});
+	}
+	
+	/**
+	 * Activa o desactiva un tag. Se define como desactivar a que el usuario no pueda modificar el valor.
+	 */
+	tagEnabled(tag, enabled) {
+		$(tag).each(function() {
+			var select = mMojito.tagAs(this, 'select');
+			if(select == null) {
+				if(enabled) {
+					$(this).removeAttr('readonly');
+				} else {
+					$(this).attr('readonly', 'readonly');
+				}
+			} else {
+				if(enabled) {
+					$('option', this).show();
+				} else {
+					var self = this;
+					$('option', this).each(function() {
+						if(mString.equals($(self).val(), $(this).val())) {
+							$(this).show();
+						} else {
+							$(this).hide();
+						}
+					});
+				}
+			}
+		});
+	}
+	
+	/**
+	 * Devuelve todo tipo de controles (incluido el root de controles Mojito).
+	 * Si se quiere obtener el handler de un control Mojito usar tagM.
+	 * Los pasos que sigue para devolver el control son:
+	 * - si tagIdNameJqMojito es un elemento o es el document entonces lo devuelve.
+	 * - Si tagIdNameJqMojito es un string lo transforma en id usando la información de context y:
+	 * -- primero lo busca por getElementById,
+	 * -- luego por getElementsByName. En este caso si encuentra un control lo devuelve y si no devuelve el array de controles encontrado.
+	 * - Si al usar tagIdNameJqMojito como selector de jQuery y context como el contexto del selector se devuelve un control lo devuelve,
+	 * y si devuelve varios devuelve el array de controles.
+	 * - Usa los tres parámetros para buscar un control root de Mojito.
+	 * - Si tagIdNameJqMojito contiene la propiedad id y context o type entonces busca con estas propiedades un control root de Mojito.
+	 */
+	tagGet(tagIdNameJqMojito, context, type) {
+		var result = null;
+		var innerInfo = null;
+		
+		// Si hay contexto el control debe pertenecer a ese contexto.
+		// El contexto puede ser de tipo Mojito (indica la sección Ajax o principal) o
+		// de tipo jQuery que indica dentro de qué tag hay que buscar al control.
+		if(context != null) {
+			var contextObj = mMojito.tagGet(context);
+			innerInfo = utilGetInnerInfo(contextObj);
+		}
+		
+		// Si es un tag lo devuelvo.
+		if(result == null && (tagIdNameJqMojito instanceof Element || tagIdNameJqMojito instanceof HTMLDocument)) {
+			result = tagIdNameJqMojito;
+		}
+		if(mString.isString(tagIdNameJqMojito)) {
+			var idAux = innerInfo == null ? tagIdNameJqMojito : innerInfo.getId(tagIdNameJqMojito)
+			// Si hay uno o más controles con el id los devuelve.
+			if(result == null) {
+				result = document.getElementById(idAux);
+			}
+			// Si hay uno o más controles con el name los devuelve.
+			if(result == null) {
+				var results = document.getElementsByName(idAux);
+				if(results.length == 1) {
+					result = results[0];
+				}
+				if(results.length > 1) {
+					resut = results;
+				}
+			}
+		}
+		// Si el selector de jQuery devuelve algo lo devuelve.
+		if(result == null) {
+			try {
+				var jq = $(tagIdNameJqMojito, context);
+				if(jq.length == 1) {
+					result = jq.get(0);
+				}
+				if(jq.length > 1) {
+					result = [ ];
+					for(var i = 0; i < jq.length; i++) {
+						result.push(jq.get(i));
+					}
+				}
+			} catch(error) {
+				// La idea es que no explote si el String pasado
+				// no es un selector válido de jQuery.
+				// No encontré nada mejor para filtrarlo.
+				if(error.name != 'Error') {
+					throw error;
+				}
+			}
+		}
+		// Si hay un control mojito con el "id" o "id|type" lo devuelve. En este único caso se puede usar el contexto.
+		if(mString.isString(tagIdNameJqMojito)) {
+			if(result == null) {
+				var contextObj = mMojito.tagGet(context);
+				result = mMojito.tagM(tagIdNameJqMojito, contextObj, type);
+			}
+		}
+		if(result == null) {
+			if(tagIdNameJqMojito != null && tagIdNameJqMojito['id'] != null && (tagIdNameJqMojito['context'] != null || tagIdNameJqMojito['type'] != null)) {
+				var contextObj = mMojito.tagGet(tagIdNameJqMojito.context);
+				result = mMojito.tagM(tagIdNameJqMojito.id, contextObj, tagIdNameJqMojito.type);
+			}
+		}
+		
+		return result;
+	}
+	
+	tagGetIdVirtual(tag, idVirtual) {
+		var result = null;
+		if(tag != null) {
+			if(mString.isEmpty(idVirtual)) {
+				result = 'tagName:' + tag.tagName;
+				var innerInfo = utilGetInnerInfo(tag);
+				result += '|innerInfo:' + mString.convEmpty(innerInfo.innerId, '(parent)');
+				if(mString.isNotEmpty(tag.id)) {
+					result += '|id:' + tag.id;
+				}
+				if(mString.isNotEmpty(tag.className)) {
+					result += '|className:' + tag.className;
+				}
+				// var text = mMojito.tagText(tag);
+				// if(mString.isNotEmpty(text)) {
+				// 	result += '|text:' + text;
+				// }
+				var value = mMojito.tagVal(tag);
+				if(mString.isNotEmpty(value)) {
+					result += '|value:' + value;
+				}
+				var mojitos = $(tag).closest('[data-control]');
+				if(mojitos.length > 0) {
+					var mojito = $(mojitos).get(0);
+					result += '|data-control:' + $(mojito).attr('data-control');
+					
+					var mId = $(mojito).attr('id');
+					if(mString.isNotEmpty(mId)) {
+						result += '|mId:' + mId;
+					}
+				}
+			} else {
+				if(!tag.isConnected) {
+					var leads = document.getElementsByTagName(tag.tagName);
+					result = null;
+					for(var i = 0; i < leads.length; i++) {
+						var lead = leads[i];
+						var leadIdVirtual = mMojito.tagGetIdVirtual(lead);
+						if(leadIdVirtual == idVirtual) {
+							result = lead;
+							break;
+						}
+					}
+				} else {
+					result = tag;
+				}
+			}
+		}
+		return result;
+	}
+	
+	tagHasAttribute(tag, attribute) {
+		var result = false;
+		var attributeValue = $(tag).attr(attribute);
+		if (typeof attributeValue !== 'undefined' && attributeValue !== false) {
+			result = true;
+		}
+		return result;
+	}
+	
+	/**
+	 * Devuelve el handler de un control Mojito.
+	 * Si se quiere devolver un elemento (incluído el elemento root de un control Mojito) se debe usar tagGet.
+	 */
+	tagM(id, context, control) {
+		var result = null;
+		var idAux = context != null ? utilGetInnerInfo(context).getId(id) : id;
+		if(stringUtilNotEmpty(control)) {
+			result = $('#' + jqEscape(idAux) + '[data-control="' + control + '"]');
+		} else {
+			result = $('#' + jqEscape(idAux));
+		}
+		if(result != null) {
+			result = $(result).prop('mHandler');
+		}
+		return result;
+	}
+	
+	/**
+	 * Rehidrata las acciones devolviendo el objeto.
+	 * Esta función tiene sus pares en ActionHelper.getActionsMode4 y ManagerAction.getJson
+	 * que son las funciones que deshidratan a las acciones.
+	 */
+	tagMode4(actions) {
+		var result = { array: [] };
+		
+		if(mString.isNotEmpty(actions)) {
+			var actionsAux = actions;
+			actionsAux = mString.extractStart(actionsAux, '{');
+			actionsAux = mString.extractEnd(actionsAux, '}');
+			// {skl|jfsad|lkfj|asdf}{target|action|ok || result|jfhsd}
+			
+			var actionsArray = actionsAux.split('}|{');
+			for(var i = 0; i < actionsArray.length; i++) {
+				// { target, method, result, response, parameters {name, value}}
+				var actionsElements = actionsArray[i].split('/?');
+				
+				
+				var action = {
+					target: actionsElements[0],
+					method: actionsElements[1],
+					result: mString.isNotEmpty(actionsElements[2]) ? actionsElements[2] : null,
+					response: mString.isNotEmpty(actionsElements[3]) ? actionsElements[3] : null,
+					parameters: [],
+				}
+				
+				for(var j = 4; j < actionsElements.length; j += 2) {
+					action.parameters.push({
+						name: actionsElements[j],
+						value: actionsElements[j + 1]
+					});
+				}
+				
+				result.array.push(action);
+			}
+		}
+		return result;
+	}
+	
+	tagText(tag, text, context) {
+		var tags = mMojito.tagGet(tag, context);
+		$(tags).each(function() {
+			var texts = $(this).contents().filter(function() {
+				return this.nodeType == Node.TEXT_NODE;
+			});
+			if(texts != null && texts.length > 0) {
+				var used = false;
+				for(var i = 0; i < texts.length && !used; i++) {
+					if(mString.isNotEmpty($(texts[i]).text())) {
+						$(texts[i]).get(0).textContent = text;
+						used = true;
+					}
+				}
+				if(!used) {
+					$(texts[0]).get(0).textContent = text;
+				}
+			} else {
+				$(this).text(text);
+			}
+		});
+	}
+	
+	/**
+	 * Devuelve el valor de un tag o lo setea. Además si el tag representa una colección
+	 * de valores y el valor seleccionado está inactivo entonces lo vuelve a activar.
+	 * Considera si el tag es input:radio en cuyo caso devuelve el valor seleccionado
+	 * o marca como seleccionado el radio que corresponda.
+	 */
+	tagVal(tag, value) {
+		var result = value;
+		var inputRadio = mMojito.tagAs(tag, 'input.radio');
+		if(inputRadio == null) {
+			if(value === undefined) {
+				// ¿No conviene usar tagGet para encontrar cualquier tipo de control?
+				result = $(tag).val();
+			} else {
+				$(tag).val(result);
+			}
+			
+			var select = mMojito.tagAs(tag, 'select');
+			if(select != null) {
+				$('option[value="' + result + '"]' ,select).fadeIn();
+			}
+		} else {
+			// input type="radio"
+			var name = $(tag).attr('name');
+			if(value === undefined) {
+				result = $('input[type="radio"][name="' + name + '"]:checked').val();
+			} else {
+				$('input[type="radio"][name="' + name + '"]').each(function() {
+					if(mString.equals($(this).val(), result)) {
+						$(this).prop('checked', true);
+					}
+				});
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Devuelve el texto de un tag o lo setea.
+	 * Difiere de tagVal porque, por ejemplo, en un select tagVal devuelve el value y esta función devuelve el texto del option seleccionado.
+	 */
+	tagValText(tag, value) {
+		var result = value;
+		var inputRadio = mMojito.tagAs(tag, 'input.radio');
+		if(inputRadio == null) {
+			var select = mMojito.tagAs(tag, 'select');
+			if(select == null) {
+				
+				var tagMojito = tag.mHandler;
+				if(tagMojito == null || tagMojito.prefix != 'inen' || tagMojito.controlType != 'description.enabled'){
+					result = mMojito.tagVal(tag, value);					
+				} else {
+					var descriptionElement = document.getElementById(tag.id+'.description');
+					descriptionElement.value = value;
+					$(descriptionElement).trigger('blur');
+				}
+			} else {
+				// SELECT
+				if(value === undefined) {
+					result = mString.trim($(select).find(':selected').text());
+					// result = mString.trim($('option[selected]', select).text());
+				} else {
+					// No probado.
+					result = $('option[selected]', select).text(value);
+				}
+			}
+		} else {
+			// INPUT TYPE="RADIO"
+			// Desarrollar cuando sea necesario.
+			/*
+			var name = $(tag).attr('name');
+			if(value === undefined) {
+				result = $('input[type="radio"][name="' + name + '"]:checked').val();
+			} else {
+				$('input[type="radio"][name="' + name + '"]').each(function() {
+					if(mString.equals($(this).val(), result)) {
+						$(this).prop('checked', true);
+					}
+				});
+			}
+			*/
+		}
+		return result;
+	}
+	
+	tagValIf(tag, value) {
+		var tagValue = mMojito.tagVal(tag);
+		var result = mString.equals(tagValue, value);
+		return result;
+	}
+	
+	tagValRemove(tag, value) {
+		$(tag).each(function() {
+			if(mString.equals(mMojito.tagVal(this), value)) {
+				mMojito.tagVal(this, null);
+			}
+			
+			var select = mMojito.tagAs(tag, 'select');
+			if(select != null) {
+				$('option[value="' + value + '"]', select).hide();
+			}
+		});
+	}
+	
+	tagVisible(tag, visible) {
+		if(visible) {
+			$(tag).fadeIn();
+		} else {
+			$(tag).fadeOut();
+		}
+	}
+}
+
+var mMojito = new mMojitoClass();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * returns x, y coordinates for absolute positioning of a span within a given text input
+ * at a given selection point
+ * @param {object} input - the input element to obtain coordinates for
+ * @param {number} selectionPoint - the selection point for the input
+ */
+var mojitoPreviousChild = null;
+const getCursorXY = (input, selectionPoint) => {
+  const {
+    offsetLeft: inputX,
+    offsetTop: inputY,
+  } = input
+  // create a dummy element that will be a clone of our input
+  const div = document.createElement('div')
+  
+  // get the computed style of the input and clone it onto the dummy element
+  const copyStyle = getComputedStyle(input)
+  for (const prop of copyStyle) {
+     div.style[prop] = copyStyle[prop]
+  }
+  
+  // div.style['width'] = '783.8px';
+  // div.style['height'] = '300px';
+  // div.style['overflow-y'] = 'auto';
+  // div.style['font-family'] = 'monospace';
+  // div.style['font-size'] = '12px';
+  
+  // we need a character that will replace whitespace when filling our dummy element if it's a single line <input/>
+  const swap = '.'
+  const inputValue = input.tagName === 'INPUT' ? input.value.replace(/ /g, swap) : input.value
+  // set the div content to that of the textarea up until selection
+  const textContent = inputValue.substr(0, selectionPoint)
+  // set the text content of the dummy element div
+  div.textContent = textContent
+  
+  // if (input.tagName === 'TEXTAREA') div.style.height = 'auto'
+  
+  // if a single line input then the div needs to be single line and not break out like a text area
+  // if (input.tagName === 'INPUT') div.style.width = 'auto'
+  
+  // create a marker element to obtain caret position
+  const span = document.createElement('span')
+  // give the span the textContent of remaining content so that the recreated dummy element is as close as possible
+  span.textContent = inputValue.substr(selectionPoint) || '.'
+  // append the span marker to the div
+  div.appendChild(span)
+  
+  // append the dummy element to the body
+  document.body.appendChild(div)
+  // get the marker position, this is the caret position top and left relative to the input
+  const { offsetLeft: spanX, offsetTop: spanY } = span
+  
+  // lastly, remove that dummy element
+  // NOTE:: can comment this out for debugging purposes if you want to see where that span is rendered
+  var result = {
+		    x: span.offsetLeft - div.offsetLeft,
+		    y: span.offsetTop - div.offsetTop - input.scrollTop
+		  }
+  
+  document.body.removeChild(div)
+  
+  // return an object with the x and y of the caret. account for input positioning so that you don't need to wrap the input
+  
+  // debugger;
+  
+  return result 
+}

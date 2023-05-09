@@ -1,0 +1,34 @@
+function butsReload(innerPrefix) {
+	reloadCheck('buttonSet', innerPrefix, function(span) {
+		new butsButtonSet(span);
+	});
+}
+
+class butsButtonSet {
+	constructor(span) {
+		var self = this;
+		this.root = tagUtilGetControl(span);
+		this.prefix = 'buts';
+		this.root.mHandler = this;
+		this.innerInfo = utilGetInnerInfo(this.root);
+		
+		/*
+		$('[data-value]', this.root).on('click', function() {
+			var input = null;
+			var value = $(this).attr('data-value');
+			
+			var method = null;
+			var confirmMessage = null;
+			var modal = null;
+			var modalWidth = null;
+			
+			$(input).val(value);
+			
+			utilMethodCall()
+		});
+		*/
+	}
+	
+	
+	// document.getElementById('statusSelected').value = 'AP.CANCE';javascript: utilSetCaller(this, true);  utilSetMethodToCall('methodName', 'refresh', true, null, null, null, null, null, null, null, 'form,messageList', this
+}

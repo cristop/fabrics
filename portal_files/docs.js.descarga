@@ -1,0 +1,341 @@
+function docsReload(innerPrefix) {
+	reloadCheck('docs', innerPrefix, function(div) {
+		new docsDocs(div);
+	});
+}
+
+/**
+ * IMPORTANTE: al modificar esta clase tener en cuenta que parte de su funcionamiento debería estar
+ * en doc.js y compartirse con inputDoc.js. Hay alguna documentación al respecto pero no está completa.
+ */
+class docsDocs {
+	constructor(div) {
+		var self = this;
+		this.root = tagUtilGetControl(div);
+		this.root.mHandler = this;
+		this.prefix = 'docs';
+		this.innerInfo = utilGetInnerInfo(this.root);
+		this.template = $('template', this.root).get(0).content.querySelector("div.mojito-docs-doc-div") ;
+		this.selected = $('>input.mojito-docs-selected-input', this.root);
+		this.selectedIndex = $('>input.mojito-docs-selectedIndex-input', this.root);
+		
+		this.method = $(this.root).attr('data-method');
+		
+		this.divs = $(this.root).find('>div.mojito-docs-doc-div');
+		this.length = this.divs.length;
+		
+		for(var i = 0; i < this.divs.length; i++) {
+			var div = $('>div>div.mojito-docs-sheet', this.divs.get(i));
+			var textArea = $('>div>textarea', this.divs.get(i));
+			var doc = new doc_Doc(div, textArea, this.buttonsRefresh.bind(this), this.saveAfter.bind(this), this.buttonsRefresh.bind(this));
+			this.divs.get(i).doc = doc;
+			this.render(this.divs.get(i), i);
+			this.buttonsRefresh(this.divs.get(i));
+		}
+		
+		this.addFirstButton = $('>button.mojito-docs-addFirst-button', this.root);
+		this.addFirstButton.on('click', function() {
+			self.add(this);
+			return false;
+		});
+	}
+	
+	add(caller) {
+		var newDoc = document.importNode(this.template, true);
+		$(newDoc).prop('addCreator', caller);
+		
+		var hiddenName = $('input[type="hidden"]', newDoc).attr('name').replace('[0]', '[' + this.length + ']');
+		$('input[type="hidden"]', newDoc).attr('name', hiddenName);
+		
+		var textAreaName = $('textarea', newDoc).attr('name').replace('[0]', '[' + this.length + ']');
+		$('textarea', newDoc).attr('name', textAreaName);
+		
+		var div = $('>div>div.mojito-docs-sheet', newDoc);
+		var textArea = $('>div>textarea', newDoc);
+		var doc = new doc_Doc(div, textArea, this.buttonsRefresh.bind(this), this.saveAfter.bind(this), this.buttonsRefresh.bind(this));
+		$(newDoc).prop('doc', doc);
+		
+		this.render(newDoc, this.length);
+		
+		// Después del render porque ahí se setea el index al div del documento.
+		this.length += 1;
+		$(this.root).append(newDoc);
+		
+		this.buttonsRefresh(newDoc);
+		if(this.length > 1) { // Si es 1 entonces es el primer documento en crearse.
+			this.buttonsRefresh(caller);
+		} else {
+			$(caller).hide();
+		}
+	}
+	
+	addImage(json, mTarget) {
+		var imageText = '{' + JSON.parse(json).viewLink + '}';
+		var divDoc = this.getDoc(mTarget);
+		var textArea = $('textarea', divDoc);
+		if(textArea.length > 0) {
+			textArea = $(textArea).get(0);
+			this.paste(textArea, imageText);
+		}
+	}
+	
+	addLink(mTarget, link) {
+		// debugger;
+		var divDoc = this.getDoc(mTarget);
+		
+		var linkOpenChar = divDoc.doc.linkOpenChar;
+		var linkCloseChar = divDoc.doc.linkCloseChar;
+		var linkSeparatorChar = divDoc.doc.linkSeparatorChar;
+		
+		var linkText = linkOpenChar + linkSeparatorChar + link + linkCloseChar;
+		
+		var textArea = $('textarea', divDoc);
+		if(textArea.length > 0) {
+			textArea = $(textArea).get(0);
+			this.paste(textArea, linkText, 1);
+		}
+	}
+	
+	buttonsRefresh(control) {
+		var result = this.getDoc(control);
+		
+		var buttons = $('>span.mojito-docs-buttons-panel [data-control="button2"], >span.mojito-docs-buttons-panel button', result);
+		var modes = this.getModes(result);
+		for(var i = 0; i < buttons.length; i++) {
+			var button = buttons[i];
+			var kind = $(button).attr('data-kind');
+			
+			var show = false;
+			if(stringUtilNotEmpty(kind)) {
+				var kindAnd = kind.split(';');
+				
+				if(kindAnd.length <= 1) {
+					var kindOr = kind.split(',');
+					for(var j = 0; j < kindOr.length; j++) {
+						for(var k = 0; k < modes.length; k++) {
+							show = show || modes[k] == kindOr[j];
+						}
+					}
+				} else {
+					show = true;
+					for(var j = 0; j < kindAnd.length; j++) {
+						var showParcial = false;
+						for(var k = 0; k < modes.length; k++) {
+							showParcial = showParcial || modes[k] == kindAnd[j];
+						}
+						show = show && showParcial;
+					}
+				}
+			}
+			
+			if(show) {
+				$(button).show();
+			} else {
+				$(button).hide();
+			}
+		}
+	}
+	
+	edit(context, text, count) {
+		var divDoc = this.getDoc(context);
+		$(divDoc).prop('doc').edit(text, count);
+		this.buttonsRefresh(context);
+	}
+	
+	/**
+	 * Devuelve el div que contiene al elemento al que pertenece el control pasado por parámetro.
+	 * Además le agrega todos los elementos internos en propiedades.
+	 */
+	getDoc(control) {
+		var result = $(control).closest('div.mojito-docs-doc-div').get(0);
+		
+		if(result != null && result.propertiesLoaded == null) {
+			var div = $('>div>div.mojito-docs-sheet', result);
+			var textArea = $('>div>textarea', result);
+			var editButton = $('>span.mojito-docs-buttons-panel button.mojito-docs-edit-button', result);
+			var saveButton = $('>span.mojito-docs-buttons-panel button.mojito-docs-save-button', result);
+			var addButton = $('>span.mojito-docs-buttons-panel button.mojito-docs-add-button', result);
+			var cancelButton = $('>span.mojito-docs-buttons-panel button.mojito-docs-cancel-button', result);
+			
+			$(result).prop('div', div);
+			$(result).prop('textArea', textArea);
+			$(result).prop('editButton', editButton);
+			$(result).prop('saveButton', saveButton);
+			$(result).prop('addButton', addButton);
+			$(result).prop('cancelButton', cancelButton);
+			$(result).prop('propertiesLoaded', true);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Devuelve el id del elemento enlazado al doc al que pertenece el control pasado por parámetro.
+	 */
+	getId(control) {
+		var doc = this.getDoc(control);
+		var result = $('>input[type="hidden"]', doc).val();
+		if(stringUtilNotEmpty(result)) {
+			result = parseInt(result);
+		} else {
+			result = null;
+		}
+		return result;
+	}
+	
+	getModes(control) {
+		var div = this.getDoc(control);
+		var index = $(div).prop('index');
+		var result = [];
+		
+		if($(div.textArea).is(":visible")) {
+			result.push('edit');
+		} else {
+			result.push('view');	
+		}
+		
+		if(index == 0) {
+			result.push('first');
+		} else {
+			result.push('noFirst');
+		}
+		if(index == this.length - 1) {
+			result.push('last');
+		} else {
+			result.push('noLast');
+		}
+		
+		var id = this.getId(control);
+		if(id != null) {
+			result.push('persisted');
+		} else {
+			result.push('new');
+		}
+		
+		return result;
+	}
+	
+	paste(textArea, text, focusOffset) {
+		var div = this.getDoc(textArea);
+		$(div).prop('doc').paste(text, focusOffset);
+	}
+	
+	render(divContainer, index) {
+		$(divContainer).prop('index', index);
+		//Cristo: Cambie las rutas de los divs, debido al nuevo contenedor mojito-docs-buttons-panel
+		var div = $('>div>div.mojito-docs-sheet', divContainer);
+		var textArea = $('>div>textarea', divContainer);
+		var editButton = $('>span.mojito-docs-buttons-panel button.mojito-docs-edit-button', divContainer);
+		var saveButton = $('>span.mojito-docs-buttons-panel button.mojito-docs-save-button', divContainer);
+		var addButton = $('>span.mojito-docs-buttons-panel button.mojito-docs-add-button', divContainer);
+		var cancelButton = $('>span.mojito-docs-buttons-panel button.mojito-docs-cancel-button', divContainer);
+		
+		$(divContainer).prop('doc').render();
+		
+		// this.buttonsRefresh(divContainer);
+		
+		var self = this;
+		$(textArea).on('keydown', function(e) {
+			if(e.ctrlKey) {
+				if(e.which == 71 || e.which == 103) { // g
+					if(stringUtilNotEmpty(self.method)) {
+						self.select(this);
+						utilMethodCall(self.root, self.method, 'messageList');
+					    event.preventDefault();
+					}
+				}
+			}
+		});
+		$(textArea).on('paste', function(e) {
+			if(event.clipboardData.types[0] == 'Files') {
+				var items = event.clipboardData.items;
+			    var blob = items[0].getAsFile();
+			    var reader = new FileReader();
+			    reader.onload = function(event)
+			    {
+			    	var hidden = tagUtilGetControlMojito('image', self.root, 'hidden');
+			    	$(hidden).val(event.target.result);
+			    	utilMethodCall(self.root, 'saveImage', null, self.addImage.bind(self.root.mHandler), [textArea]);
+			    }; // data url  
+			    reader.readAsDataURL(blob); 
+			}
+		});
+		/* Mala idea. Es muy común dar doble click en el texto para seleccionarlo y sobreescribirlo.
+		$(textArea).on('dblclick', function() {
+			self.edit(this);
+			return false;
+		});
+		*/
+		$(editButton).on('click', function() {
+			self.edit(this);
+			return false;
+		});
+		$(saveButton).on('click', function() {
+			self.save(this);
+			return false;
+		});
+		$(addButton).on('click', function() {
+			self.add(this);
+			return false;
+		});
+		$(cancelButton).on('click', function() {
+			// Hay que cambiar esto. Ahora se fija si es el último para saber si lo quita o switchea la visibilidad div-textarea.
+			// Pero pasa que cuando no agregaste ninguno nuevo el útimo es un doc normal que si se cancela hay que switchear y no eliminar.
+			// La mejor forma para saber si switchear o eliminar queda siendo buscar si el div tiene id. Si tiene, se switchea y si no se elimina.
+			var id = self.getId(this);
+			if(id != null) {
+				$(textArea).val($(textArea).prop('previousText'));
+				
+				var divDoc = self.getDoc(div);
+				divDoc.doc.renderDiv();
+				
+				$(textArea).hide();
+				// $(div).show();
+				
+				self.buttonsRefresh(this);
+			} else {
+				$(this).parent().parent().remove();
+				self.length -= 1;
+				var addCreator = $(this).parent().parent().prop('addCreator');
+				
+				if(self.length > 0) {
+					self.buttonsRefresh(addCreator);
+				} else {
+					$(addCreator).show();
+				}
+			}
+			return false;
+		});
+	}
+	
+	rerender(ids, method) {
+		var methodAux = stringUtilNotEmpty(method) ? method : 'doNothing';
+		utilMethodCall(this.root, methodAux, ids);
+	}
+	
+	save(context) {
+		var divDoc = this.getDoc(context);
+		$(divDoc).prop('doc').editEnds();
+	}
+	
+	/**
+	 * Acciones que se deben ejecutar luego de que se guarda el contenido de este input.
+	 * IMPORTANTE: método gemelo en docs.js (debieran estar ambos en doc.js).
+	 */
+	saveAfter(context) {
+		this.buttonsRefresh(context);
+		
+		if(stringUtilNotEmpty(this.method)) {
+			this.select(context);
+			utilMethodCall(this.root, this.method);
+		}
+	}
+	
+	select(control) {
+		var id = this.getId(control);
+		$(this.selected).val(id);
+		var doc = this.getDoc(control);
+		var index = $(doc).prop('index');
+		$(this.selectedIndex).val(index);
+	}
+}

@@ -1,0 +1,82 @@
+function inteReload(innerPrefix) {
+	reloadCheck('inputText', innerPrefix, function(input) {
+		new inteInputText(input);
+	});
+}
+
+function inteInputText(input) {
+	var self = this;
+	this.root = $(input);
+	this.prefix = 'inte';
+	input.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	var actions = $(this.root).attr('data-actions');
+	if(stringUtilNotEmpty(actions)) {
+		$(this.root).on('keyup', function() {
+			utilMode4Process(self.root);
+		});
+	}
+	
+	var locations = $(this.root).attr('data-location');
+	if(stringUtilNotEmpty(locations)) {
+		
+		var address = input;
+		var state;
+		var city;
+		var latitude;
+		var longitude;
+		var zipcode;
+		
+		for(var	controlId of locations.split(',')){
+			
+			var control = mMojito.tagGet(controlId, this.root);
+			
+			if(controlId.indexOf('state') != -1) { state = control; }
+			if(controlId.indexOf('city') != -1) { city = control; }
+			if(controlId.indexOf('latitude') != -1) { latitude = control; }
+			if(controlId.indexOf('longitude') != -1) { longitude = control; }
+			if(controlId.indexOf('zipCode') != -1) { zipcode = control; }
+			/*
+			var control = document.getElementById(controlId);
+			if(controlId.indexOf('state')!=-1){ state = control; }
+			if(controlId.indexOf('city')!=-1){ city = control; }
+			if(controlId.indexOf('latitude')!=-1){ latitude = control; }
+			if(controlId.indexOf('longitude')!=-1){ longitude = control; }
+			if(controlId.indexOf('zipCode')!=-1){ zipcode = control; }
+			*/
+		}
+	    
+	    new mapuMapUtil(address).autocomplete(address, city, state, zipcode, latitude, longitude);
+	}
+}
+
+inteInputText.prototype.inteClipboardCopy = function(text) {
+	var textAux = text;
+	if(stringUtilEmpty(textAux)) {
+		textAux = $(this.root).val();
+	}
+	utilCopyToClipboard(textAux);
+	
+	var messageListId = this.innerInfo.getId('messageList');
+	var messageList = jqSelectId(messageListId);
+	var messageListHandler = $(messageList).prop('mHandler');
+	
+	var textAuxAbbreviate = stringUtilAbbreviate(textAux, 30);
+	messageListHandler.meslShowInfo('Clipboard (' + textAuxAbbreviate + ')', 2);
+}
+
+inteInputText.prototype.inteBlock = function() {
+	$(this.root).attr('disabled', 'disabled');
+	$(this.root).addClass('mojito-inputbase-disabled-input');
+}
+
+inteInputText.prototype.inteAddText = function(text, separator) {
+	if(stringUtilNotEmpty(text)) {
+		if(stringUtilNotEmpty(separator) && stringUtilNotEmpty($(this.root).val())) {
+			$(this.root).val($(this.root).val() + separator);
+		}
+		$(this.root).val($(this.root).val() + text);
+		
+	}
+}

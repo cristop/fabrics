@@ -1,0 +1,55 @@
+function hiddReload(innerPrefix) {
+	reloadCheck('hidden', innerPrefix, function(input) {
+		new hiddHidden(input);
+	});
+}
+
+class hiddHidden {
+	constructor(input) {
+		var self = this;
+		this.root = $(input);
+		this.prefix = 'hidd';
+		input.mHandler = this;
+		this.innerInfo = utilGetInnerInfo(this.root);
+	}
+	
+	getValue() {
+		return $(this.root).val();
+	}
+
+	setValue(value, par01, par02, par03, par04, par05, queryTable) {
+		if(mString.isEmpty(queryTable)) {
+			var valueAux = value;
+			if(mFloat.isFloat(valueAux)) {
+				valueAux = mFloat.format(valueAux);
+			}
+			$(this.root).val(valueAux);
+		}else{			
+			var self = this;
+			var queryTable = $('div[data-control="queryTable"][id$="' + queryTable + '"]');
+			if(queryTable.length > 0){
+				queryTable.each(function() {
+					var mHandler = $(this).prop('mHandler');
+					var ids = mHandler.qtabSelectedIds();
+					self.hiddSetValue(ids);
+				});
+			}else{
+				this.hiddSetValue('');
+			}
+		}
+	}
+	
+	// Métodos a re-escribir.
+	// Reescrito.
+	hiddGetValue() {
+		return this.getValue();
+	}
+
+	hiddSetValue(value, par01, par02, par03, par04, par05, queryTable) {
+		this.setValue(value, par01, par02, par03, par04, par05, queryTable);
+	}
+
+	hiddValue() {
+		return $(this.root).val();
+	}
+}

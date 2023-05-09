@@ -1,0 +1,95 @@
+function ihtmReload(innerPrefix) {
+	reloadCheck('inputHtml', innerPrefix, function(textArea) {
+		new ihtmlInputHtml(textArea);
+	});
+}
+
+function ihtmlInputHtml(textArea) {
+	this.root = $(textArea);
+	var self = this;
+	
+	var trumbowyg = $(this.root).trumbowyg({
+		urlProtocol: true,
+		semantic: false,
+		spellcheck: true,
+		removeformatPasted: false,
+		tagsToKeep: ['span[data-id]'],
+		btnsDef: {
+			indent: {
+				fn: 'indent',
+				text: '&#9658;',
+				title: 'Indent',
+				isSupported: function () { return !!document.queryCommandSupported && !!document.queryCommandSupported('indent'); },
+				hasIcon: false
+			},
+			outdent: {
+				fn: 'outdent',
+				text: '&#9668;',
+				title: 'Outdent',
+				isSupported: function () { return !!document.queryCommandSupported && !!document.queryCommandSupported('outdent'); },
+				hasIcon: false
+			},
+		},
+		btns: [
+			['viewHTML'],
+			['undo', 'redo'],
+			['strong'],
+			['unorderedList', 'orderedList'],
+			['outdent', 'indent'],
+			['link'],
+			['fullscreen']
+		]
+	});
+	
+	// Fernando (2018-08-31): lo piso porque a veces toma el bold del estilo de la página y no queda bien.
+	$(this.root).parent().css("font-weight", "normal");
+	
+	var callback = $(this.root).attr('data-callback');
+	if(callback != null) {
+		eval(callback + '(trumbowyg)');
+	}
+	
+	var divContent = $(this.root).prev();
+	var autocomplete = $(this.root).attr('data-autocomplete');
+	if(autocomplete == 'true') {
+		// example of alternative callback
+		var tribute = new Tribute({
+			values: function (text, cb) {
+				self.remoteSearch(text, entities => cb(entities));
+			},
+			selectTemplate: function (item) {
+				if (typeof item === 'undefined') return null;
+				if (this.range.isContentEditable(this.current.element)) {
+					return '<span contenteditable="false" style="color: blue;" data-id="' + item.original.id + '">' + item.original.value + '</span>';
+				}
+				return '@' + item.original.value;
+			}
+		});
+		
+	    tribute.attach(divContent);
+	}
+	
+	var height = $(this.root).attr('data-height');
+	if(height != null) {
+		$(divContent).closest(".trumbowyg-box").css("min-height", height + "px");
+		$(divContent).closest(".trumbowyg-editor").css("min-height", height + "px");
+	}
+}
+
+ihtmlInputHtml.prototype.remoteSearch = function(text, cb) {
+	var url = utilGetAjaxUrlTribute(text);
+	xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function ()
+	{
+		if (xhr.readyState === 4) {
+			if (xhr.status === 200) {
+				var data = JSON.parse(xhr.responseText);
+				cb(data);
+			} else if (xhr.status === 403) {
+				cb([]);
+			}
+		}
+	};
+	xhr.open("GET", url, true);
+	xhr.send();
+}

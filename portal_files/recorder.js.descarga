@@ -1,0 +1,162 @@
+function rcRecorder(recorderDiv, method, containerId, innerUrl) {
+	this.div = jqSelectId(recorderDiv);
+	
+	try {
+		this.recording = $(this.div).find('#mojito-recorder-recording');
+		this.record = $(this.div).find('#mojito-recorder-record');
+		this.cancel = $(this.div).find('#mojito-recorder-cancel');
+		this.stop = $(this.div).find('#mojito-recorder-stop');
+		this.time = $(this.div).find('#mojito-recorder-timeDisplay');
+		this.audioControl = $(this.div).find('#mojito-recorder-audioControl');
+		this.recordingsListDiv = $(this.div).find('#mojito-recorder-recordingsListDiv');
+		this.method = method;
+		this.url = (innerUrl == null ? 'self' : innerUrl);
+		this.inputName = recorderDiv;
+		
+		if(containerId == null) {
+			this.container = document.forms[0];
+			this.innerPrefix = null;
+		} else {
+//			this.container = jqSelectId(containerId);
+			this.container = tagUtilGetControl(containerId);
+			this.innerPrefix = containerId.split('/')[0];
+		}
+		
+		var self = this;
+		$(this.record).on('click', function() {
+			self.startRecording();
+		});
+		$(this.cancel).on('click', function() {
+			self.cancelRecording();
+		});
+		$(this.stop).on('click', function() {
+			self.stopRecording();
+		});
+	} catch (e) {
+		vxAlert('No web audio support in this browser!');
+	}
+}
+
+rcRecorder.prototype.startRecording = function() {
+	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+	navigator.getUserMedia =
+		navigator.getUserMedia ||
+		navigator.webkitGetUserMedia ||
+		navigator.mozGetUserMedia ||
+		navigator.msGetUserMedia;
+	window.URL = window.URL || window.webkitURL;
+	
+	this.audio_context = new AudioContext;
+	var self = this;
+	try {
+		window.webkit.messageHandlers.notification.postMessage("Recording|"+self.method+"|"+self.inputName);
+	} catch(e) {
+		navigator.getUserMedia({ audio: true }, function (stream) {
+			self.audio_stream = stream;
+			
+			var input = self.audio_context.createMediaStreamSource(stream);
+			self.recorder = new Recorder(input, {
+				numChannels: 1
+			});
+
+			self.recorder && self.recorder.record();
+			$(self.audioControl).empty();
+			$(self.record).hide();
+			$(self.stop).show();
+			$(self.cancel).show();
+			$(self.recording).css('display', 'inline-block');
+			$(self.time).css('display', 'inline-block');
+			self.timeInit = new Date();
+			self.interval = window.setInterval(function() { self.updateCronometer(); }, 500);
+		}, function (e) {
+			vxAlert('No live audio input: ' + e);
+		});
+    };
+}
+
+rcRecorder.prototype.cancelRecording = function() {
+	this.recorder && this.recorder.clear();
+	$(this.record).show();
+	$(this.recording).hide();
+	$(this.stop).hide();
+	$(this.cancel).hide();
+	$(this.time).hide();
+	this.timeInit = undefined;
+	$(this.time).html("00:00");
+	clearInterval(this.interval);
+}
+
+rcRecorder.prototype.stopRecording = function(method) {
+	this.recorder && this.recorder.stop();
+	// $(this.record).show();
+	$(this.recording).hide();
+	$(this.stop).hide();
+	$(this.cancel).hide();
+	$(this.time).hide();
+	this.timeInit = undefined;
+	$(this.time).html("00:00");
+	clearInterval(this.interval);
+	this.audio_stream.getAudioTracks()[0].stop();
+	this.createDownloadLink(this.method);
+	
+	this.recorder.clear();
+}
+
+rcRecorder.prototype.updateCronometer = function() {
+	if(this.timeInit){
+		 var sec = Math.floor((new Date - this.timeInit)/1000)
+		 $(this.time).html("" + (this.minSecTime(sec / 60 | 0)) + ":" + (this.minSecTime(sec % 60)));
+	}
+}
+
+rcRecorder.prototype.minSecTime = function(n) {
+    return (n < 10 ? "0" : "") + n;
+};
+
+rcRecorder.prototype.createDownloadLink = function(method) {
+	var self = this;
+	this.recorder && this.recorder.exportWAV(function(blob) {
+		$(self.audioControl).html('Please wait...');
+		
+		var url = URL.createObjectURL(blob);
+		
+		var methodName = 'methodName';
+		var audioText = 'audioText';
+		if(self.innerPrefix != null) {
+			methodName = self.innerPrefix + '/methodName';
+			audioText = self.innerPrefix + '/' + audioText;
+		}
+		
+		var reader = new FileReader();
+		reader.readAsDataURL(blob);
+		reader.onload = function(e){
+			$("[name='" + audioText + "']").val(reader.result);
+			setTimeout(function() {
+				utilSetMethodToCall(methodName, self.method, null, self.url, self.container.id, null, null, null, null, null, 'audioText');	
+			}, 5000);
+		};
+	});
+}
+
+function rcRemoveAudio(deleteMethod, selected, id, containerId, innerUrl) {
+	vxConfirm('Are you sure to delete this audio file?', function() {
+		var selectedControl = jqSelectId(selected);
+		$(selectedControl).val(id);
+		
+		var container = document.forms[0];
+		var methodName = 'methodName';
+		var audioText = 'audioText';
+		if(containerId != null) {
+			container = tagUtilGetControl(containerId);
+			methodName = containerId.split('/')[0] + '/methodName';
+//			audioText = containerId.split('/')[0] + '/' + audioText;
+		}
+		var url = (innerUrl == null ? 'self' : innerUrl);
+		
+		utilSetMethodToCall(methodName, deleteMethod, null, url, container.id, null, null, null, null, null, audioText);
+	});
+}
+
+function rcPlaySelect(url) {
+	new Audio(url).play();
+}

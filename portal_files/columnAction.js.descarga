@@ -1,0 +1,52 @@
+function coanReload(innerPrefix) {
+	reloadCheck('columnAction', innerPrefix, function(anchor) {
+		new coanColumnAction(anchor);
+	});
+}
+
+function coanColumnAction(anchor) {
+	var self = this;
+	this.root = tagUtilGetControl(anchor);
+	this.prefix = 'coan';
+	this.root.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	this.modal = $(this.root).attr('data-modal');
+	this.modalWidth = $(this.root).attr('data-modal-width');
+	
+	var dragInfo = $(this.root).attr('data-drag');
+	if (dragInfo != null){
+		$(this.root).closest('tr').prop('coan', this);
+		$(this.root).draggable({ 
+			helper: function(){
+				var dragData = JSON.parse(dragInfo);
+				return $('<span class="mojito-drag">'+dragData.label+'</span>')
+			}
+		});
+	}
+	
+	if(stringUtilNotEmpty(this.modal)) {
+		$(this.root).on('click', function() {
+			utilSetCaller(self.root);
+			tagUtilShowModal(stringUtilResolve(self.modal), self.modalWidth, self.root);
+		});
+	}
+	
+	var actions = $(this.root).attr('data-actions');
+	if(stringUtilEmpty($(this.root).attr('onclick')) && stringUtilNotEmpty(actions) && stringUtilEmpty(this.modal)) {
+		$(this.root).on('click', function() {
+			utilMode4Process(self.root);
+		});
+	}
+}
+
+coanColumnAction.prototype.coanClipboardCopy = function(text) {
+	utilCopyToClipboard(text);
+	
+	var messageListId = this.innerInfo.getId('messageList');
+	var messageList = jqSelectId(messageListId);
+	var messageListHandler = $(messageList).prop('mHandler');
+	
+	var textAbbreviate = stringUtilAbbreviate(text, 30);
+	messageListHandler.meslShowInfo('Clipboard (' + textAbbreviate + ')', 2);
+}

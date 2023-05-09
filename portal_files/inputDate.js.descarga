@@ -1,0 +1,291 @@
+function indaReload(innerPrefix) {
+	reloadCheck('inputDate', innerPrefix, function(input) {
+		new indaInputDate(input);
+	});
+}
+
+function indaInputDate(input) {
+	var self = this;
+	this.root = input;
+	this.prefix = 'inda';
+	input.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	if(reloadIsLayoutNew()) {
+		var format = $(this.root).attr('data-format');
+		if(stringUtilEmpty(format)) {
+			format = mGlobal.dateFormat;
+		}
+		
+		if(!$(this.root).is('[readonly]')) {
+			// Cambiar debug a true para que el calendario no se cierre y se pueda ver el HTML en el navegador.
+			$(this.root).datetimepicker({debug: false, useCurrent: false, format: format.toUpperCase(), locale: mGlobal.language}).on('dp.change', function(ev){
+				var methodAttr = $(this).attr('data-method');
+				if(methodAttr != null) {
+					var rerender = $(this).attr('data-rerender');
+					// var innerInfo = self.innerInfo;
+					utilMethodCall(self.root, methodAttr, rerender, null, null, self.root);
+				}
+				
+				self.root.blur();
+				self.indaSetAge();
+			});
+			$(this.root).on('keyup', function() {
+				self.indaSetAge();
+			});
+		} else {
+			$(this.root).on('change', function(){
+				var methodAttr = $(this).attr('data-method');
+				if(methodAttr != null) {
+					var rerender = $(this).attr('data-rerender');
+					var innerInfo = self.innerInfo;
+					utilSetMethodToCall(innerInfo.methodName, methodAttr, true, innerInfo.innerUrl, innerInfo.innerId, false, null, null, null, null, rerender);
+				}
+				
+				self.indaSetAge();
+			});
+		}
+		
+		this.indaLoadRange();
+	}
+
+	this.ageEnabled = false;
+	this.age = $(this.root).attr('data-age');
+	if(stringUtilNotEmpty(this.age)) {
+		var ageId = this.innerInfo.getId(this.age);
+		var ageControl = jqSelectId(ageId);
+		if($(ageControl).length == 1) {
+			this.ageEnabled = true;
+		}
+	}
+}
+
+indaInputDate.prototype.indaGetDate = function() {
+	var value = $(this.root).val();
+	var result = dateUtilGetDate(value);
+	return result;
+}
+
+indaInputDate.prototype.indaSetAge = function() {
+	if(this.ageEnabled) {
+		var ageControl = jqSelectId(this.age);
+		var birth = this.indaGetDate();
+		var age = dateUtilAge(birth);
+		if(Number.isInteger(age)) {
+			$(ageControl).val(age);
+		} else {
+			$(ageControl).val('');
+		}
+	}
+}
+
+indaInputDate.prototype.indaSetValue = function(value, addDays, addMonths, nextWeekday) {
+	var date = value;
+	var addDaysAux = parseInt(addDays);
+	var addMonthsAux = parseInt(addMonths);
+	
+	if(date == null) {
+		date = new Date(); // devuelve el día de hoy.
+	}
+	
+	if(!isNaN(addDaysAux)) {
+		date.setDate(date.getDate() + addDaysAux);
+	}
+	if(!isNaN(addMonthsAux)) {
+		date.setMonth(date.getMonth() + addMonthsAux);
+	}
+	if(nextWeekday != null) {
+		var weekday = dateUtilGetWeekday(nextWeekday);
+		if(weekday != null) {
+			date.setDate(date.getDate() + 1);
+			while(date.getDay() != weekday) {
+				date.setDate(date.getDate() + 1); 
+			}
+		}
+	}
+	
+	if(date != null) {
+		var value;
+		if(!mString.isString(date)) {
+			value = dateUtilFormat(date);
+		} else {
+			value = date;
+		}
+		$(this.root).val(value);
+		$(this.root).trigger('change');
+	} else {
+		$(this.root).val(null);
+	}
+}
+
+indaInputDate.prototype.indaClipboardCopy = function() {
+	var data = $(this.root).val();
+	utilCopyToClipboard(data);
+	
+	var messageListId = this.innerInfo.getId('messageList');
+	var messageList = jqSelectId(messageListId);
+	var messageListHandler = $(messageList).prop('mHandler');
+	messageListHandler.meslShowInfo('Clipboard (' + data + ')', 2);
+}
+
+indaInputDate.prototype.indaLoadRange = function() {
+	var self = this;
+	var range = $(this.root).attr('data-range');
+	if(stringUtilNotEmpty(range) && !$(this.root).prop("readOnly")) {
+		var rangeId = this.innerInfo.getId(range);
+		var rangeInput = jqSelectId(rangeId);
+		
+		if(rangeInput.length == 1) {
+			this.rangeInput = rangeInput.get(0);
+			this.rangeUl = $(this.root).next().get(0);
+			var rangeButton = $(this.root).next().next();
+			
+			var options = [];
+			if(mGlobal.language == 'es') {
+				options = ['Hoy', 'Ayer', 'Mes actual',
+							'Mes anterior', 'Semana actual', 'Semana anterior', 'Año actual', 'Año anterior',
+							'Cuarto actual', 'Cuarto anterior', 'Todo'];
+			} else {
+				options = ['TODAY', 'YESTERDAY', 'THIS WEEK',
+							'LAST WEEK', 'THIS MONTH', 'LAST MONTH', 'THIS QUARTER', 'LAST QUARTER',
+							'THIS YEAR', 'LAST YEAR', 'ALL'];
+			}
+			
+			for(var i = 0; i < options.length; i++) {
+				var label = options[i];
+				var li = document.createElement('LI');
+				var liText = document.createTextNode(label);
+				li.appendChild(liText);
+				this.rangeUl.appendChild(li);
+				
+				$(li).click(function() {
+					self.indaSetRange(this.innerText);
+				});
+			}
+			
+			$(rangeButton).click(function() {
+				$(self.rangeUl).toggle();
+			});
+		}
+	}
+}
+
+indaInputDate.prototype.indaSetRange = function(option) {
+	var fromControl = this.root;
+	var toControl = this.rangeInput;
+	var listControl = this.rangeUl;
+	
+	var from;
+	var to;
+	var date = new Date();
+	
+	if(option == 'TODAY' || option == 'Hoy') {
+		from = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+		to = from;
+	}
+	if(option == 'YESTERDAY' || option == 'Ayer') {
+		from = new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1);
+		to = from;
+	}
+	if(option == 'THIS YEAR' || option == 'Año actual') {
+		from = new Date(date.getFullYear(), 0, 1); 
+		to = new Date(date.getFullYear(), 11, 31);
+	}
+	if(option == 'LAST YEAR' || option == 'Año anterior') {
+		from = new Date(date.getFullYear() - 1, 0, 1); 
+		to = new Date(date.getFullYear() - 1, 11, 31);
+	}
+	if(option == 'THIS QUARTER' || option == 'Cuarto actual') {
+		if(date.getMonth() <= 2) {
+			from = new Date(date.getFullYear(), 0, 1); 
+			to = new Date(date.getFullYear(), 2, 31);
+		}
+		if(date.getMonth() > 2 && date.getMonth() <= 5) {
+			from = new Date(date.getFullYear(), 3, 1); 
+			to = new Date(date.getFullYear(), 5, 30);
+		}
+		if(date.getMonth() > 5 && date.getMonth() <= 8) {
+			from = new Date(date.getFullYear(), 6, 1); 
+			to = new Date(date.getFullYear(), 8, 30);
+		}
+		if(date.getMonth() > 8 && date.getMonth() <= 11) {
+			from = new Date(date.getFullYear(), 9, 1); 
+			to = new Date(date.getFullYear(), 11, 31);
+		}
+	}
+	if(option == 'LAST QUARTER' || option == 'Cuarto anterior') {
+		if(date.getMonth() <= 2) {
+			from = new Date(date.getFullYear() - 1, 9, 1); 
+			to = new Date(date.getFullYear() - 1, 11, 31);
+		}
+		if(date.getMonth() > 2 && date.getMonth() <= 5) {
+			from = new Date(date.getFullYear(), 0, 1); 
+			to = new Date(date.getFullYear(), 2, 31);
+		}
+		if(date.getMonth() > 5 && date.getMonth() <= 8) {
+			from = new Date(date.getFullYear(), 3, 1); 
+			to = new Date(date.getFullYear(), 5, 30);
+		}
+		if(date.getMonth() > 8 && date.getMonth() <= 11) {
+			from = new Date(date.getFullYear(), 6, 1); 
+			to = new Date(date.getFullYear(), 8, 30);
+		}
+	}
+	if(option == 'THIS MONTH' || option == 'Mes actual') {
+		from = new Date(date.getFullYear(), date.getMonth(), 1);
+		if(date.getMonth() != 11) {
+			to = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+		} else {
+			to = new Date(date.getFullYear() + 1, 0, 0);
+		}
+	}
+	if(option == 'LAST MONTH' || option == 'Mes anterior') {
+		var fromAux;
+		if(date.getMonth() != 0) {
+			from = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+			to = new Date(date.getFullYear(), date.getMonth(), 0);
+		} else {
+			from = new Date(date.getFullYear() - 1, 11, 1);
+			to = new Date(date.getFullYear(), 0, 0);
+		}
+	}
+	if(option == 'THIS WEEK' || option == 'Semana actual') {
+		from = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay());
+		to = new Date(from.getFullYear(), from.getMonth(), from.getDate() + 6);
+	}
+	if(option == 'LAST WEEK' || option == 'semana anterior') {
+		from = new Date(date.getFullYear(), date.getMonth(), date.getDate() - 7 - date.getDay());
+		to = new Date(from.getFullYear(), from.getMonth(), from.getDate() + 6);
+	}
+	if(option == 'ALL' || option == 'Todo') {
+		from = '';
+		to = '';
+	}
+	
+	if(from != null) {
+		if(from != '') {
+			if(mGlobal.dateFormat == 'dd/MM/yyyy') {
+				fromControl.value = stringUtilPadLeft(from.getDate().toString(), 2, "0") + '/' + stringUtilPadLeft((from.getMonth() + 1).toString(), 2, "0") + '/' + from.getFullYear();;
+			}
+			if(mGlobal.dateFormat == 'MM/dd/yyyy') {
+				fromControl.value = stringUtilPadLeft((from.getMonth() + 1).toString(), 2, "0") + '/' + stringUtilPadLeft(from.getDate().toString(), 2, "0") + '/' + from.getFullYear();;
+			}
+		} else {
+			fromControl.value = '';
+		}
+	}
+	if(to != null) {
+		if(to != '') {
+			if(mGlobal.dateFormat == 'dd/MM/yyyy') {
+				toControl.value = stringUtilPadLeft(to.getDate().toString(), 2, "0") + '/' + stringUtilPadLeft((to.getMonth() + 1).toString(), 2, "0") + '/' + to.getFullYear();;
+			}
+			if(mGlobal.dateFormat == 'MM/dd/yyyy') {
+				toControl.value = stringUtilPadLeft((to.getMonth() + 1).toString(), 2, "0") + '/' + stringUtilPadLeft(to.getDate().toString(), 2, "0") + '/' + to.getFullYear();;
+			}
+		} else {
+			toControl.value = '';
+		}
+	}
+	
+	$(listControl).toggle();
+}

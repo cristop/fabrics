@@ -1,0 +1,37 @@
+var shiftPressed = false;
+var ctrlPressed = false;
+var altPressed = false;
+
+document.onkeydown = function(e) {
+	if(e.which == 16) {
+		shiftPressed = true;
+	}
+	if(e.which == 17) {
+		ctrlPressed = true;
+	}
+	if(e.which == 18) {
+		altPressed = true;
+	}
+}
+
+document.onkeyup = function(e) {
+	if(e.which == 16) {
+		shiftPressed = false;
+	}
+	if(e.which == 17) {
+		ctrlPressed = false;
+	}
+	if(e.which == 18) {
+		altPressed = false;
+	}
+}
+
+function keyUtilIsPressed(e, shift, ctrl, alt, key) {
+	var result = false;
+	
+	if(shift == shiftPressed && ctrl == ctrlPressed && alt == altPressed) {
+		result = (e.which == key);
+	}
+	
+	return result;
+}

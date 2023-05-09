@@ -1,0 +1,236 @@
+var eventLastChangeMap = {};
+
+function listReload(innerPrefix) {
+	reloadCheck('list', innerPrefix, function(table) {
+		new listList(table);
+	});
+}
+
+class listList {
+	constructor(table) {
+		var self = this;
+		this.root = tagUtilGetControl(table);
+		this.id = $(this.root).attr('id');
+		this.idVirtual = mMojito.tagGetIdVirtual(this.root);
+		this.prefix = 'list';
+		this.root.mHandler = this;
+		this.innerInfo = utilGetInnerInfo(this.root);
+		this.selectedInput = $('input[data-role="selected"]', $(this.root).parent().parent());
+		this.searchInput = $('input.mojito-list-search-input', $(this.root).parent());
+		
+		if(this.searchInput.length == 1) {
+			this.searchInput.on('keyup', function() {
+				clearTimeout(self.searchTimeout);
+				self.searchTimeout = setTimeout(function() { this.listSearch(); }.bind(self), 250);
+			});
+		}
+		
+		$(this.root).addClass('data-agent-' + mGlobal.navigator);
+		this.event = $(this.root).attr('data-event');
+		this.eventMethod = $(this.root).attr('data-event-method');
+		
+		if(mString.isNotEmpty(this.event)) {
+			
+			if(eventLastChangeMap[this.idVirtual] !== null){
+				this.eventLastChange = eventLastChangeMap[this.idVirtual];
+			}			
+			
+			mEvents.register(this, this.event, this.reloadEvent);
+		}
+		
+		this.listConfig();
+	}
+	
+	config() {
+		var self = this;
+		
+		$('tbody', this.root).sortable({
+			cursor: 'move',
+			containment: 'parent',
+			handle: '.mojito-listcolumn-td-sortable',
+			stop: function (event, ui) {
+				self.listSetOrder();
+			} 
+		});
+	}
+	
+	doRerender(newHtml, part) {
+		var nameBegins = this.id + '[';
+		var nameEnds = '].id';
+		var hidden = $('input[type="hidden"][name^="' + nameBegins + '"][name$="' + nameEnds + '"][value="' + part + '"]');
+		
+		// var tr = $(hidden).closest('tr.mojito-list-data-tr');
+		var tr = $(hidden).closest('tr');
+		
+		$(tr).get(0).outerHTML = newHtml;
+	}
+
+	// Queda por compatibilidad.
+	listSearch() {
+		this.search();
+	}
+
+	// Queda por compatibilidad.
+	listConfig() {
+		this.config();
+	}
+
+	// Queda por compatibilidad.
+	listSetOrder() {
+		this.setOrder();
+	}
+	
+	reloadEvent(data) {
+		// console.log('ELC: '+this.eventLastChange+' - JSON: '+data);
+		var dataObj = JSON.parse(data);
+
+		if(this.eventLastChange != null) {		
+			
+			// console.log('1: ' +this.eventLastChange);
+			if(dataObj.lastChange > this.eventLastChange) {
+//				var formId = this.innerInfo.getId('form');
+//				var handler = document.getElementById(formId).mHandler;
+				
+				var listId =this.innerInfo.getNoInnerPrefix(this.id)
+				mMojito.tagM('form', this.root).refresh(this.eventMethod, listId);
+				eventLastChangeMap[this.idVirtual]=dataObj.lastChange;
+				this.eventLastChange = dataObj.lastChange;
+			}
+		} else {
+			// console.log('2: ' +this.eventLastChange);
+			eventLastChangeMap[this.idVirtual]=dataObj.lastChange;
+			this.eventLastChange = dataObj.lastChange;
+		}
+	}
+
+	search() {
+		var q = $(this.searchInput).val();
+		// $('>tbody>tr.mojito-list-data-tr', this.root).each(function() {
+		$('>tbody>tr', this.root).each(function() {
+			if(mString.indexOf($(this).text(), q) >= 0) {
+				$('>td.mojito-listcolumn-disabled', $(this)).each(function() {
+					var textOriginal = $(this).prop('textOriginal');
+					
+					if(mString.isNotEmpty(textOriginal)) {
+						// En el caso que tenga guardado el texto original
+						// elimina todo lo que sea texto y el span de
+						// highlight y repone el texto original.
+						$(this).contents().filter(function() {
+						    return this.nodeType === 3;
+						}).remove();
+						$('span.mojito-list-highlight-span', this).remove();
+						
+						$(this).append(textOriginal);
+					}
+				});
+				// En este punto todos los TDs tienen el texto normal sin highlight.
+				// El if que sigue se encarga de agregar highlight donde sea necesario.
+				
+				if(mString.isNotEmpty(q)) {
+					$('>td.mojito-listcolumn-disabled', $(this)).each(function() {
+						var textOriginal = $(this).prop('textOriginal');
+						
+						var index = mString.indexOf($(this).text(), q);
+						if(index >= 0) {
+							// En el caso que en el texto esté el texto buscado
+							// remueve todos los nodos de tipo texto y agrega
+							// un primer nodo con el texto previo al texto buscado
+							// luego el texto buscado decorado con un span y por
+							// último el texto posterior al buscado.
+							if(mString.isEmpty(textOriginal)) {
+								$(this).prop('textOriginal', $(this).text());
+							}
+							
+							var text = $(this).prop('textOriginal');
+							var text01 = text.substring(0, index);
+							var text02 = '<span class="mojito-list-highlight-span">' +
+							  text.substring(index, index + q.length) +
+							  '</span>';
+							var text03 = text.substring(index + q.length);
+							
+							$(this).contents().filter(function() {
+							    return this.nodeType === 3;
+							}).remove();
+							// $(this).text('');
+							
+							$(this).append(text01);
+							$(this).append(text02);
+							$(this).append(text03);
+						}
+					});
+				}
+				
+				$(this).fadeIn();
+			} else {
+				$(this).fadeOut();
+			}
+		});
+	}
+	
+	setOrder() {
+		var index = 0;
+		var onchange = null;
+		$('tr', this.root).each(function() {
+			var sortable = $(this).find('[data-sortable]')
+			if($(sortable).length > 0) {
+				$(sortable).val(index);
+				if(onchange == null) {
+					onchange = $(sortable).attr('data-onchange');
+				}
+			}
+			index += 1;
+		});
+		if(onchange != null) {
+			utilMethodCall(this.root, onchange);
+		}
+	}
+	
+	setRow(id) {
+		var target = this.root;
+		var tdId = this.root.id + '[{#}].id';
+		var valueData = id;
+		
+		$(target).closest('table').children('tbody').children('tr').each(
+		    function(index, element) {
+			    $(element).removeClass('mojito-list-selected-tr');
+		    }
+		  );
+		
+		var index = 0;
+		
+		var inputsId = document.getElementsByName(tdId.replace('{#}', index));
+		var inputId = inputsId != null && inputsId.length > 0 ? inputsId[0] : null;
+		
+		while(inputId != null) {
+			if(inputId.value == valueData) {
+				var tr = $(inputId).closest('tr'); 
+				tr.addClass('mojito-list-selected-tr');
+				if(tr.next().hasClass('mojito-internal')) {
+					tr.next().addClass('mojito-list-selected-tr');
+					
+					// Fernando (2018-10-14): parche, funciona hasta 3 filas, hay que hacer un while.
+					if(tr.next().next().hasClass('mojito-internal')) {
+						tr.next().next().addClass('mojito-list-selected-tr');
+						// Fernando (2019-06-27): parche, funciona hasta 4 filas, hay que hacer un while.
+						if(tr.next().next().next().hasClass('mojito-internal')) {
+							tr.next().next().next().addClass('mojito-list-selected-tr');
+						}
+					}
+				}
+			}
+			
+			index += 1;
+			
+			inputsId = document.getElementsByName(tdId.replace('{#}', index));
+			inputId = inputsId != null && inputsId.length > 0 ? inputsId[0] : null;
+		}
+	}
+	
+	setSelected(tag) {
+		// var tr = $(tag).closest('tr.mojito-list-data-tr');
+		var tr = $(tag).closest('tr');
+		var input = $('input[type="hidden"][name$="].id"]', tr);
+		var id = $(input).val();
+		$(this.selectedInput).val(id);
+	}
+}

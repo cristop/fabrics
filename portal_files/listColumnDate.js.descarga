@@ -1,0 +1,29 @@
+function lcdaReload(innerPrefix) {
+	reloadCheck('listColumnDate', innerPrefix, function(td) {
+		new lcdaListColumnDate(td);
+	});
+}
+
+function lcdaListColumnDate(td) {
+	var self = this;
+	this.root = td;
+	this.prefix = 'lcda';
+	this.root.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	this.input = $('input', this.root);
+	
+	// Solo inputs visibles y que permitan carga. Si no deben quedar con el formato que hayan sido renderizados.
+	if($(this.input).attr('readonly') != 'true' && !mString.equals($(this.input).attr('type'), 'hidden')) {
+		if(reloadIsLayoutNew()) {
+			$(this.input).datetimepicker( {
+				format: mGlobal.dateFormat.toUpperCase(),
+				locale: mGlobal.language 
+			});
+		}
+		if(reloadIsLayoutHorizontal()) {
+			$(this.input).on('focus', function() {
+				showCalendarControl(this, mGlobal.dateFormat);
+			});
+		}
+	}
+}

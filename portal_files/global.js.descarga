@@ -1,0 +1,49 @@
+// Se revisó y buscó en Cava, Duplo y Mojito.
+var reloadDecimalComma = false;
+var reloadDateFormat = 'MM/dd/yyyy';
+var reloadDateFormatCapital = 'MM/dd/yyyy'.toUpperCase();
+var reloadUniqueClass = false;
+var reloadLayout = 'vertical';
+var reloadErrorPage = 'errorHandler.htm';
+var reloadLanguage = 'en';
+var reloadNavigator = '(unknown)';
+var reloadFavicon;
+var reloadErrorHandlerInProgress;
+/**
+ * Detiene todos los requests que envía utilAjaxPost.
+ * Es decir casi la totalidad de las llamadas por Ajax.
+ * Se utiliza cuando se detecta que en el request viene el login.
+ * Porque eso indica que no hay usuario logueado.
+ */
+var realodIgnoreAllRequests = false;
+
+/**
+ * Detiene los refrescos de secciones solamente.
+ * No recuerdo por qué esta variable está definida como propiedad de window.
+ * Pero la dejo así y la documento.
+ */ 
+// window.reloadIntervalsStop = true;
+
+class mGlobalClass {
+	
+	constructor() {
+		// Carga en JavascriptParameters.
+		this.inSession = false;
+		this.decimalComma = false;
+		this.dateFormat = 'MM/dd/yyyy';
+		this.dateFormatCapital = 'MM/dd/yyyy'.toUpperCase();
+		this.uniqueClass = false;
+		this.layout = 'vertical';
+		this.intervalsStop = false; // setear a true para que no se ejecute ningún intervalo.
+		this.errorPage = 'errorHandler.htm';
+		this.language = 'en';
+		this.navigator = '(unknown)';
+		this.favicon = null;
+	}
+	
+	swapIntervals() {
+		this.invervalsStop = !this.intervalsStop;
+	}
+}
+
+var mGlobal = new mGlobalClass();

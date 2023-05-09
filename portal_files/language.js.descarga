@@ -1,0 +1,29 @@
+function langReload(innerPrefix) {
+	reloadCheck('language', innerPrefix, function(span) {
+		new langLanguage(span);
+	});
+}
+
+function langLanguage(span){
+	var self = this;
+	this.root = tagUtilGetControl(span);
+	this.prefix = 'lang';
+	this.root.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	var parent = $(this.root).parent();
+	if($(parent).prop('tagName') == 'A') {
+		$(parent).attr('href', '#');
+		$(parent).attr('target', '');
+	}
+	
+	$(this.root).on('click', function() {
+		var id = self.innerInfo.getNoInnerPrefix($(self.root).attr('id'));
+		var page = 'messageRecordAjax.htm?code=' + encodeURIComponent(id);
+		tagUtilShowModal(page);
+		event.stopPropagation();
+	});
+}
+
+langLanguage.prototype.langConfig = function() {
+}

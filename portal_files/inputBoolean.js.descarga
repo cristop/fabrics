@@ -1,0 +1,52 @@
+function inboReload(innerPrefix) {
+	reloadCheck('inputBoolean', innerPrefix, function(input) {
+		new inboInputBoolean(input);
+	});
+}
+
+function inboInputBoolean(input) {
+	var self = this;
+	this.root = input;
+	this.prefix = 'inbo';
+	input.mHandler = this;
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	this.input = $('input[type="hidden"]', this.root);
+	
+	var actions = $(this.root).attr('data-actions');
+	if(stringUtilNotEmpty(actions)) {
+		$(this.input).change(function() {
+			utilMode4Process(self.root);
+		});
+	}
+	
+	var rerender = $(this.root).attr('data-rerender');
+	var method = $(this.root).attr('data-method');
+	if(stringUtilNotEmpty(rerender) || stringUtilNotEmpty(method)) {
+		$(this.input).change(function() {
+			// var rerenderArray = rerender.split(':');
+			// var method = rerenderArray.length <= 1 ? null : rerenderArray[0];
+			// var ids = rerenderArray.length <= 1 ? rerenderArray[0] : rerenderArray[1];
+			utilMethodCall(self.root, method, rerender);
+		});
+	}
+}
+
+inboInputBoolean.prototype.inboValue = function() {
+	return $(this.input).val();
+}
+
+inboInputBoolean.prototype.inboSetValue = function(value) {
+	var originalValue = this.inboValue();
+	
+	if(originalValue != value){
+
+		// Las llamadas siguientes se deberían registrar directo en JS. Ahora es el comportamiento que toma el onClick cuando esta enable y se informa desde el InputBooleanRender.		
+		if (reloadIsLayoutHorizontal()){
+			var checkBox = tagUtilGetControl(this.root.id+'.checkbox');
+			tagUtilSetCheckboxToHidden2(checkBox.id, this.input.id, $(checkBox).attr('data-image-true'), $(checkBox).attr('data-image-false'));
+		}else {
+			tagUtilSetCheckboxToHidden3(this.root.id+'.checkbox.id', this.input.id);
+		}
+	}
+}

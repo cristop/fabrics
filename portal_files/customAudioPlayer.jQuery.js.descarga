@@ -1,0 +1,212 @@
+/* ******************************* */
+/* ******************************* */
+/* 
+Developed: by Cristo
+Required:
+Jquery
+FontAwebsome
+Bootstrap - Opcional, para modal
+/* ******************************* */
+/* ******************************* */
+/*
+Instrucciones:
+SI LA VARIABLE modalBootstrap ESTA EN TRUE (Bootstrap necesario)
+Botón o link:
+ * Agregar la clase .customAudioPlayer
+ * Atributo data-player-name, para poner nombre de canción, o titulo principal
+ * Atributo data-player-description, para poner artista o descripcion
+ * Atributo data-player-href, para poner la url del audio
+
+Ejemplo:
+<button type="button" class="btn btn-primary customAudioPlayer" data-player-name="Cristo" data-player-description="Leña para el carbón" data-player-href="example.mp3">
+  Tema 1
+</button>
+/* ******************************* */
+/* ******************************* */
+var settingsModalBootstrap=true;
+var settingsVersionBootstrap=3;
+
+var iconPlay = '';
+var iconStop = '';
+var iconPrev = '';
+var iconNext = '';
+
+$(
+function(){
+	
+	if(reloadIsLayoutHorizontalNew()){
+		iconPlay = 'cis-media-play';
+		iconStop = 'cis-media-stop';
+		iconPrev = 'cis-media-skip-backward';
+		iconNext = 'cis-media-skip-forward';
+	} else {
+		iconPlay = 'icon-play';
+		iconStop = 'icon-stop';
+		iconPrev = 'icon-prev';
+		iconNext = 'icon-next';
+	}
+	
+	/* Si el modal bootstrap está en true */
+	if(settingsModalBootstrap){
+		if(settingsVersionBootstrap == 3){
+			$('body').append(createAudioModalB3());
+		}
+		if(settingsVersionBootstrap == 4){
+			$('body').append(createAudioModalB4());
+		}
+		initBootstrapModal();
+	}
+
+	/* Player Functions */
+	var aud = $('#player-custom audio')[0];
+	$('#player-custom .play-pause').on('click', function(){
+		if (aud.paused) {
+			aud.play();
+			$('.play-pause').removeClass(iconPlay);
+			$('.play-pause').addClass(iconStop);
+		}
+		else {
+			aud.pause();
+			$('#player-custom .play-pause').removeClass(iconStop);
+			$('#player-custom .play-pause').addClass(iconPlay);
+		}
+	});
+	$('#player-custom .prev').on('click', function(){
+		/* aud.src = 'another audio source'; */
+		aud.currentTime = aud.currentTime - 10;
+	})
+	$('#player-custom .next').on('click', function(){
+		/* aud.src = 'another audio source'; */
+		aud.currentTime = aud.currentTime + 10;
+	})
+	aud.ontimeupdate = function(){
+		$('#player-custom .progress').css('width', aud.currentTime / aud.duration * 100 + '%');
+
+		$('#player-custom .current-progress').text(sToTime(aud.currentTime));
+		if(aud.duration)
+			$('#player-custom .total-progress').text(sToTime(aud.duration));
+	} 
+});
+
+
+/* Funciones para Bootstrap Modal */
+function initBootstrapModal(controlOrId){
+	
+	var selector ='.customAudioPlayer'; 
+	if(controlOrId !== undefined){
+		selector = controlOrId;
+	}
+		
+	// Armado de Attrs, segun version
+	if(settingsVersionBootstrap == 3){
+		$(selector).attr('data-toggle','modal');
+		$(selector).attr('href','#audioModal');
+	}
+	if(settingsVersionBootstrap == 4){
+		$(selector).attr('data-toggle','modal');
+		$(selector).attr('data-target','#audioModal');
+	}
+
+	// acciones para el click del link
+	$(selector).click(function(event) {
+		$('.audioModal .name').text($(this).attr('data-player-name'));
+		$('.audioModal .description').text($(this).attr('data-player-description'));
+		$('#player-custom audio')[0].src=$(this).attr('data-player-href');
+	});
+
+	// Fix para cuando se cierra el Modal
+	$('.audioModal .close').on('click', function(){
+		$('#player-custom audio')[0].stop();
+		$('#player-custom .progress').css('width',0);
+		$('#player-custom .play-pause').removeClass(iconStop);
+		$('#player-custom .play-pause').addClass(iconPlay);
+	});
+}
+
+
+/* Funciones constructoras de HTML */
+function createAudioPlayer(){
+	$(this).html(AudioPlayer());
+}
+function AudioPlayer(){
+	var player='<!-- Reproductor -->  \
+		<div id="player-custom"> \
+		<audio src="">Your browser does not support the audio element.</audio> \
+		<div class="info"> \
+		<div class="name"></div> \
+		<div class="description"></div> \
+		</div> \
+		<div class="player-container"> \
+		<div> \
+		<div class="btns"> \
+		<div class="iconfont prev '+iconPrev+'"></div> \
+		<div class="iconfont play-pause '+iconPlay+'"></div> \
+		<div class="iconfont next '+iconNext+'"></div> \
+		</div> \
+		<div class="progress-container"> \
+		<div class="progress"></div> \
+		<div class="current-progress">00:00</div> \
+		<div class="total-progress">00:00</div> \
+		</div> \
+		</div> \
+		</div> \
+		</div> \
+		<!-- Fin Reproductor -->';
+	return player;
+}
+function createAudioModalB4(){
+	var modal=' \
+		<!-- Modal --> \
+		<div class="modal fade audioModal" id="audioModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"> \
+		<div class="modal-dialog" role="document"> \
+		<div class="modal-content"> \
+		<div class="modal-body"> \
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+		<span aria-hidden="true">&times;</span> \
+		</button> \
+		'+AudioPlayer()+'\
+		</div> \
+		</div> \
+		</div> \
+		</div> \
+		<!-- Fin Modal --> \
+		';
+	return modal;
+}
+function createAudioModalB3(){
+	var modal=' \
+		<!-- Modal --> \
+		<div id="audioModal" class="modal fade audioModal"> \
+		<div class="modal-dialog"> \
+		<div class="modal-content"> \
+		<div class="modal-body"> \
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button> \
+		'+AudioPlayer()+'\
+		</div> \
+		</div> \
+		</div> \
+		</div> \
+		<!-- Fin Modal --> \
+		';
+	return modal;
+}
+
+/* Funciones para conversion a minutos */
+function sToTime(t) {
+	var timeFinal = "";
+	timeFinal += padZero(parseInt((t / (60 * 60)) % 24)) + ":"; /* Hours */
+	timeFinal += padZero(parseInt((t / (60)) % 60)) + ":"; /* Minutes */
+	timeFinal += padZero(parseInt((t) % 60)); /* Seconds */
+	return timeFinal 
+
+}
+function padZero(v) {
+	return (v < 10) ? "0" + v : v;
+}
+
+/* Prototypo para stop */
+HTMLAudioElement.prototype.stop = function()
+{
+	this.pause();
+	this.currentTime = 0.0;
+}

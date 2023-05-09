@@ -1,0 +1,17 @@
+function ddSet(id, value, received) {
+	new Dragdealer(id, {
+		disabled: true,
+		animationCallback: function(x, y) {
+			porc = Math.round(x * 100);
+			div = '#' + id;
+	
+			$(div).siblings('.value').text(porc);
+			$(div).find('.completed').width(porc + '%');
+			if(porc == 100) {
+				$(div).siblings('.value').addClass('complet');
+			} else {
+				$(div).siblings('.value').removeClass('complet');
+			}
+		}
+	}).setValue(value, 0); //este set value sirve para darle un valor inicial, 0.4 es 40%
+}

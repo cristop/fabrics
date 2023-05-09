@@ -1,0 +1,139 @@
+function bellReload(innerPrefix) {
+	reloadCheck('bell', innerPrefix, function(aOrDiv) {
+		new bellBell(aOrDiv);
+	});
+}
+
+function bellReloadAfter(innerPrefix) {
+	if(mString.isEmpty(innerPrefix)) {
+		mEvents.open();
+	}
+}
+
+class bellBell {
+	constructor(a) {
+		var self = this;
+		this.root = a;
+		this.prefix = 'bell';
+		this.id = $(this.root).attr("id");
+		a.mHandler = this;
+		this.innerInfo = utilGetInnerInfo(this.root);
+		
+		this.event = $(this.root).attr('data-event');
+		this.link = $(this.root).attr('data-link');
+		this.linkAside = $(this.root).attr('data-aside');
+		this.favicon = mBool.isTrue($(this.root).attr('data-favicon'), false);
+		
+		if(mString.isNotEmpty(this.linkAside)) {
+			// El botón llama a un slider.
+			
+			this.aside = $('aside.mojito-bell-aside');
+			this.closeNotifications = $('a.mojito-bell-closeNotifications-a');
+			this.comments = $('div.mojito-bell-comments-div');
+			
+			if(reloadIsLayoutHorizontalNew()) {
+				this.button = this.root;
+				this.span = $('span.badge', this.root);
+			}
+			if(reloadIsLayoutVertical()) {
+				this.button = $('ul > li > a > i.fa-bell', this.root);
+				this.span = $('ul > li > a > i > span', this.root);
+			}
+		
+			$(this.button).click( function(event) {
+				if($(self.aside).is(':visible')){
+					// Si el destino esta visible, buscamos el botón cerrar en el aside y le damos click.
+					// $(self.closeNotifications).trigger('click');
+					$(self.aside).stop().animate({
+						width: "toggle"
+					}, 300);
+				} else {
+					// Si el destino no está visible, lo mostramos.
+					$(self.aside).stop().animate({
+						height: "toggle"
+					}, 200);
+					
+					utilDoAjaxDirect(self.linkAside, $(self.comments).get(0), null, true, true);
+					$(self.aside).find('.container-fluid').delay(100).fadeIn('fast');
+				}
+				
+				return false;
+			});
+		
+			// El tag está por fuera del control y no se recarga. Por eso solo se configura si no está previamente configurado.
+			var controlOk = $(this.closeNotifications).attr("data-control-OK");
+			if(controlOk == null) {
+				$(this.closeNotifications).attr("data-control-OK", true);
+				
+				bellLog.log(bellLogBell, log_Debug,
+				  'Define closeNotifications.onclick...');
+				$(this.closeNotifications).click(function(event) {
+					bellLog.log(bellLogBell, log_Debug, 
+							'Call to closeNotifications.click...');
+					
+					$(self.aside).stop().animate({
+						width: "toggle"
+					}, 300);
+				});
+			}
+		
+		}
+		
+		if(mString.isNotEmpty(this.link)) {
+			// El botón llama a un link.
+			if(mString.isNotEmpty(this.link)) {
+				$(this.root).click( function(event) {
+					mMojito.navGoTo(self.link);
+					return false;
+				});
+			}
+		}
+		
+		if(reloadIsLayoutHorizontalNew()) {
+			mEvents.register(this, this.event, this.setValueByEvent);
+		}
+		if(reloadIsLayoutVertical()) {
+			this.faviconNotification(true);
+		}
+	}
+
+	close() {
+		$(this.aside).stop().animate({
+			width: "toggle"
+		}, 300);
+	}
+	
+	faviconNotification(force) {
+		if((mBool.isTrue(force, false) || this.favicon) && this.span !== undefined && this.span.length > 0) {
+			var countString = this.span.html().trim();
+			var count = parseInt(countString);
+			if(mGlobal.favicon != null) {
+				if(count > 0){
+					mGlobal.favicon.badge(count);
+				} else {
+					mGlobal.favicon.reset();
+				}
+			}
+		}
+	}
+
+	setValue(count) {
+		mMojito.tagText('span.badge', count, this.root);
+		if(count <= 0) {
+			$(this.root).fadeOut();
+		} else {
+			$(this.root).fadeIn();
+		}
+		this.faviconNotification();
+	}
+	
+	setValueByEvent(data) {
+		var dataObj = JSON.parse(data);
+		this.setValue(dataObj.count);
+	}
+	
+	// Queda solo por compatibilidad
+	bellClose() {
+		this.close();
+	}
+}

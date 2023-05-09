@@ -1,0 +1,46 @@
+// trshLog.log(trshLogTrash, log_Info, 
+//   line1, line2, line3, ..., lineN);
+
+/**
+ * Deprecado 2022-06-16.
+ */
+function trshUtilAjaxPost001(responseText) {
+	trshLog.log(trshLogTrash, log_Trace, 
+			'Se ingresa a código deprecado porque targetParent estaba en true.');
+	
+	// $.get('https://apps.mojito-soft.com.ar/adm-catador/rest/log?id=2').fail(function(data) { 
+	//   console.log('Error: ' + data);
+	// });
+	
+	// Fernando (2018-09-24): en principio esto está deprecado. La responsabilidad de decidir la acción que debe hacer
+	// la página al volver del manager es del manager. Por eso no se requiere el manejo de targetParent.
+	// Lo que hay que hacer es que el método devuelva BaseManager.AJAX_REFRESH_PARENT o BaseManager.AJAX_RELOAD_PARENT
+	// según corresponda.
+	if(responseText == null || !responseText.startsWith('redirect:')) {
+		// Fernando (2018-09-20): nueva forma porque si no no respeta lo que se haya cargado en el padre.
+		utilSetMethodToCall('methodName', 'doNothing', true);
+	} else {
+		window.location.href = responseText.substring(9);
+	}
+}
+
+/**
+ * Deprecado 2022-09-03
+ */
+function trshUtilAjaxPost002(callback) {
+	trshLog.log(trshLogTrash, log_Trace, 
+	  'Se ingresa a código deprecado toda llamada a tagUtilCloseModal debe tener el primer parámetro en true. Este parámetro indica que se cerrará el último modal que se abrió.');
+	
+	setTimeout(function() {
+		// console.log('.mojito-modal-div: ' + $('.mojito-modal.div').length);
+		// console.log('.mojito-modal-div, window: ' + $('.mojito-modal.div', window).length);
+		// console.log('.mojito-modal-div, document: ' + $('.mojito-modal.div', document).length);
+		$('.mojito-modal-div').each(function() {
+			document.body.removeChild(this);
+		});
+		
+		if(callback != null) {
+			callback();
+		}
+	}, 100);
+}

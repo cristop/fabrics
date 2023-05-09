@@ -1,0 +1,170 @@
+function sboxReload(innerPrefix) {
+	reloadCheck('searchBox', innerPrefix, function(input) {
+		new sboxSearchBox(input);
+	});
+}
+
+var sboxTestIconSearchStart = '..search';
+var sboxTestIconSearchOk = '..ok';
+// var sboxTestIconSearchFails = '..fails'; No es necesario, escribir cualquier cosa.
+
+function sboxSearchBox(input) {
+	var self = this;
+	this.root = tagUtilGetControl(input);
+	this.root.mHandler = this;
+	this.prefix = 'sbox';
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	if(reloadIsLayoutVertical()) {
+		this.iconSearchStart = '<i class="fa fa-cog fa-spin fa-fw" style="font-size: 20px; position: relative; top: -1px; left: -7px;"></i>';
+		this.iconSearchOk = '<i class="fa fa-check" style="font-size: 20px; position: relative; top: -1px; left: -4px; color: green;"></i>';
+		this.iconSearchFails = '<i class="fa fa-times-circle-o" style="font-size: 21px; position: relative; top: -1px; left: -4px; color: red;"></i>';
+	}
+	if(reloadIsLayoutHorizontalNew()) {
+		this.iconSearchStart = '<i class="cis-cog" style="font-size: 20px;"></i>';
+		this.iconSearchOk = '<i class="cis-check" style="font-size: 20px;"></i>';
+		this.iconSearchFails = '<i class="cis-x" style="font-size: 21px;"></i>';
+	}
+	if(reloadIsLayoutNew()) {
+		
+	}
+	
+	this.root = tagUtilGetControl(input);
+	if(reloadIsLayoutHorizontalNew()) {
+		this.button = $(this.root).next();
+	}
+	
+	if(reloadIsLayoutNew()) {
+        $(this.root).autocomplete({
+            serviceUrl: 'incremental.ajax?entity=q',
+            minChars: 3,
+            width: 400,
+            deferRequestBy: 1000,
+            onSelect: function (suggestion) {
+                self.q(suggestion);
+                applyScroll();
+            },
+            onSearchStart: function(){
+            	var icon = self.iconSearchStart;
+                $('.search-icon').html(icon);
+            },
+            onSearchComplete: function(query, suggestions){
+            	if(query != sboxTestIconSearchStart) {
+					if(suggestions.length > 0 || query == sboxTestIconSearchOk) {
+						var icon = self.iconSearchOk;
+						$('.search-icon').html(icon);
+					} else {
+						var icon = self.iconSearchFails;
+						$('.search-icon').html(icon);
+					}
+            	}
+            },
+            /* appendTo: 'div#mojito-searchBox-suggestions', */
+            beforeRender: function(container) {
+            	$(container).mCustomScrollbar({
+                	scrollInertia: 0,
+                    live: true
+                });
+            }
+        }).bind('focus',function(){
+            var e = jQuery.Event( 'keydown', { which: $.ui.keyCode.DOWN } );
+            $(this).trigger(e);
+            applyScroll();
+        }).bind('keypress',function(e){
+        	if(e.key == 'Enter') {
+        		var q = $(this).val();
+        		if(q.length > 2) {
+        			window.location.href = 'searchResults.htm?query=' + encodeURI(q);
+        		} else {
+        			if(!reloadIsEnglish()) {
+        				vxAlert('Debe ingresar al menos tres caracteres.');
+        			} else {
+        				vxAlert('You must enter at least three characters.');
+        			}
+        		}
+        	}
+        });                            
+	}
+	
+	if(this.button != null) {
+		$(this.button).bind('click', function() {
+			if($(self.root).hasClass('hideSearch')) {
+				$(self.root).removeClass('hideSearch');
+				$(self.root).focus();
+				
+				self.inputTimer = setTimeout(function() {
+					if($(self.root).val() == '' && !$(self.root).is(':focus')) {
+						($('#qInput').addClass('hideSearch'))
+						clearTimeout(self.inputTimer);
+					}
+				  }, 10000);
+			}
+			return false;
+		});
+		$(this.button).bind('mousemove', function() {
+			if($(self.root).hasClass('hideSearch')) {
+				$(self.root).removeClass('hideSearch');
+				$(self.root).focus();
+				
+				self.inputTimer = setTimeout(function() {
+					if($(self.root).val() == '' && !$(self.root).is(':focus')) {
+						($('#qInput').addClass('hideSearch'))
+						clearTimeout(self.inputTimer);
+					}
+				  }, 10000);
+			}
+		});
+	}
+}
+
+sboxSearchBox.prototype.q = function(q) {
+	if(q.forbidden == null || !q.forbidden) {
+		utilMethodCallFormCustom('q', null, ['q', q.data]);
+		
+		/*
+		var formQ = $('form');
+		if($(formQ).length > 0) {
+			formQ = $('form').get(0);
+		} else {
+			// El q y el logout hay que hacerlo con un form porque lo requiere el chequeo de csrf. El link solo no funciona.
+			formQ = document.createElement("form");
+			formQ.setAttribute("method", "post");
+			
+			// hiddenCsrf
+			var hiddenCsrf = document.createElement("input");
+		    hiddenCsrf.setAttribute("type", "hidden");
+		    
+		    var csrf = document.head.querySelector("meta[name=_csrf]").content;
+		    hiddenCsrf.setAttribute("name", "_csrf");
+		    hiddenCsrf.setAttribute("value", csrf);
+		    
+			// hiddenMethod
+			var hiddenMethod = document.createElement("input");
+		    hiddenMethod.setAttribute("type", "hidden");
+		    hiddenMethod.setAttribute("id", "methodName");
+		    hiddenMethod.setAttribute("name", "methodName");
+		    hiddenMethod.setAttribute("value", "q");
+		    formQ.appendChild(hiddenMethod);
+		    
+		    formQ.appendChild(hiddenCsrf);
+		    
+		    document.body.appendChild(formQ);
+		}
+		
+		// hiddenQ
+		var hiddenQ = document.createElement("input");
+	    hiddenQ.setAttribute("type","hidden");
+	    hiddenQ.setAttribute("name", "q");
+	    hiddenQ.setAttribute("value", q.data);
+	    formQ.appendChild(hiddenQ);
+	    
+	    utilMethodCall(hiddenQ, 'q');
+	    */
+	} else {
+		var message = 'No permission to query this entity:<br><b>' + q.value + '</b>';
+		if(q.valueForbidden != null && q.valueForbidden.trim() != '') {
+			message += '<br><br><b>' + q.valueForbidden; + '</b>'
+		}
+		vxAlertHtml(message);
+	}
+}

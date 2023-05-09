@@ -1,0 +1,51 @@
+//var popUpStyle = 'status=no,directories=no,menubar=no,toolbar=no,scrollbars=no,location=no,resizable=no,titlebar=no,width=400,height=305';
+ var popUpStyle = 'status=no,directories=no,menubar=no,toolbar=no,scrollbars=no,location=no,resizable=no,titlebar=no,width=450,height=305';
+var popUpName = 'popupDialer';
+function communicationUtilOpenAgentPopUp( continueCalling ){
+	
+	if(continueCalling !== undefined && continueCalling == true){
+		utilAjaxPost('call/pendingDisposition?u='+getUserId(), null, null, communicationUtilValidateOpenAgentPopUp, [continueCalling]);
+	}else {
+		window.open('callAgentActivePopup.htm?continueCalling='+continueCalling, popUpName, popUpStyle);
+	}		
+}
+
+function communicationUtilValidateOpenAgentPopUp(data, continueCalling ){
+	
+	var jsonData = null;
+	if(data != null && data.trim() != '') {
+		jsonData = JSON.parse(data);
+	}
+	
+	if(jsonData!= null){ 
+		if( jsonData['dispositionUrl'] !== undefined ){
+			vxConfirm('You have pending dispositions. You can not init dialer after all previous calls are disposed. Do you want to dispose now?', function(){window.open(jsonData['dispositionUrl'], '_blank');})
+		}
+		
+		var myWindow = window.open('callAgentActivePopup.htm?continueCalling='+continueCalling, popUpName, popUpStyle);		
+		myWindow.focus();
+	}else{
+		vxAlert("Error opening dialer.");
+	}
+}
+
+function communicationUtilOpenLiveMonitorPopup(idCall){	
+	var popUpLiveStyle = 'status=no,directories=no,menubar=no,toolbar=no,scrollbars=no,location=no,resizable=no,titlebar=no,width=400,height=175';
+	var myWindow = window.open('callLiveMonitorPopup.htm?idCall='+idCall, 'popupLiveMonitor', popUpLiveStyle);		
+	myWindow.focus();
+}
+
+function communicationUtilClickToCall(userId, tid){
+	$.getJSON('rest/call/clickToCall', {userName: userId, tid: tid}).done(function (data) {
+		// communicationUtilDialer(true);
+	}).fail(function(data) { 
+		console.log('Error> '+ data);
+	});
+}
+function communicationUtilDialer( singleCall ){
+	var url = 'callDialer.htm';
+	if(singleCall !== undefined){
+		url += '?singleCall=' + singleCall;
+	}
+	window.open(url, 'dialer', 'status=0,directories=0,menubar=0,toolbar=0,scrollbars=0,location=0,resizable=0,titlebar=0,width=360,height=340');
+}

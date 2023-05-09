@@ -1,0 +1,221 @@
+/*:root {
+  --x-primary: #9CA949;
+  --bullet: #8F8E93;
+}*/
+#audioModal {
+	z-index: 9999; 
+}
+#player-custom {
+}
+#player-custom img {
+  margin-top: 5px;
+  width: 60px;
+  height: 50px;
+}
+#player-custom .info {
+  margin-bottom: 15px;
+}
+#player-custom .info .name {
+  font-size: 15px;
+  font-weight: 700;
+}
+#player-custom .info .description {
+  font-size: 12px;
+}
+
+#player-custom .player-container{
+  border: 1px solid #EFEFEF;
+  position: relative;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  padding: 25px 20px;
+  padding-bottom: 10px;
+}
+#player-custom .player-container > div{
+  position: relative;
+}
+
+#player-custom .btns {
+  padding-top: 20px;
+  width: 100%;
+  text-align: center;
+}
+#player-custom .btns div{
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 18px;
+  margin-left: 7px;
+  margin-right: 7px;
+  color: #999;
+  cursor: pointer;
+}
+#player-custom .btns div:hover{
+  opacity: 0.7;
+}
+#player-custom .btns div.play-pause {
+  font-size: 30px;
+  color: var(--c-primary);
+}
+
+#player-custom .progress-container {
+  position: absolute;
+  height: 2px;
+  left: 0;
+  top: 0;
+  background-color: #eee;
+  width: 100%;
+}
+#player-custom .progress {
+  position: relative;
+  background-color: var(--c-primary);
+  overflow: initial;
+  height: 2px;
+  width: 0;
+}
+/*Bull*/
+/*.progress::before {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 5px;
+  background-color: var(--bullet);
+  position: absolute;
+  right: 0;
+  -webkit-border-radius: 50%;
+  border-radius: 50%;
+  transform: translateY(-50%) ;
+  top: 50%;
+}*/
+.current-progress,
+.total-progress{
+  padding-top: 5px;
+  color: #A4A4A4;
+  font-size: 12px;
+}
+.current-progress{
+  float: left;
+}
+.total-progress{
+  float: right;
+}
+
+/* icons */
+#player-custom .iconfont {
+  font-family: FontAwesome;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: inherit;
+}
+#player-custom .icon-list:before {
+  content: "\f03a";
+}
+#player-custom .icon-loop-single:before {
+  content: "\f2ea";
+}
+#player-custom .icon-arrow-right:before {
+  content: "\f105";
+}
+#player-custom .icon-loop:before {
+  content: "\f2ea";
+}
+#player-custom .icon-favor:before {
+  content: "\e608";
+}
+
+/* */
+#player-custom .icon-prev,
+#player-custom .icon-next{
+  position: relative;
+}
+#player-custom .icon-prev:after,
+#player-custom .icon-next:after{
+  content: "15";
+  position: absolute;
+  font-size: 7px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Arial', sans-serif;
+}
+#player-custom .icon-prev:before {
+  content: "\f0e2";
+}
+#player-custom .icon-next:before {
+  /*content: "\f2f9";*/ /*fa5*/
+  content: "\f0e2";
+  display: block;
+  -webkit-transform: scaleX(-1);
+  -moz-transform: scaleX(-1);
+  transform: scaleX(-1);
+  filter: FlipH;
+  -ms-filter: "FlipH";
+}
+/* */
+
+#player-custom .icon-download:before {
+  content: "\f019";
+}
+#player-custom .icon-search:before {
+  content: "\f002";
+}
+#player-custom .icon-zhanwei1:before {
+  content: "\e610";
+}
+#player-custom .icon-favor1:before {
+  content: "\e618";
+}
+#player-custom .icon-random:before {
+  content: "\f074";
+}
+#player-custom .icon-play:before {
+  content: "\f04b";
+}
+#player-custom .icon-stop:before {
+  /*content: "\f04d";*/
+  content: "\f04c"; /* Pause */
+}
+#player-custom .icon-mv:before {
+  content: "\e61b";
+}
+#player-custom .icon-arrow-down:before {
+  content: "\f107";
+}
+#player-custom .icon-arrow-left:before {
+  content: "\f104";
+}
+#player-custom .icon-arrow-up:before {
+  content: "\f106";
+}
+#player-custom .icon-listen:before {
+  content: "\f025";
+}
+#player-custom .icon-round:before {
+  content: "\e60d";
+}
+#player-custom .icon-triangle:before {
+  content: "\f111";
+}
+#player-custom .icon-information:before {
+  content: "\e60f";
+}
+#player-custom .icon-home:before {
+  content: "\e611";
+}
+#player-custom .icon-i:before {
+  content: "\e612";
+}
+#player-custom .icon-information-:before {
+  content: "\e613";
+}
+#player-custom .icon-bubble-filled-icon:before {
+  content: "\e614";
+}
+#player-custom .icon-round-right:before {
+  content: "\e615";
+}
+#player-custom .icon-vip:before {
+  content: "\e61a";
+}
+#player-custom .icon-word:before {
+  content: "\e61c";
+}

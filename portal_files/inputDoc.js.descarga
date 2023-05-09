@@ -1,0 +1,154 @@
+function indoReload(innerPrefix) {
+	reloadCheck('inputDoc', innerPrefix, function(div) {
+		new indoInputDoc(div);
+	});
+}
+
+/**
+ * IMPORTANTE: al modificar esta clase tener en cuenta que parte de su funcionamiento debería estar
+ * en doc.js y compartirse con docs.js. Hay alguna documentación al respecto pero no está completa.
+ */
+class indoInputDoc {
+	constructor(div) {
+		var self = this;
+		this.root = tagUtilGetControl(div);
+		this.root.mHandler = this;
+		this.prefix = 'indo';
+		this.innerInfo = utilGetInnerInfo(this.root);
+		
+		this.method = $(this.root).attr('data-method');
+		
+		this.div = $('div.mojito-inputdoc-doc-div', this.root);
+		
+		this.render(this.div);
+		
+		this.buttonsRefresh(this);
+	}
+	
+	/**
+	 * Oculta o muestra los botones del input.
+	 * IMPORTANTE: método gemelo en docs.js (debieran estar ambos en doc.js).
+	 */
+	buttonsRefresh(control) {
+		var result = this.root;
+		
+		var buttons = $('span.mojito-docs-buttons-panel [data-control="button2"], span.mojito-docs-buttons-panel button, span.mojito-docs-buttons-panel i', result);
+		var modes = this.getModes(result);
+		for(var i = 0; i < buttons.length; i++) {
+			var button = buttons[i];
+			var kind = $(button).attr('data-kind');
+			
+			var show = false;
+			if(stringUtilNotEmpty(kind)) {
+				var kindAnd = kind.split(';');
+				
+				if(kindAnd.length <= 1) {
+					var kindOr = kind.split(',');
+					for(var j = 0; j < kindOr.length; j++) {
+						for(var k = 0; k < modes.length; k++) {
+							show = show || modes[k] == kindOr[j];
+						}
+					}
+				} else {
+					show = true;
+					for(var j = 0; j < kindAnd.length; j++) {
+						var showParcial = false;
+						for(var k = 0; k < modes.length; k++) {
+							showParcial = showParcial || modes[k] == kindAnd[j];
+						}
+						show = show && showParcial;
+					}
+				}
+			}
+			
+			if(show) {
+				$(button).show();
+			} else {
+				$(button).hide();
+			}
+		}
+	}
+	
+	/**
+	 * Devuelve el o los modos en que está el control. Al ser un único control solo
+	 * devuelve 'edit' o 'view'. Pero se mantiene la devolución en forma de array
+	 * para que sea compatbile con su método gemelo.
+	 * IMPORTANTE: método gemelo en docs.js (debieran estar ambos en doc.js).
+	 */
+	getModes(control) {
+		var div = this.doc;
+		var result = [];
+		
+		if($(div.textArea).is(":visible")) {
+			result.push('edit');
+		} else {
+			result.push('view');	
+		}
+		
+		return result;
+	}
+	
+	render(divContainer) {
+		if(this.doc == null) {
+			var div = $('div.mojito-inputdoc-sheet', divContainer);
+			var textArea = $('textarea', divContainer);
+			
+			this.doc = new doc_Doc(div, textArea, this.buttonsRefresh.bind(this));
+		}
+		
+		var editButton = $('>span.mojito-docs-buttons-panel button.mojito-docs-edit-button', divContainer);
+		var saveButton = $('>span.mojito-docs-buttons-panel button.mojito-docs-save-button', divContainer);
+		var cancelButton = $('>span.mojito-docs-buttons-panel button.mojito-docs-cancel-button', divContainer);
+		
+		this.doc.render();
+		
+		var self = this;
+		$(editButton).on('click', function() {
+			self.doc.edit(this);
+			self.buttonsRefresh(self);
+			return false;
+		});
+		$(saveButton).on('click', function() {
+			self.doc.editEnds();
+			self.buttonsRefresh(self);
+			return false;
+		});
+		$(cancelButton).on('click', function() {
+			// Hay que cambiar esto. Ahora se fija si es el último para saber si lo quita o switchea la visibilidad div-textarea.
+			// Pero pasa que cuando no agregaste ninguno nuevo el útimo es un doc normal que si se cancela hay que switchear y no eliminar.
+			// La mejor forma para saber si switchear o eliminar queda siendo buscar si el div tiene id. Si tiene, se switchea y si no se elimina.
+			var id = self['getId'] == null ? 'noNull' : self.getId(this);
+			if(id != null) {
+				$(textArea).val($(textArea).prop('previousText'));
+				self.doc.renderDiv();
+				$(textArea).hide();
+				// $(div).show();
+				
+				self.buttonsRefresh(this);
+			} else {
+				$(this).parent().parent().remove();
+				self.length -= 1;
+				var addCreator = $(this).parent().parent().prop('addCreator');
+				
+				if(self.length > 0) {
+					self.buttonsRefresh(addCreator);
+				} else {
+					$(addCreator).show();
+				}
+			}
+			return false;
+		});
+	}
+	
+	/**
+	 * Acciones que se deben ejecutar luego de que se guarda el contenido de este input.
+	 * IMPORTANTE: método gemelo en docs.js (debieran estar ambos en doc.js).
+	 */
+	saveAfter(context) {
+		this.buttonsRefresh(context);
+		
+		if(stringUtilNotEmpty(this.method)) {
+			utilMethodCall(this.root, this.method);
+		}
+	}
+}

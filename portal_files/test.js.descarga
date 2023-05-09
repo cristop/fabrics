@@ -1,0 +1,191 @@
+class mCondition {
+	
+	constructor(preCondition, condition) {
+		if(condition != null) {
+			this.preCondition = preCondition;
+			this.condition = condition;
+		} else {
+			this.preCondition = true;
+			this.condition = preCondition;
+		}
+	}
+	
+	// Biválidas
+	classSwap(selector, classes) {
+		if(this.preCondition) {
+			var classesArray = classes.split(' ');
+			if(this.condition) {
+				classesArray.forEach(
+					function(classElement) {
+						if(classElement.startsWith('+')) {
+							$(selector).addClass(classElement.substring(1));
+						}
+						if(classElement.startsWith('-')) {
+							$(selector).removeClass(classElement.substring(1));
+						}
+					}
+				);
+			} else {
+				classesArray.forEach(
+						function(classElement) {
+							if(classElement.startsWith('+')) {
+								$(selector).removeClass(classElement.substring(1));
+							}
+							if(classElement.startsWith('-')) {
+								$(selector).addClass(classElement.substring(1));
+							}
+						}
+					);
+			}
+		}
+		return this;
+	}
+	
+	cssSwap(selector, property, trueValue, falseValue) {
+		if(this.preCondition) {
+			if(this.condition) {
+				$(selector).css(property, trueValue);
+			} else {
+				$(selector).css(property, falseValue);
+			}
+		}
+	}
+	
+	fadeIn(selector) {
+		if(this.preCondition) {
+			if(this.condition) {
+				$(selector).fadeIn();
+			} else {
+				$(selector).fadeOut();
+			}
+		}
+		return this;
+	}
+	
+	fadeOut(selector) {
+		this.condition = !this.condition;
+		this.fadeIn(selector);
+		this.condition = !this.condition;
+		return this;
+	}
+	
+	hide(selector) {
+		if(this.preCondition) {
+			if(this.condition) {
+				$(selector).hide();
+			} else {
+				$(selector).show();
+			}
+		}
+		return this;
+	}
+	
+	text(selector, trueText, falseText) {
+		if(this.preCondition) {
+			if(this.condition) {
+				$(selector).text(trueText);
+			} else {
+				$(selector).text(falseText);
+			}
+		}
+		return this;
+	}
+	
+	// Con selector
+	s(selector) {
+		this.selector = selector;
+		return this;
+	}
+	
+	sClassSwap(classes) {
+		this.classSwap(this.selector, classes);
+		return this;
+	}
+	
+	sCssSwap(property, trueValue, falseValue) {
+		this.classSwap(this.selector, property, trueValue, falseValue);
+		return this;
+	}
+	
+	sFadeOut() {
+		this.fadeOut(this.selector);
+		return this;
+	}
+	
+	sText(trueText, falseText) {
+		this.text(this.selector, trueText, falseText);
+		return this;
+	}
+	
+	// Solo true
+	tExec(method) {
+		if(this.preCondition) {
+			if(this.condition) {
+				if(mUtil.isFunction(method)) {
+					method();
+				} else {
+					window[method]();
+				}
+			}
+		}
+		return this;
+	}
+	
+	tFadeIn(selector) {
+		if(this.preCondition) {
+			if(this.condition) {
+				$(selector).fadeIn();
+			}
+		}
+		return this;
+	}
+	
+	tFadeOut(selector) {
+		if(this.preCondition) {
+			if(this.condition) {
+				$(selector).fadeOut();
+			}
+		}
+		return this;
+	}
+	
+	tRemove(selector) {
+		if(this.preCondition) {
+			if(this.condition) {
+				$(selector).remove();
+			}
+		}
+		return this;
+	}
+	
+	tShow(selector) {
+		if(this.preCondition) {
+			if(this.condition) {
+				$(selector).show();
+			}
+		}
+		return this;
+	}
+	
+	// Solo false (da vuelta la condición y llama al tMethod)
+	fExec(method) {
+		this.condition = !this.condition;
+		this.tExec(method);
+		this.condition = !this.condition;
+		return this;
+	}
+	
+	fFadeIn() {
+		this.condition = !this.condition;
+		this.tFadeIn();
+		this.condition = !this.condition;
+		return this;
+	}
+	
+	fFadeOut() {
+		this.condition = !this.condition;
+		this.tFadeOut();
+		this.condition = !this.condition;
+		return this;
+	}
+}

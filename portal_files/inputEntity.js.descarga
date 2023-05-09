@@ -1,0 +1,350 @@
+function inenReload(innerPrefix) {
+	reloadCheck('inputEntity', innerPrefix, function(input) {
+		new inenInputEntity(input);
+	});
+}
+
+function inenInputEntity(input) {
+	
+	var self = this;
+	this.root = $(input);
+	input.mHandler = this;
+	input.inen = this;
+	this.prefix = 'inen';
+	this.innerInfo = utilGetInnerInfo(this.root);
+	
+	this.controlType = $(input).attr('data-control-type');
+	
+	this.inputUser = $(this.root).next();
+	
+	if (this.controlType == 'id.enabled') {
+		if(reloadIsLayoutHorizontal()) {
+			this.labelDescription = $('.mojito-inputentity-description-input', $(this.root).parent());
+		}
+	}
+	
+	// Hidratación.
+	var hashControl = $('option[data-hash]', this.root);
+	if(hashControl.length == 1) {
+		var hash = $(hashControl).attr('data-hash');
+		var id = $(hashControl).attr('value');
+		
+		var source = $($('option[data-hash-id=' + hash + ']').get(0)).parent();
+		var target = $(hashControl).parent();
+		
+		var options = $('option', source).clone();
+		$(options).prop('selected', false);
+		
+		$(target).children().remove();
+		$(target).append(options);
+		$(target).val(id);
+		
+		$(hashControl.get(0)).attr('data-hash', '');
+	}
+	
+	// Propiedades comunes.
+	this.items = $(this.root).attr('data-items');
+	this.lookUpField = $(this.root).attr('data-look-up-field');
+	this.descriptionField = $(this.root).attr('data-description-field');
+	
+	this.filters = null;
+	var filtersJson = $(this.root).attr('data-filters');
+	if(filtersJson != null) {
+		filtersJson = filtersJson.replace(/'/g, '"');
+		this.filters = JSON.parse(filtersJson).array;
+	}
+	
+	this.parameters = null;
+	var parametersJson = $(this.root).attr('data-parameters');
+	if(parametersJson != null) {
+		parametersJson = parametersJson.replace(/'/g, '"');
+		this.parameters = JSON.parse(parametersJson).array;
+	}
+	
+	this.sets = null;
+	var setsJson = $(this.root).attr('data-sets');
+	if(setsJson != null) {
+		setsJson = setsJson.replace(/'/g, '"');
+		this.sets = JSON.parse(setsJson).array;
+	}
+	
+	/*
+	this.actions = null;
+	var actionsJson = $(this.root).attr('data-actions');
+	if(actionsJson != null) {
+		actionsJson = actionsJson.replace(/'/g, '"');
+		this.actions = JSON.parse(actionsJson).array;
+	}
+	*/
+	
+	if (this.controlType == 'description.enabled' || this.controlType == 'id.enabled') {
+		this.span = $(this.root).parent();
+		if(reloadIsLayoutNew()) {
+			this.magnifier = $(this.span).next().children()[0];
+		} else {
+			this.magnifier = $(this.span).children()[2];
+		}
+		this.incremental = $(this.root).attr('data-incremental');
+		
+		this.height = $(this.root).attr('data-height');
+		if(this.height == null) {
+			this.height = 450;
+		}
+		
+		this.width = $(this.root).attr('data-width');
+		if(this.width == null) {
+			this.width = 500;
+		}
+		
+		this.top = $(this.root).attr('data-top');
+		if(this.top == null) {
+			this.top = 200;
+		}
+		if (this.height > 400) {
+			this.top = 100;
+		}
+		
+		$(this.inputUser).on('focus', function() {
+			self.previousValue = this.value;
+		});
+		if (this.controlType == 'description.enabled') {
+			$(this.inputUser).on('blur', function() {
+				utilDoAjaxCombo2(self.items, 'input.' + self.descriptionField, $(this).attr('id'),
+					$(self.span).attr('id'), self.filters, self.sets, $(self.inputUser).attr('id'));
+				self.executeActions();
+			});
+		}
+		if (this.controlType == 'id.enabled') {
+			$(this.inputUser).on('blur', function() {
+				utilDoAjaxCombo2(self.items, 'input.' + self.lookUpField, $(this).attr('id'),
+					$(self.span).attr('id'), self.filters, self.sets, $(self.inputUser).attr('id'));
+				self.executeActions();
+			});
+		}
+		
+		/* DEPRECADO (inicio) */
+		/*
+		Fernando (2023-01-25): esto pretende ser una forma de poner el rerender y el método en el atributo rerender.
+		Pero no es correcto, para hacer eso hay que usar: method="metodo" rerender="rerenderIds".
+		Lo mismo pasa en inputSelect.js.
+		*/
+		var rerender = $(this.root).attr('data-rerender');
+		if(stringUtilNotEmpty(rerender)) {
+			$(this.root).change(function() {
+				var rerenderArray = rerender.split(':');
+				var method = rerenderArray.length <= 1 ? null : rerenderArray[0];
+				var ids = rerenderArray.length <= 1 ? rerenderArray[0] : rerenderArray[1];
+				
+				utilMethodCall(self.root, method, ids);
+			});
+		}
+		/* DEPRECADO (fin) */
+		
+		$(this.magnifier).on('click',function() {
+			
+			var filtersQueryString = utilGetQueryString('fixedFilterEntity.' + self.items, self.filters, true);
+			var parametersQueryString = utilGetQueryString('', self.parameters, true);
+			
+			var url = stringUtilResolve(
+					self.items + '.htm?inputId=' + encodeURIComponent($(self.root).attr('id')) +
+					filtersQueryString + parametersQueryString);
+			window.open(url,
+				'new', 'top=' + self.top + ', left=200, height=' + self.height + ', width=' + self.width
+				+ ', location=no, menubar=no, status=no, titlebar=no, toolbar=no, scrollbars=yes"); return false;');
+			/*
+			window.open(stringUtilResolve(
+					self.items + '.htm?inputId=' + encodeURIComponent($(self.root).attr('id')) +
+					utilGetQueryString('fixedFilterEntity.' + self.items, self.filters, true) + 
+					utilGetQueryString('', self.parameters, true) +
+					utilGetQueryString('sets', self.sets, true)),
+					'new', 'top=' + self.top + ', left=200, height=' + self.height + ', width=' + self.width
+					+ ', location=no, menubar=no, status=no, titlebar=no, toolbar=no, scrollbars=yes"); return false;');
+			*/
+		});
+		
+		if(this.incremental) {
+			this.inenAutocompleteReload();
+			
+			if(this.filters != null) {
+				for(var i = 0; i < this.filters.length; i += 2) {
+					var filterValue = this.filters[i + 1];
+					if(filterValue.startsWith('[')) {
+						filterValue = filterValue.substring(1, filterValue.length - 1);
+						var filterControl = document.getElementById(filterValue);
+						if(filterControl != null) {
+							utilAddEventListener(filterControl, 'change', function() {
+								self.setValue(null);
+								self.inenAutocompleteReload();
+							});
+						}
+					}
+				}
+			}
+		}
+	}
+	if (this.controlType == 'disabled') {
+		this.inputDescription = $(this.root).next();
+	}
+	if (this.controlType == 'combo') {
+		var actions = $(this.root).attr('data-actions');
+		if(stringUtilNotEmpty(actions)) {
+			$(this.root).on('change', function() {
+				utilMode4Process(self.root);
+			});
+		}
+	}
+}
+
+inenInputEntity.prototype.inenAutocompleteReload = function() {
+	//debugger
+	var self = this;
+	var originalAutocomplete = $(this.inputUser).attr('autocomplete');
+	$(this.inputUser).autocomplete('destroy');
+	$(this.inputUser).autocomplete({
+		serviceUrl: utilGetAjaxUrlIncremental(self.items, $(self.inputUser).attr('id'), '', self.sets),
+		minChars: 3,
+		width: 400,
+		deferRequestBy: 500,
+		onSearchStart: function (params) {
+			if(!$(this).is(':focus')) {
+				return false;
+			}
+			if(self.filters != null) {
+				for(var i = 0; i < self.filters.length; i += 2) {
+					params['filter.' + self.filters[i]] = stringUtilResolve(self.filters[i + 1]);
+				}
+			}
+		},
+		onSelect: function (suggestion) {
+			// Fernando (2020-03-09): acá se busca por "input.id" en vez de "id" porque cuando el combo se llena con una
+			// entidad que tiene dentro el id (por ejemplo, se llena con personBranches pero el combo es de person) entonces
+			// si se manda "id" lo busca como si fuera el id de Person y en realidad es el id de PersonBranch.
+			// Fernando (2020-05-30): al parecer lo que era válido para utilAjaxCombo22 no lo es para el setValue en relación
+			// al anterior comentario del 2020-03-09.
+			
+			self.setValue(suggestion.data);
+			// utilDoAjaxCombo22(self.items, 'input.id', suggestion.data, $(self.span).attr('id'), self.filters, self.sets);
+			// utilDoAjaxCombo22(self.items, 'id', suggestion.data, $(self.span).attr('id'), self.filters, self.sets);
+		}
+	});
+	if(originalAutocomplete != null ){
+	    $(this.inputUser).attr('autocomplete',originalAutocomplete);
+	}
+}
+
+inenInputEntity.prototype.inenClipboardCopy = function(text) {
+	var textAux = text;
+	if(stringUtilEmpty(textAux)) {
+		if(this.inputDescription == null) {
+			textAux = mString.trim($('option:selected', this.root).text());
+		} else {
+			textAux = mMojito.tagVal(this.inputDescription);
+		}
+	}
+	utilCopyToClipboard(textAux);
+	
+	var messageListId = this.innerInfo.getId('messageList');
+	var messageList = jqSelectId(messageListId);
+	var messageListHandler = $(messageList).prop('mHandler');
+	
+	var textAuxAbbreviate = stringUtilAbbreviate(textAux, 30);
+	messageListHandler.meslShowInfo('Clipboard (' + textAuxAbbreviate + ')', 2);
+}
+
+inenInputEntity.prototype.inenOnLoad = function() {
+	if ($(this.root).get(0)['onLoad']!=null){
+		$(this.root).get(0).onLoad();
+	}	
+}
+
+inenInputEntity.prototype.inenValue = function() {
+	var result = $(this.root).val();
+	return result;
+}
+
+inenInputEntity.prototype.executeActions = function() {
+	// actionExecute3Json(this.actions);
+	utilMode4Process(this.root);
+}
+
+inenInputEntity.prototype.setValue = function(id) {
+	if (this.controlType == 'description.enabled' || this.controlType == 'id.enabled') {
+		if(id != null && id.toString().trim() != '') {
+			utilDoAjaxCombo22(this.items, 'idFixed', id.toString(), $(this.span).attr('id'), this.filters, this.sets);
+			// utilDoAjaxCombo22 ya ejecuta las acciones. En especial porque es asincrónico.
+			// this.executeActions();
+		} else {
+			$(this.inputUser).val('');
+			$(this.root).val('');
+			this.executeActions();
+		}
+	}
+	if (this.controlType == 'combo') {
+		if(id != null && id.toString().trim() != '') {
+			$('option[value="' + jqEscape(id.toString()) + '"]', this.root).attr("selected", true);
+		}
+	}
+	if (this.controlType == 'disabled') {
+		var self = this;
+		this.getEntity(id, function(xmlDoc) {
+			var description = $('description', xmlDoc);
+			if(description.length > 0) {
+				$(self.inputUser).val($(description).html());
+			} else {
+				$(self.inputUser).val('');
+			}
+		});
+		// utilDoAjaxCombo22(this.items, 'id', id.toString(), $(this.inputDescription).attr('id'), this.filters, this.sets);
+	}
+}
+
+inenInputEntity.prototype.setDescription = function(description) {
+	if (this.controlType == 'combo') {
+		var optionSelected = $("option:selected", this.root);
+		$(optionSelected).html(description);
+	}
+	if (this.controlType == 'disabled') {
+		$(this.inputUser).val(description);
+	}
+}
+
+inenInputEntity.prototype.addValue = function(id, description) {
+	if (this.controlType == 'combo') {
+		var option = $("<option></option>");
+		$(option).attr("value", id);
+		$(option).html(description);
+		$(this.root).append($(option));
+	}
+}
+
+inenInputEntity.prototype.addAndSetValue = function(id, description) {
+	this.addValue(id, description);
+	this.setValue(id);
+}
+
+inenInputEntity.prototype.setStateUi = function(stateUi, id) {
+}
+
+inenInputEntity.prototype.getEntity = function(id, callback) {
+    if (stringUtilNotEmpty(id)) {
+    	var filtersQueryString = utilGetQueryString("filter", this.filters, true);
+    	var setsQueryString = utilGetQueryString("set", this.sets, true);
+    	
+    	// Guardo un id de query, porque si la selección por autocomplete se ejecuta primero, entonces hay que ignorar la búsqueda por pérdida de foco.
+    	// Llamada por autocomplete (dando click)
+    	// Llamada por pérdida de foco (porque al dar click pierde el foco)
+    	// Respuesta por autocomplete (más rápida porque busca por id) (OK, procesar)
+    	// Respuesta por pérdida de foco (NOK, se ignora porque hubo una búsqueda exitosa anterior)
+    	this.queryId = utilRandom(10);
+    	var urlCombo = 'combo2.ajax?entity=' + this.items + '&input.id=' + encodeURIComponent(id) + filtersQueryString + setsQueryString;
+    	
+    	utilDoAjax(urlCombo, null, callback);
+    } else {
+    	// console.log('utilProcessCombo2WithData.vacio.774');
+        utilProcessCombo2WithData('', '', '', null, this.root.parent().get(0));
+    }
+}
+
+inenInputEntity.prototype.ignoreState = function() {
+	$(this.root).attr('name', '');
+}

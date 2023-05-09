@@ -1,0 +1,95 @@
+class mEventsClass {
+	constructor() {
+		this.events = [];
+		
+		var self = this;
+		$(document).on('visibilitychange', function() {
+			if (document.visibilityState != "hidden") {
+				self.open();
+			} else  {
+				if(self.eventSingle != null) {
+					self.eventSingle.close();
+					self.eventSingle = null;
+				}
+			}
+		});
+	}
+	
+	getEvent(url) {
+		var result = null;
+		if(this.events != null) {
+			for(var i = 0; i < this.events.length; i++) {
+				if(this.events[i].url == url) {
+					result = this.events[i];
+				}
+			}
+		}
+		return result;
+	}
+	
+	close(url) {
+		// Sigo escuchando el evento pero ya no lo proceso.
+		// No sé si valga la pena dejar de escucharlo, habría que reiniciar el EventSource.
+		if(this.events != null) {
+			this.events = this.events.filter(data => data.url != url);
+		}
+	}
+	
+	open() {
+		if(this.eventSingle == null && this.events != null && this.events.length > 0) {
+			var url = '';
+			for(var i = 0; i < this.events.length; i++) {
+				if(url != '') {
+					url += '.';
+				}
+				url += this.events[i].url;
+			}
+			
+			url = mMojito.navAddParameter(url, '_page', mMojito.navGetPage());
+			this.eventSingle = new EventSource("eventsource/" + url);
+			
+			var self = this;
+			this.eventSingle.onmessage = function(event) {
+				var message = mDate.format(new Date(), "HH:mm:ss") + ': ' + event.data;
+				evenLog.log(evenLogEvents, log_Info, 'Message received: ' + message);
+				
+				for(var i = 0; i < self.events.length; i++) {
+					var eventObj = self.events[i];
+					var dataObj = JSON.parse(event.data);
+					eventObj.onMessage(dataObj.source, event.data);
+				}
+			};
+		}
+	}
+	
+	register(owner, url, callback) {
+		var event = this.getEvent(url);
+		if(event == null) {
+			event = new mEvent(owner, url, callback);
+			this.events.push(event);
+		} else {
+			event.owner = owner;
+		}
+		
+		// if (document.visibilityState != "hidden") {
+		// 	event.open();
+		// }
+	}
+}
+
+class mEvent {
+	constructor(owner, url, callback) {
+		this.owner = owner;
+		this.url = url;
+		this.callback = callback;
+	}
+	
+	onMessage(event, message) {
+		if(this.url == event && this.owner != null) {
+			var callbackFunc = this.callback.bind(this.owner);
+			callbackFunc(message);
+		}
+	}
+}
+
+var mEvents = new mEventsClass();

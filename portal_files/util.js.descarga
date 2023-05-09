@@ -1,0 +1,2782 @@
+var utilProcesando = false;
+var utilPreviousIcon;
+// Guarda qué control llamó a un modal. Para que al cerrarse el modal se pueda ejecutar el modo 4.
+// La estructura es tag (tag llamador), idVirtual (idVirtual para recuperarlo en caso de un rerender) y
+// mojito (para indicar si el tag está dentro de un control Mojito para recuperarlo al llamar al modo 4).
+// Y un método getTagMode4() que devuelve el control que hay que enviarle al modo 4 (que tiene que ser
+// el control Mojito y no necesariamente el llamador).
+var utilCaller = null;
+
+function setMethodToCall(methodName, doSubmit) {
+	document.forms[0].methodName.value = methodName;
+//	document.forms[0].methodName.value = 'doNothing';
+//	document.forms[0].methodName.value = 'doNothing|{"type":"tetra.core..Carpeta", "value": "1"}';
+	
+	if(document.forms[0].target != '_blank') {
+		utilShowProcesando();
+	}
+	if(doSubmit){
+		document.forms[0].submit();
+	}
+}
+
+function utilSubmit(url, idForm) {
+	// utilShowProcesando();
+	
+	if(url == null) {
+		// Procesamiento para página normal.
+		document.forms[0].submit();
+	} else {
+		// Procesamiento para página con Ajax.
+		utilAjaxPost(url, idForm, false);
+	}
+}
+
+function utilHiddenCreate(name, value, form) {
+	if(name != null && name.trim() != '') {
+		var hiddenBefore = $('input[type="hidden"][name="' + jqEscape(name) + '"]');
+		if(hiddenBefore.length > 0) {
+			$(hiddenBefore).val(value);
+		} else {
+			var hidden = document.createElement("input");
+			hidden.setAttribute("type","hidden");
+			hidden.setAttribute("name", name);
+			hidden.setAttribute("value", value);
+			form.appendChild(hidden);
+		}
+	}
+}
+
+// Sirve para hacer un post utilizando un formulario que se va a crear específicamente para el post que se quiere enviar.
+// Es útil para los botones del menú que no saben si la página tiene o no formulario creado.
+// paramValues: array que contiene un elemento con el nombre del parámetro y otro con el valor.
+function utilMethodCallFormCustom(method, rerender, paramValues, callback, callbackParameters, context) {
+	
+	utilLog.log(utilLogSetMethodToCall, log_Info, 
+			  'Se pide una llamada a con formulario custom.',
+			  'method: ' + method,
+			  'rerender: ' + rerender,
+			  'paramValues: ' + paramValues,
+			  'callback: ' + callback,
+			  'callbackParameters: ' + callbackParameters);
+	
+	var form;
+	if(context == null) {
+		form = $('form[data-control^="form"]');
+	} else {
+		// Fernando (2022-10-25): esto antes decía 'div[data-control^="form"]' le quité
+		// el div porque puede ser que se envíe de contexto un control de un formulario
+		// común y si es común entonces no tiene div si no form.
+		form = $(context).closest('[data-control^="form"]');
+	}
+	
+	if($(form).length > 0) {
+		utilLog.log(utilLogSetMethodToCall, log_Info, 
+				  'Se encuentra un formulario en la página. Se usará para la llamada custom.',
+				  'data-control: ' + $(form).attr('data-control'));
+		form = $(form).get(0);
+	} else {
+		utilLog.log(utilLogSetMethodToCall, log_Info, 
+		  'No se encuentra un formulario en la página. Se creará uno para hacer la llamada custom.');
+		
+		// El q y el logout hay que hacerlo con un form porque lo requiere el chequeo de csrf. El link solo no funciona.
+		form = document.createElement("form");
+		form.setAttribute("method", "post");
+		form.setAttribute("data-control", "formOnTheFly");
+		
+		// hiddenCsrf
+		var hiddenCsrf = document.createElement("input");
+	    hiddenCsrf.setAttribute("type", "hidden");
+	    
+	    var csrf = document.head.querySelector("meta[name=_csrf]").content;
+	    hiddenCsrf.setAttribute("name", "_csrf");
+	    hiddenCsrf.setAttribute("value", csrf);
+	    
+		// hiddenMethod
+		var hiddenMethod = document.createElement("input");
+	    hiddenMethod.setAttribute("type", "hidden");
+	    hiddenMethod.setAttribute("id", "methodName");
+	    hiddenMethod.setAttribute("name", "methodName");
+	    // hiddenMethod.setAttribute("value", method);
+	    form.appendChild(hiddenMethod);
+	    
+	    form.appendChild(hiddenCsrf);
+	    
+	    document.body.appendChild(form);
+	}
+	
+	if(paramValues != null) {
+		for(var i = 0; i < paramValues.length; i += 2) {
+			utilHiddenCreate(paramValues[i], paramValues[i + 1], form);
+		}
+	}
+	
+	utilMethodCall(form, method, rerender, callback, callbackParameters);
+}
+
+/**
+ * Wrapper reducido de utilSetMethodToCall. La idea es en un futuro usar este wrapper y no utilSetMethodToCall.
+ * @param controlOrId Control que va a hacer la llamda al servidor. Sirve para tener contexto de si llama la página principal o alguna sección Ajax.
+ * @param methodName Método que se va a llamar.
+ * @param rerender Secciones a rerenderizar. Si este parámetro no se informa se envía "form,messageList".
+ * @param caller En el caso de llamadas a ventanas modales se utiliza utilCaller para saber quién llamó. Pero cuando se trata de un botón simple (o cualquier otro control) se usa este parámetro. Sería bueno usar una única estrategia.
+ * Más allá de eso en este parámetro hay que mandar un elemento que será usado como contexto para detectar al control que llamó.
+ * @param noLoading True para no mostrar el cartel de que está procesando. Sirve para cuando se hacen llamadas de refresco a intervalos continuos.
+ */
+function utilMethodCall(controlOrId, methodName, rerender, callback, callbackParameters, caller, noLoading) {
+	var controlOrIdAux = mObject.convNull(controlOrId, 'form'); 
+	var control = tagUtilGetControl(controlOrIdAux);
+    var innerInfo = utilGetInnerInfo(control);
+    var methodNameAux = (methodName != null && methodName.trim() != '') ? methodName : 'doNothing';
+    var rerenderAux = rerender == null ? 'messageList,form' : rerender;
+    utilSetMethodToCall(innerInfo.getId('methodName'), methodNameAux, null, innerInfo.innerUrl, innerInfo.innerId, null, null, null, callback, callbackParameters, rerenderAux, caller, noLoading);
+}
+
+/**
+ * 
+ * @param methodControlOrId Input en el que se debe guardar el nombre del método a ejecutar.
+ * @param methodName Nombre del método del manager que se llamará al procesar el request.
+ * @param doSubmit En una llamada normal (sin Ajax) decide si hace submit del formulario.
+ * @param url URL que se llamará para obtener la respuesta por Ajax.
+ * @param idForm
+ * @param targetParent Si es una llamada Ajax, en true indica que hay que refrescar toda la página, en false, que solo hay que
+ * refrescar la sección Ajax.
+ * @param paramName
+ * @param paramValue
+ * @param ajaxCallback Callback que se debe llamar con la respuesta que dé "url". Se utiliza para cuando el manager devuelve un
+ * String de tipo "data:...". Si este parámetro no está seteado la respuesta se renderiza en el contenedor.
+ * @param ajaxCallbackParameters Parámetros para pasarle a la función de callback adem�s del String correspondiente a los datos.
+ * Este parámetro es un array.
+ * @param rerender Secciones a rerenderizar después de ejecutarse el método indicado.
+ * @param callerId id del control que hizo la llamada. Este control se utiliza cuando la respuesta al request es de tipo "data:"
+ * para extraer sus acciones (data-actions) y ejecutarlas.
+ * @param noLoading no muestra el cartel de que está procesando.
+ * 
+ * La variable utilSetMethodToCallPause se usa para pausar este método y que se ignore mientras se está ejecutando algo que no
+ * debe generar una cascada. En particular se está usando en el enlace de combos para que si uno se modifica y tiene definido el
+ * change que no mande la ejecución al manager. Ejemplo en opportunityRecordResultsCrossSalePotential.jsp (Tetra).
+ */
+var utilSetMethodToCallPause = false;
+function utilSetMethodToCall(methodControlOrId, methodName, doSubmit, url, idForm, targetParent, paramName, paramValue, ajaxCallback, ajaxCallbackParameters, rerender, callerId, noLoading) {
+	
+	utilLog.log(utilLogSetMethodToCall, log_Info, 
+				'methodControlOrId = "' + methodControlOrId + '"',
+				'methodName = "' + methodName + '"',
+				'doSubmit = "' + doSubmit + '"',
+				'url = "' + url + '"',
+				'idForm = "' + idForm + '"',
+				'targetParent = "' + targetParent + '"',
+				'paramName = "' + paramName + '"',
+				'paramValue = "' + paramValue + '"',
+				'ajaxCallback = "' + ajaxCallback + '"',
+				'ajaxCallbackParameters = "' + ajaxCallbackParameters + '"',
+				'rerender = "' + rerender + '"',
+				'callerId = "' + callerId + '"');
+	
+	var form = null;
+	var forms = $('form[data-control^="form"]');
+	if(forms.length > 0) {
+		form = forms.get(0);
+	}
+	
+	var noLoadingAux = mBool.isTrue(noLoading, false);
+	
+	if(!utilSetMethodToCallPause) {
+		// Fernando (2016-10-31): agrega un parámetro extra al formulario. Esto se usa
+		// cuando el control queda fuera del formulario en el main-top o layout-top, no
+		// se supone que se use para nada más.
+		
+		// Gastón (2019-07-03) antes el chequeo del form se hacia en el if de paramName y paramValue. Y si se quería ejecutar algo que no tuviera form obligaba a mandar 
+		// cualquier parámetro innecesariamente. Lo necesité para calcular la url de SSO de la universidad en treeium.
+		if(form == null) {
+			utilLog.log(utilLogSetMethodToCall, log_Debug, 
+			  'No se detecta form (form == null) se procede a crearlo y crear inputs para methodName y _csrf.');
+			
+			// Fernando (2020-04-18): no sé por qué no funcionaba con .head en el main de MJT que tiene de dashboard unos botones.
+			var csrf = document.querySelector("meta[name=_csrf]").content;
+			//var csrf = document.head.querySelector("meta[name=_csrf]").content;
+			$('<form>').attr({id: 'form', method: 'post','data-control': 'form' }).appendTo(document.body);
+			$('<input>').attr({type: 'hidden', name: 'methodName', id: 'methodName' }).appendTo($('#form'));
+			$('<input>').attr({type: 'hidden', name: '_csrf', value: csrf }).appendTo($('#form'));
+			form = $('#form');
+		}
+		if(paramName != null && paramValue != null) {
+			utilLog.log(utilLogSetMethodToCall, log_Debug, 
+			  'Se solicitó la creación de un parámetro on the fly (' + paramName + ', ' + paramValue + '). Se procede a crearlo.');
+			$('<input>').attr({type: 'hidden', name: paramName, value: paramValue }).appendTo(document.forms[0]);
+		}
+		
+		var methodControl = tagUtilGetControl(methodControlOrId);
+		methodControl.value = methodName;
+		
+		utilLog.log(utilLogSetMethodToCall, log_Debug, 
+		  'Se seteó el methodControl. Su id fue ' + methodControlOrId + '. El valor que quedó seteado es ' +  methodControl.value + '.');
+		
+		if(url == null && rerender == null) {
+			utilLog.log(utilLogSetMethodToCall, log_Debug, 
+					  'url y rerender son nulos. En base a doSubmit se verá si se envía el formulario o si no se hace nada (doSubmit = ' + doSubmit + ').');
+			
+			// Procesamiento para página normal.
+			if(form.target != '_blank') {
+				if(!noLoadingAux) {
+					utilShowProcesando();
+				}
+			}
+			if(doSubmit){
+				form.submit();
+			}
+		} else {
+			utilLog.log(utilLogSetMethodToCall, log_Debug, 
+					  'url o rerender tienen valor. Se llamará a utilAjaxPost.',
+					  'url: ' + url,
+					  'idForm: ' + idForm,
+					  'targetParent: ' + targetParent,
+					  'ajaxCallback: ' + ajaxCallback,
+					  'ajaxCallbackParameters: ' + ajaxCallbackParameters,
+					  'rerender: ' + rerender,
+					  'false: ' + false);
+			
+			// Fernando (2020-01-03): el rerender también puede tardar. Y no hay problema en llamarlo siempre porque se ejecuta retardado.
+			// if(rerender == null) {
+			if(!noLoadingAux) {
+				utilShowProcesando();
+			}
+			// }
+				
+			// Fernando (2019-12-02): este if estaba comentado pero no entiend por qué.
+			// Lo descomento porque si un Input necesita un rerender y no está dentro de una sección entonces
+			// la url viene nula y hay que cargarla de alguna forma. Otra opción sería pasarle 'self' que es
+			// un valor que maneja utilAjaxPost, pero no veo la necesidad si ya lo puedo enviar correctamente
+			// cargado.
+			if(url == null) {
+			 	url = window.location.href;
+			}
+			
+			utilAjaxPost(url, idForm, targetParent, ajaxCallback, ajaxCallbackParameters, rerender, noLoadingAux, null, callerId);
+		}
+	} else {
+		utilLog.log(utilLogSetMethodToCall, log_Info, 
+				'utilSetMethodToCallPause activo. Se ignora la llamada a utilSetMethodToCall.');
+	}
+}
+
+function doAjax(url, renderId)
+{
+	var xmlhttp;
+
+	if (window.XMLHttpRequest) {
+		// code for IE7+, Firefox, Chrome, Opera, Safari
+		xmlhttp = new XMLHttpRequest();
+	} else {
+		// code for IE6, IE5
+		xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+	}
+
+	xmlhttp.onreadystatechange = function() {
+		if(xmlhttp.readyState == 4) {
+			if(renderId != null){
+				render = document.getElementById(renderId);
+				
+				if(render.tagName == 'LABEL') {
+					render.innerHTML = xmlhttp.responseText;
+				}
+				if(render.tagName == 'INPUT') {
+					render.value = xmlhttp.responseText;
+				}
+			}
+		}
+	}
+	
+	// Fernando (2021-12-04): no es necesario que form exista.
+	// Hay que tener cuidado si se usa esto desde fuera del backend porque
+	// en ese caso hay que des-segurizar lo que sea necesario.
+	xmlhttp.open("GET", url, true);
+	xmlhttp.send(document.forms[0]);
+}
+
+// url: URL que se va a llamar vía Ajax. Se puede enviar el valor 'self' para indicar que hay que llamar a la URL actual.
+// formOrId: control que se usará para determinar los parámetros a enviar. Además en el caso que el rerender sea nulo se
+// utiliza para determinar el contenedor en el que se renderizará la respuesta. Si formOrId no termina con '[avoidUseParent]'
+// entonces usa al padre del control apuntado por formOrId, caso contrario utiliza al control apuntado por formOrId. Este
+// parche fue necesario para poder utilizar este método desde tagUtilSectionInterval.
+// en el control en sí mismo, si no se renderiza en su padre.
+// targetParent: (deprecado) indica si el renderizado debe hacerse en el padre del formOrId o en la página toda.
+// noLoading: indica que no se pidió la pantalla de "loading..." por lo tanto no hay que ocultarla.
+// reloading: indica si hay que llamar a reloadReload (la función Javascript que recarga las configuraciones por medio de
+// los atributos data de los tags).
+// callerId: id del control que hizo la llamada. Este control se utiliza cuando la respuesta al request es de tipo "data:"
+// para extraer sus acciones (data-actions) y ejecutarlas.
+// overwrite: indica si hay que pisar el contenido sin importar si está o no cargado.
+var utilAvoidUseParent = '[avoidUseParent]';
+function utilAjaxPost(url, formOrId, targetParent, callback, callbackParameters, rerender, noLoading, reloading, callerId, overwrite) {
+
+// utilAjaxPost('testRecord04.htm?wait=5', 'seccionCargada, null, null, null, null, true, true);
+
+	utilLog.log(utilLogAjaxPost, log_Trace, 
+			'url = "' + url + '"',
+			'formOrId = "' + formOrId + '"',
+			'targetParent = "' + targetParent + '"',
+			'callback = "' + callback + '"',
+			'callbackParameters = "' + callbackParameters + '"',
+			'rerender = "' + rerender + '"',
+			'noLoading = "' + noLoading + '"',
+			'reloading = "' + reloading + '"',
+			'callerId = "' + callerId + '"');
+	
+	var formRequest; // formControl
+	var containerResponse; // render
+	var innerId = null;
+	var ajax = false; // Determina si la llamada es para una sección Ajax o no.
+	var process = true; // indica si esta petición debe procesarse. En el layout horizontal, si se trata de una pestaña y ya está cargada, no debe procesarse.
+	
+	var avoidUseParent = false;
+	if(formOrId != null && formOrId.endsWith != null && formOrId.endsWith(utilAvoidUseParent)) {
+		formOrId = formOrId.substring(0, formOrId.length - 16);
+		
+		var formControl = tagUtilGetControl(formOrId);
+		if(formControl != null) {
+			if(formControl.innerHTML.trim() == '') {
+				if(reloadIsLayoutHorizontal()) {
+					formControl.innerHTML = "<div style=\"height: 29px; padding-top: 20px; vertical-align: middle; text-align: center;\"><img src=\"jar/mojito/utils/web/images/wait.gif\" /></div>";
+				}
+			} else {
+				if(overwrite == null || !overwrite) {
+					process = false;
+				}
+			}
+		}
+		
+		avoidUseParent = true;
+		
+		utilLog.log(utilLogAjaxPost, log_Debug, 
+				'Se evitará el uso del padre al rerenderizar porque está presente la constante "' + utilAvoidUseParent + '" en formOrId.');
+	}
+	
+	var xmlhttp = null;
+
+	if(process) {
+		if(rerender == null) {
+			// Carga de secciones o pestañas. O llamadas en el modo viejo de postback.
+			formRequest = tagUtilGetControl(formOrId);
+			containerResponse = formRequest != null ? (!avoidUseParent ? formRequest.parentNode : formRequest) : null;
+			formRequestId = formRequest != null ? $(formRequest).attr('id') : null;
+			if(formRequestId != null) {
+				var control = $(containerResponse).attr('data-control'); // tab
+				if(control == null) {
+					control = $(containerResponse).parent().parent().parent().attr('data-control'); // section
+				}
+				if(control != 'section' && control != 'tab') {
+					var formRequestIdArray = formRequestId.split('/');
+					if(formRequestIdArray.length > 1) {
+						innerId = formRequestIdArray[0];
+					}
+				}
+				// Si es una sección no tengo el innerid cargado en el control, lo tengo que deducir de la URL que se va a cargar.
+				// También como red de contención se agrega que si no hay innerId también se deduzca de la URL a cargar.
+				if(control == 'section' || control == 'tab' || innerId == null) {
+					innerId = utilGetInnerPrefix(url);
+				}
+				if(control != 'form') {
+					ajax = true;
+				}
+			}
+		} else {
+			var formIdArray = formOrId == null ? null : formOrId.split('/');
+			
+			if(formIdArray == null || formIdArray.length == 1) {
+				var forms = $('form[data-control^="form"]');
+				if(forms.length > 0) {
+					formRequest = forms.get(0);
+				}
+			} else {
+				formRequest = document.getElementById(formIdArray[0] + '/methodName').parentElement;
+				innerId = formIdArray[0];
+				ajax = true;
+			}
+			// Fernando (2020-09-05): si tiene rerender no necesita containerResponse porque se va a rerenderizar lo que indique el rerender.
+			// containerResponse = tagUtilGetControl(rerender);
+			
+			utilLog.log(utilLogAjaxPost, log_Debug, 
+					'Con rerender presente ("' + rerender + '") se determinó que el formulario a enviar es "' + $(formRequest).attr('id') + '".');
+		}
+		
+		var params = utilGetParams(formRequest);
+		
+		if(rerender != null) {
+			params.append('_rerender', rerender);
+			
+			utilLog.log(utilLogAjaxPost, log_Debug, 'Se seteo el parámetro \'_rerender\' con el valor ("' + rerender + '"). Recordar que el rerender NO tiene que ser de la forma innerForm/controlId.');
+			
+			var isBack = utilGetParameter('isBack');
+			if(isBack != null) {
+				params.append('isBack', 'true');
+			}
+		}
+		
+		// Fernando (2018-04-03): informo si una vez que vuelva el request Ajax se va a hacer una recarga
+		// del parent porque en ese caso hay que guardar en sesión las variables que así se indiquen en
+		// el manager. La condición para que esto pase es que no haya postback, pero como estos métodos
+		// recargan sobre la misma página simulan un postback y no guardaban las variables en sesión. En
+		// particular este problema se detectó porque no se mostraban los mensajes del control
+		// messageslist. (Comentario relacionado a MojitoController2.bindToSession).
+		if(targetParent) {
+			params.append('ajaxTargetParent', '1');
+			//if(params != null && params != '') {
+			//	params += '&ajaxTargetParent=1';
+			//} else {
+			//	params = 'ajaxTargetParent=1';
+			//}
+		}
+		
+		if (window.XMLHttpRequest) {
+			// code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlhttp = new XMLHttpRequest();
+		} else {
+			// code for IE6, IE5
+			xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+		}
+		
+		var urlAux = (url != 'self' ? url : window.location.href);
+		
+		urlAux = mMojito.navGetUrlAjax(urlAux,ajax);
+		
+		/*
+		if(ajax && stringUtilNotEmpty(urlAux)) {
+			if(urlAux.indexOf('_jx=1') < 0) {
+				if(urlAux.indexOf('?') >= 0) {
+					urlAux += '&';
+				} else {
+					urlAux += '?';
+				}
+				urlAux += '_jx=1';
+			}
+		}
+		*/
+		
+		utilLog.log(utilLogAjaxPost, log_Debug, 'Se procede a hacer un post a ' + logDescription(urlAux) + '.');
+		xmlhttp.open("POST", urlAux, true);
+		
+	// Gastón (2018-11-09) Este lo comenté para poder mandar los files por ajax. Cambia el params para que mande un objeto FormData en vez enviarlos como queryString
+	//	xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=iso-8859-1");
+		
+		var token = document.getElementsByName('_csrf')[0].content;
+		var header = document.getElementsByName('_csrf_header')[0].content;
+		if(stringUtilNotEmpty(token) && stringUtilNotEmpty(header)){
+			xmlhttp.setRequestHeader(header, token);
+		}
+		//xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=utf-8");
+	
+		var focusedId = $(document.activeElement).prop('id');
+		xmlhttp.onreadystatechange = function() {//Call a function when the state changes.
+			if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				var responseText = xmlhttp.responseText;
+				if(responseText.startsWith('BASE64:')) {
+					responseText = atob(responseText.substring(7));
+				}
+				
+				utilLog.log(utilLogAjaxPost, log_Trace, 
+					'responseText= "' + responseText.substring(0, 50) + '"');
+				
+				var login = false;
+				var newHtml = responseText;
+				var parser = new DOMParser();
+				newHtmlDoc = parser.parseFromString(newHtml, "text/html");
+				var metas = newHtmlDoc.getElementsByTagName('meta');
+				for (var i = 0; i < metas.length; i++) {
+				    if (!login && metas[i].getAttribute('name') == 'login') {
+				      login = true;
+				    }
+				}
+				
+				if(!login) {
+					if(!targetParent) {
+						if(responseText == null || (
+								!responseText.startsWith('redirect:') && // (Deprecar 'redirect')
+								!responseText.startsWith('ajax:refreshParent:') &&
+								!responseText.startsWith('ajax:reloadParent:') &&
+								!responseText.startsWith('ajax:reloadSection:') &&
+								!responseText.startsWith('ajax:reload:') &&
+								!responseText.startsWith('ajax:close:') &&
+								!responseText.startsWith('ajax:closeModal:') &&
+								!responseText.startsWith('ajax:showModal:') &&
+								!responseText.startsWith('ajax:open:') &&
+								!responseText.startsWith('ajax:goto:') &&
+								!responseText.startsWith('ajax:showMessage:')
+								)) {
+							if(responseText == null || responseText.substring(0, 5) != 'data:') {
+								if(rerender != null) {
+									reloadError(newHtmlDoc);
+									
+									utilLog.log(utilLogAjaxPost, log_Info, 
+									  'El request tiene rerenders. Se comenzará a procesarlos. rerender = "' + rerender + '".');
+	
+									var rerenders = newHtmlDoc.getElementsByTagName('rerender');
+									if(rerenders.length > 0) {
+										for (var i = 0; i < rerenders.length; i++) {
+											var idArray = $(rerenders[i]).attr("id").substring(9).split('#');
+											var id = idArray[0];
+											var part = idArray.length > 1 ? idArray[1] : null;
+											
+											utilLog.log(utilLogAjaxPost, log_Debug, 
+													  'Se ingresa a procesar el rerender: "' + id + '".');
+											
+											var container = document.getElementById(id);
+											
+											if($(container).attr("data-control-OK") != null) {
+												$(container).attr("data-control-OK", null);
+											}
+											if($(container).attr("data-control-onload-OK") != null) {
+												$(container).attr("data-control-onload-OK", null);
+											}
+											
+											// Fernando (2023-02-04): agregar controles que se quieren renderizar completos y no solo su contenido.
+											if($(container).attr('data-control') != 'actionContainer' &&
+											   $(container).attr('data-control') != 'hidden' &&
+											   $(container).attr('data-control') != 'inputText') {
+												if(mString.isEmpty(part)) {
+													newHtml = newHtmlDoc.getElementById(id).innerHTML;
+													container.innerHTML = newHtml;
+												} else {
+													var open = '<rerender id=\'' + $(rerenders[i]).prop("id") + '\'>';
+													var begins = responseText.indexOf(open) + open.length;
+													var ends = responseText.indexOf('</rerender>', begins);
+													newHtml = responseText.substring(begins, ends);
+													$(container).prop('mHandler').doRerender(newHtml, part);
+												}
+											} else {
+												container.outerHTML = newHtmlDoc.getElementById(id).outerHTML;
+												// $(container).replaceWith(newHtmlDoc.getElementById(id).outerHTML);
+											}
+											
+											utilLog.log(utilLogAjaxPost, log_Trace, 
+													'rerender "' + rerenders[i] + '": "' + container.innerHTML.substring(0, 50) + '"');
+											
+											var scripts = container.getElementsByTagName("script");
+											for (var j = 0; j < scripts.length; ++j) {
+												var script = scripts[j];
+												try {
+													window.eval(script.innerHTML);
+												} catch(e) {
+													console.log('Script eval error: ' + script.innerHTML);
+													throw e;
+												}
+											}
+											
+											/*
+											 * Fernando (2020-03-20): ¿para qué está esto? Lo quito porque falla el rerender
+											 * de la querytable cuando se filtra. En realidad lo que falla es que en la
+											 * recarga no se ven bien las flechitas de orden ascendente/descendente.
+											var imgs = container.getElementsByTagName("img");
+											for (var j = 0; j < imgs.length; ++j) {
+												var img = imgs[j];
+												if(img.src != null && img.src.trim() != '') {
+													img.src = img.src + new Date().getTime();
+												}
+											}
+											*/
+										}
+									} else {
+										utilLog.log(utilLogAjaxPost, log_Warn,
+												'El response debería haber traído al menos un rerender y no trajo ninguo. Originalmente se pidió el rerender de ' +
+												rerender + '. Request recibido: ' + responseText);
+									}
+									
+									if(utilCaller != null) {
+										var caller = mMojito.tagGetIdVirtual(utilCaller.tag, utilCaller.idVirtual);
+										utilCaller.tag = caller;
+									}
+									
+									// (gcincotta) 2021-08-18: Esta linea comentada la puse porque fallaba la descarga (generaba dos descargas). Pero después de probar, volvió a fallar. Lo vuelvo al modo original
+									// var downloads = $('input[type="hidden"][data-control="download"]', container);
+									
+									var downloads = $('input[type="hidden"][data-control="download"]', newHtmlDoc);
+									
+									// Si tiene un download se pierde el debug porque cambio el window.location. Si se quiere debuguear usar console.log()									
+									for (var i = 0; i < downloads.length; i++) {
+										utilDownloadExecute(downloads[i]);
+									}
+									
+									if(reloading == null || reloading) {
+										utilLog.log(utilLogAjaxPost, log_Info, 
+												  'Llamada al reload con innerId = "' + innerId + '".');
+										reloadReload(innerId);
+									}
+									
+									var downloadMessages = $('input[type="hidden"][data-control="download-message"]', newHtmlDoc);
+									for (var i = 0; i < downloadMessages.length; i++) {
+										tagUtilGetControlMojito("messageList", formRequest, null, 'showInfo', [downloadMessages[i].value]);										
+									}
+									
+									var dataObj = null;
+									var actions = newHtmlDoc.getElementsByTagName('actions');
+									if(actions != null && actions.length > 0) {
+										for(var i = 0; i < actions.length; i++) {
+											var actionsJson = $(actions[i]).attr('data-actions');
+											if(mString.startsWith(actionsJson, '{_json_/?_json_/?')) {
+												actions = mMojito.tagMode4(actionsJson);
+												dataObj = JSON.parse(actions.array[0].parameters[0].value);
+											}
+										}
+										
+										for(var i = 0; i < actions.length; i++) {
+											if(!mString.startsWith($(actions[i]).attr('data-actions'), '{_json_/?_json_/?')) {
+												utilMode4Process(actions[i], dataObj);
+											}
+										}
+									}
+									
+									if(callback != null) {
+										if(callbackParameters == null || callbackParameters.length == 0) {
+											callback();
+										}
+										if(callbackParameters != null) {
+											if(callbackParameters.length == 1) {
+												callback(callbackParameters[0]);
+											}
+											if(callbackParameters.length == 2) {
+												callback(callbackParameters[0], callbackParameters[1]);
+											}
+											if(callbackParameters.length == 3) {
+												callback(callbackParameters[0], callbackParameters[1], callbackParameters[2]);
+											}
+											if(callbackParameters.length == 4) {
+												callback(callbackParameters[0], callbackParameters[1], callbackParameters[2], callbackParameters[3]);
+											}
+											if(callbackParameters.length == 5) {
+												callback(callbackParameters[0], callbackParameters[1], callbackParameters[2], callbackParameters[3], callbackParameters[4]);
+											}
+										}
+									}
+									
+									if(utilCaller != null) {
+										// caller = tagUtilGetControlMojito(null, utilCaller.getTagMode4());
+										// utilMode4Process(caller, null);
+										
+										var form = document.getElementById(utilCaller.formId);
+										if(form != null) {
+											utilMode4Process(form, dataObj, utilCaller.dataActions, true);
+										}
+									}
+								} else {
+									utilLog.log(utilLogAjaxPost, log_Info, 
+											  'El response tiene contenido si la variable no está vacía se renderizará en containerResponse = "' + containerResponse + '".');
+									
+									// Ajax OK (sin callback) o Ajax con error (con callback).
+									if(containerResponse != null){
+										containerResponse.innerHTML = newHtml;
+										
+										var scripts = containerResponse.getElementsByTagName("script");
+										for (var i = 0; i < scripts.length; ++i) {
+											var script = scripts[i];
+											try {
+												window.eval(script.innerHTML);
+											} catch(e) {
+												console.log('Script eval error: ' + script.innerHTML);
+												throw e;
+											}
+										}
+										
+										if(reloading == null || reloading) {
+											utilLog.log(utilLogAjaxPost, log_Info, 
+													  'Llamada al reload con innerId = "' + innerId + '".');
+										    reloadReload(innerId);
+										}
+									}
+									
+									if(callback != null) {
+										if(callbackParameters == null || callbackParameters.length == 0) {
+											callback();
+										}
+										if(callbackParameters != null) {
+											if(callbackParameters.length == 1) {
+												callback(callbackParameters[0]);
+											}
+											if(callbackParameters.length == 2) {
+												callback(callbackParameters[0], callbackParameters[1]);
+											}
+											if(callbackParameters.length == 3) {
+												callback(callbackParameters[0], callbackParameters[1], callbackParameters[2]);
+											}
+											if(callbackParameters.length == 4) {
+												callback(callbackParameters[0], callbackParameters[1], callbackParameters[2], callbackParameters[3]);
+											}
+										}
+									}
+								}
+								
+								utilOcultarProcesando(noLoading);
+								// window.scrollTo(0,0);
+							} else {
+								// Ajax OK (con callback).
+								
+								utilLog.log(utilLogAjaxPost, log_Info, 
+										  'El response tiene "data:". Se comenzará a procesar las acciones o callbacks asociados.');
+	
+								var responseText = responseText.substring(5);
+								
+								if(callback != null) {
+									utilLog.log(utilLogAjaxPost, log_Info, 
+									  'Llamada con callback. Se procesará el "data:" con el callback asociado.');
+									
+									if(callbackParameters == null || callbackParameters.length == 0) {
+										callback(responseText);
+									}
+									if(callbackParameters != null) {
+										if(callbackParameters.length == 1) {
+											callback(responseText, callbackParameters[0]);
+										}
+										if(callbackParameters.length == 2) {
+											callback(responseText, callbackParameters[0], callbackParameters[1]);
+										}
+										if(callbackParameters.length == 3) {
+											callback(responseText, callbackParameters[0], callbackParameters[1], callbackParameters[2]);
+										}
+										if(callbackParameters.length == 4) {
+											callback(responseText, callbackParameters[0], callbackParameters[1], callbackParameters[2], callbackParameters[3]);
+										}
+										if(callbackParameters.length == 5) {
+											callback(responseText, callbackParameters[0], callbackParameters[1], callbackParameters[2], callbackParameters[3], callbackParameters[4]);
+										}
+									}
+								} else {
+									utilLog.log(utilLogAjaxPost, log_Info, 'Llamada sin callback.');
+								}
+								
+								if(callerId != null) {
+									utilLog.log(utilLogAjaxPost, log_Info, 
+									  'Llamada con callerId. Se procesará el "data:" con las acciones asociadas al elemento de id "' + callerId + '".');
+									
+									var jsonData = responseText;
+									if(stringUtilNotEmpty(jsonData)) {
+										var json = JSON.parse(jsonData);
+										var caller = tagUtilGetControlMojito(null, callerId);
+										utilMode4Process(caller, json, null, true);
+									}
+								} else {
+									utilLog.log(utilLogAjaxPost, log_Info, 'Llamada sin callerId.');
+								}
+								
+								if(callback != null && callerId != null) {
+									utilLog.log(utilLogAjaxPost, log_Warn, 'La llamada tenía "data:" pero no había ni callback ni callerId para procesarlo.');
+								}
+								
+								utilOcultarProcesando(noLoading, callerId);
+							}
+						} else {
+							
+							var actions = responseText.split('|');
+							for(var i = 0; i < actions.length; i++) {
+								var action = actions[i];
+								
+								// Ajax con redirección. (Deprecar)
+								if(action.startsWith('redirect:')) {
+									window.location.href = action.substring(9);
+								}
+								if(action.startsWith('ajax:goto:')) {
+									window.location.href = action.substring(10);
+								}
+								if(action.startsWith('ajax:open:')) {
+									window.open(action.substring(10), '_blank');
+									utilOcultarProcesando(noLoading);
+								}
+								if(action.startsWith('ajax:refreshParent:')) {
+									// Fernando (2018-09-20): nueva forma porque si no no respeta lo que se haya cargado en el padre.
+									var method = action.substring(19);
+									if(method == null || method == '') {
+										method = 'doNothing';
+									}
+									utilSetMethodToCall('methodName', method, null, null, null, null, null, null, null, null, 'form,messageList');
+									tagUtilCloseModal();
+								}
+								if(action.startsWith('ajax:reloadParent:')) {
+									var url = window.location.href;
+									if(stringUtilEndsWith(url, '#')) {
+										url = url.substr(0, url.length - 1);
+									}
+									if(url.indexOf('isBack=') < 0) {
+										if(url.indexOf('?') < 0) {
+											url += '?isBack=true';
+										} else {
+											url += '&isBack=true';
+										}
+									}
+									
+									if(action.length > 18) {
+										url = action.substring(18);
+									}
+									
+									window.location.href = url;
+								}
+								if(action.startsWith('ajax:reloadSection:')) {
+									utilOcultarProcesando(noLoading);
+									var sectionId = action.substring(19);
+									if(sectionId != null && sectionId != '') {
+										var url = jqSelect('#'+sectionId+'Panel').attr('data-url');
+										utilDoAjaxDirect(url, sectionId, null, true, true);
+									}
+									
+								}
+								
+								if(action.startsWith('ajax:reload:')) {
+									// Este reload se hace desde una sección Ajax. Pero esa sección ajax va a cambiar de dirección, si no
+									// no se llamaría a este método. Por lo tanto es buena idea usar el utilDoAjaxDirect pero además
+									// usarlo desde el elemento contenedor de toda la página Ajax, no solamente desde el formulario
+									// que es lo que por lo general se pasa para pisar el contenido. Para eso son las líneas siguientes.
+									// Determinar desde el formulario si se trata de una section, un tab o un modal y rerenderizar desde
+									// el elemento base.
+									utilOcultarProcesando(noLoading);
+									
+									// Si llama al ajax:reload, es Ajax.
+									var url = mMojito.navAddParameter(action.substring(12), '_jx', 1);
+									// var url = action.substring(12);
+									
+									var formOrIdAux = null;
+									var formContainer = tagUtilGetControlMojito('form', formOrId, 'form');
+									if(formContainer != null) {
+										var parent = $(formContainer);
+										while(parent.length == 1 && formOrIdAux == null) {
+											if(mString.startsWith(parent.attr('id'), 'mojito-modal-content-div')) {
+												formOrIdAux = parent.attr('id');
+												// Si encuentra un mojito-modal-content-div es modal.
+												url = mMojito.navAddParameter(url, '_mdl', 1);
+											}
+											parent = $(parent).parent();
+										}
+									}
+									if(formOrIdAux == null) {
+										formOrIdAux = formOrId;
+									}
+									
+									// Antes estaba esta instrucción, pero no se usaba en la función de abajo por eso la comenté.
+									// formOrIdAux = formOrIdAux + (avoidUseParent == null || avoidUseParent == false ? '' : utilAvoidUseParent);
+									
+									utilDoAjaxDirect(url, formOrIdAux, null, true, true); //, noLoading, callback, callbackParameters);
+								}
+								if(action.startsWith('ajax:close:')) {
+									window.close();
+								}
+								if(action.startsWith('ajax:showModal:')) {
+									var urlParts = action.substring(15).split(':');
+									var url = urlParts[0];
+									var width = urlParts.length > 1 ? mInt.translate(urlParts[1]) : null;
+									var close = urlParts.length > 2 ? mBool.translate(urlParts[2]) : false;
+									
+									if(close) {
+										// Habría que cerra la última. Por ahora lo dejo así que cierra todas.
+										tagUtilCloseModal(true);
+									}
+									tagUtilShowModal(url, width);
+								}
+								if(action.startsWith('ajax:closeModal:')) {
+									utilLog.log(utilLogAjaxPost, log_Info, 'Entra a ajax:closeModal.');
+									
+									var jsonData = action.substring(16);
+									tagUtilCloseModal(true, null, jsonData);
+									
+									utilOcultarProcesando(noLoading);
+								}
+								if(action.startsWith('ajax:showMessage:')) {
+									var json = JSON.parse(action.substring(17));
+									var message = json["message"];
+									tagUtilGetControlMojito('messageList', null, 'messageList','showInfo',[message]);
+								}
+							}
+							// Fernando (2019-08-02)
+							// No generalizar el utilOcultarProcesando(). Porque por ejemplo si devuelve ajax:refreshParent se
+							// va el "Loading..." y pareciera que le vuelve el control de la página al usuario mientras
+							// comienza a cargar la nueva página.
+						}
+					} else {
+						trshUtilAjaxPost001(responseText);
+					}
+				} else {
+					realodIgnoreAllRequests = true;
+				}
+				
+				if(focusedId != null) {
+					var focused = document.getElementById(focusedId);
+					if(focused != null && $(focused).datepicker == null) {
+						$(focused).focus();
+					}
+				}
+			}
+		}
+		
+		if(!realodIgnoreAllRequests) {
+			xmlhttp.send(params);
+//			var token = document.getElementsByName('_csrf')[0].content;
+//			var header = document.getElementsByName('_csrf_header')[0].content;
+//			$.ajax({
+//			    type: "POST",
+//			    url: urlAux,
+//			    data: params,
+//			    processData: false,
+//			    contentType: false,
+//			    headers: JSON.parse('{ "' + header + '": "' + token + '" }')
+//			});
+		}
+	}
+	
+	return xmlhttp;
+}
+
+
+function utilGetParams(containerId) {
+	var container = tagUtilGetControl(containerId);
+	var result = new FormData();
+	if(container != null){
+		utilGetChildrenParams(container, result);
+	}
+	return result;
+}
+
+function utilGetChildrenParams(parent, formData) {
+	for(var i = 0; i < parent.childNodes.length; i++) {
+		var childNode = parent.childNodes[i];
+		
+		// Solo se analiza si tiene "name" si no, no.
+		if(childNode.nodeName == "INPUT")  {
+			if(childNode.type == 'text' || childNode.type == 'hidden' || childNode.type == 'color' || childNode.type == 'password' || childNode.type == 'number' || childNode.type == 'email' || childNode.type == 'tel') {
+				if(childNode.name != '') {
+					if(childNode.value != '[NOTHING}') {
+						utilPutChildrenParams(formData, childNode.name, childNode.value);
+					} else {
+						utilPutChildrenParams(formData, childNode.name, childNode.value);
+					}
+				}
+			}
+			if(childNode.type == 'checkbox') {
+				if(childNode.checked) {
+					utilPutChildrenParams(formData, childNode.name, childNode.value);
+				}
+			}
+			if(childNode.type == 'radio') {
+				if(childNode.checked) {
+					// Imposible que devuelva más de un valor.
+					formData.append(childNode.name, childNode.value);
+				}
+			}
+			if(childNode.type == 'file' ){
+				if(childNode.files.length > 0){
+					for(var f=0;f<childNode.files.length;f++){
+						utilPutChildrenParams(formData, childNode.name, childNode.files[f]);
+					}
+				}
+			}
+			
+		}
+		if(childNode.nodeName == "SELECT")  {
+			if(childNode.name != '') {
+				if(!childNode.multiple) {
+					utilPutChildrenParams(formData, childNode.name, childNode.value);
+				} else {
+					// formData.append(childNode.name+"[]", "[NOTHING}");
+					var options = childNode.options;
+					for(var j = 0; j < options.length; j++) {
+						var option = options[j];
+						if(option.selected) {
+							utilPutChildrenParams(formData, childNode.name+"[]", option.value);
+						}
+					}
+				}
+			}
+		}
+		if(childNode.nodeName == "TEXTAREA")  {
+			if(childNode.name != '') {
+				utilPutChildrenParams(formData, childNode.name, childNode.value);
+			}
+		}
+		
+		utilGetChildrenParams(childNode, formData);
+	}
+}
+
+function utilPutChildrenParams(formData, name, value) {
+	if(document.getElementsByName(name).length <= 1) {
+		utilLog.log(utilLogAjaxPost, log_Trace, 'Se agrega el parámetro ' + logDescription(name) + ' con valor ' + logDescription(value) + '.');
+		formData.append(name, value);
+	} else {
+		utilLog.log(utilLogAjaxPost, log_Trace, 'Se agrega el parámetro ' + logDescription(name + '[]') + ' con valor ' + logDescription(value) + '.');
+		formData.append(name + '[]', value);
+	}
+}
+
+function utilProcessCombo2(xmlDoc, renderId, queryId) {
+	
+	utilLog.log(utilLogProcessCombo, log_Debug, 'Recibido para procesar desde combo2.ajax: ',
+			'xmlDoc: ' + logDescription(xmlDoc),
+			'renderId: ' + logDescription(renderId),
+			'queryId: ' + logDescription(queryId));
+	
+	// Ver utilDoAjaxCombo22.
+	// La idea es no procesar queries anteriores.
+	var process = true;
+	if(queryId != null) {
+		var renderIdQueryId = document.getElementById(renderId).queryId;
+		process = (queryId == renderIdQueryId);
+		// console.log('check query id (' + queryId + '): ' + process);
+	}
+	
+	if(process) {
+		var id = null;
+		var idSearch = null;
+		var description = null;
+		var message = null;
+		
+		if(xmlDoc.getElementsByTagName("id").length > 0) {
+			id = stringUtilTrim(xmlDoc.getElementsByTagName("id")[0].childNodes[0].nodeValue);
+			// console.log('utilProcessCombo2.id: ' + id);
+		}
+		if(xmlDoc.getElementsByTagName("idSearch").length > 0) {
+			idSearch = stringUtilTrim(xmlDoc.getElementsByTagName("idSearch")[0].childNodes[0].nodeValue);
+		}
+		if(xmlDoc.getElementsByTagName("description").length > 0) {
+			description = stringUtilTrim(xmlDoc.getElementsByTagName("description")[0].childNodes[0].nodeValue);
+		}
+		if(xmlDoc.getElementsByTagName("message").length > 0) {
+			message = stringUtilTrim(xmlDoc.getElementsByTagName("message")[0].childNodes[0].nodeValue);
+		}
+		
+		// console.log('utilProcessCombo2.302: ' + id);
+		var change = utilProcessCombo2WithData(id, idSearch, description, message, renderId);
+		
+		/* Pongo primero clean para que si se quiere pisar un valor se pueda usar clean+set */
+		utilProcessCombo2Clean(xmlDoc);
+		
+		utilProcessCombo2Properties(xmlDoc);
+		
+		utilProcessCombo2Blink(xmlDoc);
+		
+		utilProcessCombo2Block(xmlDoc);
+		
+		utilProcessCombo2Unblock(xmlDoc);
+		
+		if(change) {
+			var parent = document.getElementById(renderId);
+			var idControl = $(parent).find('.mojito-inputentity-id-input[type="hidden"]');
+			
+			if($(idControl).length == 1) {
+				var methodAttr = $(idControl).attr('data-method');
+				if(methodAttr != null) {
+					utilLog.log(utilLogProcessCombo, log_Info, 'Se llama al método ' + methodAttr + ' por onchange...');
+					
+					utilMethodCall(idControl, methodAttr);
+					// utilSetMethodToCall("methodName", methodAttr, true, null, null, false, null, null, null, null, null);
+					// utilSetMethodToCall(methodControlOrId, methodName, true, url, idForm, targetParent, null, null, ajaxCallback, null, rerender);
+				}
+			}
+			
+			if($(idControl).prop('inen') != null) {
+				$(idControl).prop('inen').executeActions();
+			}
+		} else {
+			utilLog.log(utilLogProcessCombo, log_Info, 'Onchange no necesario (change = ' + change + ')...');
+		}
+	}
+}
+
+function utilProcessSelect(xmlDoc, renderId) {
+	/* Pongo primero clean para que si se quiere pisar un valor se pueda usar clean+set */
+	utilProcessCombo2Clean(xmlDoc);
+	
+	utilProcessCombo2Properties(xmlDoc);
+	
+	utilProcessCombo2Blink(xmlDoc);
+	
+	utilProcessCombo2Block(xmlDoc);
+	
+	utilProcessCombo2Unblock(xmlDoc);
+}
+
+function utilProcessCombo2WithData(id, idSearch, description, message, controlOrId) {
+	// console.log('utilProcessCombo2WithData(renderId: ' + renderId + ')');
+	var result = false;
+	
+	var parent = tagUtilGetControl(controlOrId)
+	var i;
+	var child;
+	
+	if(parent != null) {
+		if(id != null) {
+			for(i = 0; i < parent.childNodes.length; i++) {
+				child = parent.childNodes[i];
+				
+				if(tagUtilHasClass(child, 'mojito-inputentity-id-input')) {
+					if(child.type == 'hidden') {
+						if(child.value != id){
+							result = true;
+						}
+						
+						child.value = id;						
+					} else {
+						child.value = idSearch;
+					}
+					tagUtilRemoveClass(child, "mojito-input-error");
+					tagUtilFireEvent(child, "change");
+				}
+				if(tagUtilHasClass(child, 'mojito-inputentity-description-input') || tagUtilHasClass(child, 'mojito-inputbase-disabled-input')) {
+					if(child.nodeName == "INPUT") {
+						child.value = description;
+						child.previousValue = description;
+					}
+					if(child.nodeName == "LABEL") {
+						child.innerHTML = description;
+					}
+					
+					tagUtilRemoveClass(child, "mojito-input-error");
+				}
+			}
+		} else {
+			// console.log('putting error on combo...');
+			for(i = 0; i < parent.childNodes.length; i++) {
+				child = parent.childNodes[i];
+				
+				if(tagUtilHasClass(child, 'mojito-inputentity-id-input')) {
+					if(child.nodeName == "INPUT") {
+						if(child.type == "hidden") {
+							if(child.value != ""){
+								result = true;
+							}
+							child.value = "";
+							tagUtilFireEvent(child, "change");
+						}
+					}
+					if(child.nodeName == "LABEL") {
+						child.innerHTML = "";
+					}
+					
+					tagUtilAddClass(child, "mojito-input-error");
+				}
+				
+				if(tagUtilHasClass(child, 'mojito-inputentity-description-input') || tagUtilHasClass(child, 'mojito-inputbase-disabled-input')) {
+					if(child.nodeName == "INPUT") {
+						if(child.disabled) {
+							child.value = "";
+						} else {
+							tagUtilAddClass(child, "mojito-input-error");
+						}
+					}
+					if(child.nodeName == "LABEL") {
+						child.innerHTML = "";
+						tagUtilAddClass(child, "mojito-input-error");
+					}
+				}
+			}
+		}
+	}
+	
+	return result;
+}
+
+function utilGetFirstParentOfType(element, tagName){
+	
+	tagName = tagName.toLowerCase();
+	while (element && element.parentNode) {
+		element = element.parentNode;
+	    if (element.tagName && element.tagName.toLowerCase() == tagName) {
+	      return element;
+	    }
+	  }
+
+	  return null;
+}
+
+function utilGetFirstTextNode(element){
+	for (var i = 0; i < element.childNodes.length; i++) {
+	    var node = element.childNodes[i];
+	    if (node.nodeName === "#text") {
+	        return node;
+	    }
+	}
+	
+	return null;
+}
+
+function utilDownload(innerPrefix) {
+	reloadCheck('download', innerPrefix, function(input) {
+		utilDownloadExecute(input);
+	});
+}
+
+function utilDownloadExecute(input) {
+	var page = $(input).attr('data-page');
+	var pathX = $(input).val();
+	
+	var filename = $(input).attr('data-filename');
+	var isDelete = $(input).attr('data-delete');
+	
+	var url = "./" + page + "?pathX=" + encodeURIComponent(pathX);
+	if(filename != null && filename.trim() != '') {
+		url += "&filename=" + filename;
+	}
+	if(isDelete != null && isDelete.trim() != '') {
+		url += "&delete=" + isDelete;
+	}
+	window.location.href = url;
+	
+	$(input).remove();
+}
+
+function utilProcessCombo2Properties(xmlDoc) {
+	var properties = xmlDoc.getElementsByTagName("property");
+	for (var i = 0; i < properties.length; ++i) {
+		var property = properties[i];
+		var controlId = property.childNodes[0].childNodes[0].nodeValue;
+		
+		var value;
+		if(property.childNodes[1].childNodes.length > 0) {
+			value = property.childNodes[1].childNodes[0].nodeValue;
+		} else {
+			value = '';
+		}
+		//var value = property.childNodes[1].childNodes[0].nodeValue;
+		
+		utilLog.log(utilLogProcessCombo, log_Debug, 'Comienza el set de una propiedad ',
+				'property: ' + logDescription(controlId),
+				'value: ' + logDescription(value));
+		
+		var controls = document.getElementsByName(controlId);
+		if(controls.length > 0) {
+			if(property.childNodes[1].childNodes.length >= 0) {
+				if(property.childNodes[1].childNodes[0] != null) {
+					
+					var checkbox = document.getElementById(controlId + ".checkbox");
+					if(checkbox == null) {
+						if(controls[0]['mHandler'] == null || $(controls[0]).attr('data-control') != 'inputEntity') {
+							// Fernando (2022-08-21): esta parte del if debería ir deprecándose.
+							
+							// No es un checkbox.
+							controls[0].value = value;
+							// Fernando (2018-02-28): en numberUtil.numberFormula hay un aviso de que el trigger('input')
+							// no funcionó. Dejo este aviso por si se detecta que en algún caso no funciona ver si se
+							// puede hacer lo mismo en ambos lados.
+							if(controls[0].type == "hidden"){
+								$(controls[0]).trigger('change');
+							} else {
+								$(controls[0]).trigger('input');
+							}
+							
+							if(controls[0].type == "hidden"){
+								var parentTd = utilGetFirstParentOfType(controls[0], 'td');
+								if (parentTd != null){
+									var textNode = utilGetFirstTextNode(parentTd);
+									if(textNode != null){
+										textNode.nodeValue = value;
+									} else {
+										textNode = document.createTextNode(value);
+										parentTd.appendChild(textNode);
+									}
+								}
+							}
+						} else {
+							// Fernando (2022-08-21): esta parte del if debería ir agrandándose.
+							
+							controls[0].mHandler.setValue(value);
+						}
+					} else {
+						// Es un checkbox.
+						var valueAux = (value.toUpperCase() == 'Sí' || value.toUpperCase() == 'SI') ? 'true' : 'false';
+						if(controls[0].value != valueAux) {
+							tagUtilSetCheckboxToHidden2(checkbox, controls[0], 'F', ' ');
+						}
+					}
+				} else {
+					controls[0].value = '';
+					//Esto es para blanquear los combos
+					var parentSpan = utilGetFirstParentOfType(controls[0], 'span');
+					if (parentSpan != null){
+						// console.log('utilProcessCombo2WithData.vacio.467');
+						utilProcessCombo2WithData('', '', '', null, parentSpan.id)
+					}
+				}
+			}
+		} else {
+			var control = document.getElementById(controlId);
+			if(control != null) {
+				if(property.childNodes[1].childNodes.length >= 0) {
+					if(property.childNodes[1].childNodes[0] != null) {
+						var mHandler = $(control).prop('mHandler');
+						if(mHandler != null) {
+							if(mString.equals(mHandler.prefix, 'lchi')) {
+								control = mHandler.input;
+							}
+						}
+						
+						control.value = value;
+						if(control.type == "hidden"){
+							var parentTd = utilGetFirstParentOfType(control, 'td');
+							if (parentTd != null && $(parentTd).is(":visible")) {
+								var textNode = utilGetFirstTextNode(parentTd);
+								if(textNode != null){
+									textNode.nodeValue = value;
+								} else {
+									parentTd.innerHTML = value;
+								}
+							}
+						}
+					} else {
+						control.value = '';
+					}
+					
+					if(control.type == "hidden"){
+						$(control).trigger('change');
+					} else {
+						$(control).trigger('input');
+					}
+				}
+			}
+		}
+	}
+}
+
+function utilProcessCombo2Blink(xmlDoc) {
+	var properties = xmlDoc.getElementsByTagName("blink");
+	for (var i = 0; i < properties.length; ++i) {
+		var property = properties[i];
+		var controlId = property.childNodes[0].childNodes[0].nodeValue;
+		
+		var controls = document.getElementsByName(controlId);
+		if(controls.length > 0) {
+			controls[0];
+		} else {
+			var control = document.getElementById(controlId);
+			if(control != null) {
+				tagUtilBlink(control);
+			}
+		}
+	}
+}
+
+function utilProcessCombo2Block(xmlDoc) {
+	var properties = xmlDoc.getElementsByTagName("block");
+	for (var i = 0; i < properties.length; ++i) {
+		var property = properties[i];
+		var controlId = property.childNodes[0].childNodes[0].nodeValue;
+		var color = property.childNodes[1].childNodes[0].nodeValue;
+		
+		if(controlId.indexOf('*') < 0) {
+			var controls = document.getElementsByName(controlId);
+			if(controls.length > 0) {
+				tagUtilBlock(controls[0], color);
+			} else {
+				var control = document.getElementById(controlId);
+				if(control != null) {
+					tagUtilBlock(control, color);
+				}
+			}
+		} else {
+			var parts = controlId.split('*');
+			var controls = $("input[name^='" + parts[0] + "'][name$='" + parts[1] + "']");
+			for(var j = 0; j < controls.length; j++) {
+				tagUtilBlock(controls[j], color);
+			}
+		}
+	}
+}
+
+function utilProcessCombo2Unblock(xmlDoc) {
+	var properties = xmlDoc.getElementsByTagName("unblock");
+	for (var i = 0; i < properties.length; ++i) {
+		var property = properties[i];
+		var controlId = property.childNodes[0].childNodes[0].nodeValue;
+		var color = property.childNodes[1].childNodes[0].nodeValue;
+		
+		if(controlId.indexOf('*') < 0) {
+			var controls = document.getElementsByName(controlId);
+			if(controls.length > 0) {
+				tagUtilUnblock(controls[0], color);
+			} else {
+				var control = document.getElementById(controlId);
+				if(control != null) {
+					tagUtilUnblock(control, color);
+				}
+			}
+		} else {
+			var parts = controlId.split('*');
+			var controls = $("input[name^='" + parts[0] + "'][name$='" + parts[1] + "']");
+			for(var j = 0; j < controls.length; j++) {
+				tagUtilUnblock(controls[j], color);
+			}
+		}
+	}
+}
+
+function utilProcessCombo2Clean(xmlDoc) {
+	var properties = xmlDoc.getElementsByTagName("clean");
+	for (var i = 0; i < properties.length; ++i) {
+		var property = properties[i];
+		var controlId = property.childNodes[0].childNodes[0].nodeValue;
+		
+		if(controlId.indexOf('*') < 0) {
+			var controls = document.getElementsByName(controlId);
+			if(controls.length > 0) {
+				tagUtilClean(controls[0]);
+			} else {
+				var control = document.getElementById(controlId);
+				if(control != null) {
+					tagUtilClean(control);
+				}
+			}
+		} else {
+			var parts = controlId.split('*');
+			var controls = $("input[name^='" + parts[0] + "'][name$='" + parts[1] + "']");
+			for(var j = 0; j < controls.length; j++) {
+				tagUtilClean(controls[j]);
+			}
+		}
+	}
+}
+
+function utilDoAjaxComboItems(entity, linkedId, linkField, linkId, cleanLinked, extraFilters) {
+	var linkControl = document.getElementById(linkId);
+	
+	var linkedIdReal = linkedId.split("|")[0];
+	var linkedIdControl = document.getElementById(linkedIdReal);
+	
+	if(linkControl.value != '' && linkControl.value != 'Cargando...') {
+		var ef = extraFilters !== undefined ? utilGetQueryString('', extraFilters, true) : '';
+		utilDoAjax('comboItems.ajax?entity=' + entity + '&' + ef, linkedId, utilProcessComboItems);
+		// ef = extraFilters !== undefined ? extraFilters : '';
+		//utilDoAjax('comboItems.ajax?entity=' + entity + '&' + linkField + '=' + encodeURIComponent(linkControl.value) + ef, linkedId, utilProcessComboItems);
+	}
+	
+	// Fernando (2013-06-27): al parecer, pase lo que pase, el control
+	// linkeado se tiene que borrar, porque se supone que se cambi� el
+	// valor, as� que el valor que tenga ya no es v�lido.
+	// Fernando (2013-07-07): result� falsa la apreciaci�n anterior.
+	// Cuando se est� produciendo la carga del control, no hay que
+	// borrar porque el control tiene un valor v�lido y debe mantenerse.
+	// Una vez que ya se carg� la p�gina, ah� s� si hay un cambio se
+	// borra. El ejemplo es Bocoy en cotizadorAutomovilRegistro.jsp
+	// que al cargar la p�gina mostraba la marca, pero no el modelo.
+	// Tambi�n hay que tener en cuenta que si el combo "padre" est�
+	// vac�o, entonces tambi�n debe limpiarse el combo "hijo".
+	if(cleanLinked || linkControl.value == '' || linkControl.value == 'Cargando...') {
+		linkedIdControl.options.length = 1;
+		utilSetMethodToCallPause = true;
+		tagUtilFireEvent(linkedIdControl, "change");
+		utilSetMethodToCallPause = false;
+	}
+}
+
+function utilLinkCombos(entity, linkedId, linkField, linkId, valuesHiddenId, searchTextId, extraFilters) {
+	var control = document.getElementById(linkId);
+	
+	var handler = function() {
+		var linkedIdReal = linkedId
+		if(valuesHiddenId != null && searchTextId != null){
+			linkedIdReal = linkedId + '|' + valuesHiddenId + '|' + searchTextId;
+		}
+		
+		utilDoAjaxComboItems(entity, linkedIdReal, linkField, linkId, true, extraFilters);
+	};
+	
+	utilAddEventListener(control, 'change', handler);
+}
+
+function utilLinkCombosIncremental(entity, linkedId, linkField, linkId, valuesHiddenId, searchTextId, extraFilters) {
+
+// utilLinkCombosIncremental('addendums', 'template', 'type.id', 'addendumType', 'template-values-hidden', 'template-search-text', ['proposal.opportunity.salesAgent.id', '\u0022fpantanetti\u0022', 'type.id', '[addendumType]']);
+	var control = document.getElementById(linkId);
+	
+	var handler = function() {
+		var linkedControl = document.getElementById(linkedId);
+		var linkedControlDescription = document.getElementById(linkedId+'.description');
+		linkedControl.value='';
+		linkedControlDescription.value='';
+	};
+	
+	utilAddEventListener(control, 'change', handler);
+}
+
+function utilProcessComboItems(xmlDoc, data) {
+	var datas = data.split('|');
+	var renderId = datas[0];
+	var valuesHiddenId = null;
+	var searchTextId = null;
+	
+	if(datas.length == 3) {
+		valuesHiddenId = datas[1];
+		searchTextId = datas[2];
+	}
+	
+	utilProcessComboItems2(xmlDoc, renderId, valuesHiddenId, searchTextId);
+}
+	
+function utilProcessComboItems2(xmlDoc, renderId, valuesHiddenId, searchTextId) {
+	var combo = document.getElementById(renderId);
+	var comboItem;
+	var comboItems = xmlDoc.getElementsByTagName("comboitem");
+	var actualValue = null;
+	
+	if(combo.selectedIndex >= 0) {
+		actualValue = combo.options[combo.selectedIndex].value;
+	}
+	
+	while(combo.options.length > 1) {
+		combo.remove(1);
+	}
+	
+	for(var i = 0; i < comboItems.length; i++) {
+		var option = document.createElement("option");
+		var comboItem = comboItems.item(i);
+		
+		for(var j = 0; j < comboItem.childNodes.length; j++) {
+			var comboItemInfo = comboItem.childNodes.item(j);
+			
+			if(comboItemInfo.nodeName == 'id') {
+				option.value = comboItemInfo.childNodes.item(0).nodeValue;
+			}
+			if(comboItemInfo.nodeName == 'description') {
+				option.text = comboItemInfo.childNodes.item(0).nodeValue;
+			}
+		}
+		
+		//combo.add(option, null);
+		try {
+			// for IE earlier than version 8
+			combo.add(option, combo.options[null]);
+		}
+		catch(e) {
+			combo.add(option,null);
+		}
+	}
+	
+	tagUtilSetValue(renderId, actualValue);
+	
+	// Gastón (2020-03-29) esto estaría bueno que se haga en caso que un combo dependiente use la marca de selectIfOne. Dejo el código (lo use para probar y funciona, no estaba) para tenerlo de referencia y analizarlo.
+	//if((actualValue == null || actualValue == '') && comboItems.length == 1) {
+	//	tagUtilSetValue(renderId, combo.options[1].value);
+	//}
+	
+	if(valuesHiddenId != null && searchTextId != null) {
+		tagUtilOnlineCombo(renderId, valuesHiddenId, searchTextId);
+	}
+	
+	if(window['extraLoad'] != null){
+		window['extraLoad'](combo);
+	}
+}
+
+function utilDoAjaxSelect(valueClass, controlId, sets) {
+    var controlIdInput = document.getElementById(controlId);
+    
+    if(controlIdInput != null) {
+    	var id = controlIdInput.value;
+    	if(id != null) {
+	    	var setsQueryString = utilGetQueryString("set", sets, true);
+	    	utilDoAjax('select.ajax?valueClass=' + valueClass + '&id=' + encodeURIComponent(id) + setsQueryString, null, utilProcessSelect);
+    	}
+    }
+}
+
+/*
+ * userInputId: input donde el usuario carga el valor a buscar.
+ */
+function utilDoAjaxCombo2(entity, lookUpField, lookUpInputId, renderId, filters, sets, userInputId) {
+    var lookUpInput = document.getElementById(lookUpInputId);
+    
+    var userInput = document.getElementById(userInputId);
+    
+    if(userInput == null || (userInput.value != userInput.previousValue)) {
+    	utilDoAjaxCombo22(entity, lookUpField, lookUpInput.value, renderId, filters, sets);
+    }
+}
+
+/**
+ * Ver utilDoAjaxCombo22.
+ */
+function utilDoAjaxCombo21(entity, lookUpField, lookUpValue, renderId, filters) {
+	utilDoAjaxCombo22(entity, lookUpField, lookUpValue, renderId, filters, null);
+}
+
+/**
+ * Llama al servlet del combo para buscar el valor que corresonde y lo procesa.<br>
+ * Este es el mejor método para llamar para activar la búsqueda del combo.<br>
+ * El <b>utilDoAjaxCombo21</b> es igual a este método pero no maneja los sets.<br>
+ * El <b>utilDoAjaxCombo2</b> termina llamando a este método pero previamente hace
+ * verificaciones sobre los inputs que recibe por par�metro que son los inputs del
+ * control.
+ * @param entity Nombre del combo.
+ * @param lookUpField Campo de búsqueda. Se puede enviar como "input.fieldName" o
+ * "filter.fieldName" o como "id" (único valor válido si se busca por id). El servlet
+ * lo toma de las tres maneras. La diferencia es que interpreta "input" como input de
+ * usuario, "filter" como filtro fijo y "id" como una búsqueda fija por el campo "id".
+ * @param lookUpValue Valor de búsqueda. Asociado al lookUpField.
+ * @param renderId Span donde se renderizan los controles que hay que setear con el
+ * resultado que se obtiene.
+ * @param filters Filtros extras que requiere la búsqueda.
+ * @param sets Seteos a ejecutar luego de encontrar el valor.
+ */
+function utilDoAjaxCombo22(entity, lookUpField, lookUpValue, renderId, filters, sets) {
+    if (lookUpValue != '') {
+    	var filtersQueryString = utilGetQueryString("filter", filters, true);
+    	var setsQueryString = utilGetQueryString("set", sets, true);
+    	
+    	// var ajaxCall = 'combo2.ajax?entity=' + entity + '&' + lookUpField + '=' + encodeURIComponent(lookUpValue) + filtersQueryString + setsQueryString;
+    	// console.log('utilDoAjax: ' + ajaxCall);
+    	
+    	// Guardo un id de query, porque si la selección por autocomplete se ejecuta primero, entonces hay que ignorar la búsqueda por pérdida de foco.
+    	// Llamada por autocomplete (dando click)
+    	// Llamada por pérdida de foco (porque al dar click pierde el foco)
+    	// Respuesta por autocomplete (más rápida porque busca por id) (OK, procesar)
+    	// Respuesta por pérdida de foco (NOK, se ignora porque hubo una búsqueda exitosa anterior)
+    	var queryId = utilRandom(10);
+    	document.getElementById(renderId).queryId = queryId;
+    	var urlCombo = 'combo2.ajax?entity=' + entity + '&' + lookUpField + '=' + encodeURIComponent(lookUpValue) + filtersQueryString + setsQueryString;
+    	// console.log('utilDoAjaxCombo22.url: ' + url);
+    	
+    	utilLog.log(utilLogProcessCombo, log_Info, 'Llamando al servlet combo2.ajax: ',
+    			'urlCombo: ' + logDescription(urlCombo),
+    			'renderId: ' + logDescription(renderId),
+    			'queryId: ' + logDescription(queryId));
+    	
+    	utilDoAjax(urlCombo, renderId, utilProcessCombo2, queryId);
+    } else {
+    	// console.log('utilProcessCombo2WithData.vacio.774');
+        utilProcessCombo2WithData('', '', '', null, renderId);
+    }
+}
+
+function utilGetAjaxUrlIncremental(entity, lookUpField, filters, sets) {
+	var filtersQueryString = utilGetQueryString("filter", filters, true);
+	var setsQueryString = utilGetQueryString("set", sets, true);
+	var result = 'incremental.ajax?entity=' + entity + '&' + filtersQueryString + setsQueryString;
+	return result;
+}
+
+function utilGetAjaxUrlTribute(q) {
+	var result = 'mention.ajax?q=' + q;
+	return result;
+}
+
+function utilDoAjaxHistory(beanName, renderId, back) {
+	var id = document.getElementById(renderId + ".history.lastId").value;
+	var url = 'history.ajax?bean=' + beanName + "&id=" + id + "&back=" + back;
+	utilDoAjax(url, renderId, utilProcessHistory);
+}
+
+function utilProcessHistory(xmlDoc, renderId) {
+	var id = null;
+	var value = null;
+	var message = null;
+	
+	if(xmlDoc.getElementsByTagName("id").length > 0) {
+		id = stringUtilTrim(xmlDoc.getElementsByTagName("id")[0].childNodes[0].nodeValue);
+		document.getElementById(renderId + ".history.lastId").value = id;
+	}
+	if(xmlDoc.getElementsByTagName("value").length > 0) {
+		value = stringUtilTrim(xmlDoc.getElementsByTagName("value")[0].childNodes[0].nodeValue);
+		document.getElementById(renderId).value = value;
+	}
+}
+
+function utilGetQueryString(preffix, queryString, withAmpersand) {
+	var result = "";
+	
+	if(queryString != null) {
+		if(typeof queryString == "string") {
+			if(queryString != '') {
+				if(prefix != '') {
+					result = preffix + "." + queryString;
+				} else {
+					
+				}
+			}
+		}
+		//Se agregó lo que está a la derecha del || porque en el IE 8, cuando volvía de seleccionar en la lupa, la llamada
+		//devolvía [object Object]. Se uso la solución http://stackoverflow.com/a/1058753
+		if(Object.prototype.toString.call(queryString) === "[object Array]" || (typeof queryString !== 'object' && queryString !== null && typeof queryString.length === 'number')) {
+			var first = true;
+			if(queryString.length > 0){
+				for(var i = 0; i < queryString.length; i += 2) {
+					if(!first) {
+						result += "&";
+					} else {
+						first = false;
+					}
+					
+					if(preffix != '') {
+						result += encodeURIComponent(preffix + "." + queryString[i]);
+					} else {
+						result += encodeURIComponent(queryString[i]);
+					}
+					result += "=";
+					
+					// queryString[i + 1] = queryString[i + 1].replace("%", "%25");
+					// Fernando (2014-04-02): le agrego el stringUtilResolve porque no estaban funcionando los filtros
+					// y parámetros con corchetes. Me resulta raro que no funcionaran, por eso dejo este comentario.
+					var value = stringUtilResolve(queryString[i + 1]);
+					result += encodeURIComponent(value);
+					//result += encodeURIComponent(queryString[i + 1]);
+				}				
+			//} else {
+			//	//Gaston (2014-06-26): Esto es un parche porque sino fallaba los inputs si no se le pasaba el set. Queda pendiente buscar una mejor soluci�n
+			//	if(preffix != '') {
+			//		result = preffix+".=";
+			//	}
+			}
+		}
+	//} else {
+	//	//Gaston (2014-06-26): Esto es un parche porque sino fallaba los inputs si no se le pasaba el set. Queda pendiente buscar una mejor soluci�n
+	//	if(preffix != '') {
+	//		result = preffix+".=";
+	//	}
+	}
+	if(withAmpersand && result.length > 0) {
+		result = "&" + result;
+	}
+	
+	//alert(result);
+	return result;
+}
+
+function utilDoAjax(url, renderId, method, queryId)
+{
+	var xmlhttp;
+
+	if (window.XMLHttpRequest) {
+		// code for IE7+, Firefox, Chrome, Opera, Safari
+		xmlhttp = new XMLHttpRequest();
+	} else {
+		// code for IE6, IE5
+		xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+	}
+
+	xmlhttp.onreadystatechange = function() {
+		if(xmlhttp.readyState == 4) {
+			if(method != null) {
+				// console.log(xmlhttp.responseText);
+				if (window.DOMParser)
+				{
+					parser = new DOMParser();
+					xmlDoc = parser.parseFromString(xmlhttp.responseText, "text/xml");
+				}
+				else // Internet Explorer
+				{
+					xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+					xmlDoc.async = "false";
+					xmlDoc.loadXML(xmlhttp.responseText); 
+				}			
+				
+				method(xmlDoc, renderId, queryId);
+			}
+		} 
+	}
+	
+	xmlhttp.open("GET", url, true);
+	xmlhttp.send(document.forms[0]);
+	
+	// Gaston (2016-10-25) Codigo para mandar los request de ajax por post. Queda comentado hasta que se pueda probar mejor
+	//var urlSplitted = url.split('?');
+	//var formData = urlSplitted.length > 1?urlSplitted[1]:document.forms[0];
+	
+	//var csrfToken = document.head.querySelector("meta[name=_csrf]").content;
+	//xmlhttp.open("POST", urlSplitted[0], true);
+	//xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+	//xmlhttp.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+	//xmlhttp.send(urlSplitted[1]);
+	
+}
+
+// Llamada Ajax básica que hace el callback devolviendo el texto exacto que recibió.
+function utilDoAjaxPlain(url, callback)
+{
+	var xmlhttp;
+
+	if (window.XMLHttpRequest) {
+		// code for IE7+, Firefox, Chrome, Opera, Safari
+		xmlhttp = new XMLHttpRequest();
+	} else {
+		// code for IE6, IE5
+		xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+	}
+
+	xmlhttp.onreadystatechange = function() {
+		if(xmlhttp.readyState == 4) {
+			callback(xmlhttp.responseText);
+		} 
+	}
+	
+	xmlhttp.open("GET", url, true);
+	xmlhttp.send(document.forms[0]);
+}
+
+function utilDoAjaxDirect(url, renderId, swap, overwrite, vertical, noLoading, callback, callbackParameters)
+{
+	utilLog.log(utilLogDoAjaxDirect, log_Info,
+	  'Calling utilDoAjaxDirect...',
+	  'url: "' + url + '"',
+	  'renderId: "' + renderId + '"',
+	  'swap: "' + swap + '"',
+	  'overwrite: "' + overwrite + '"',
+	  'vertical: "' + vertical + '"',
+	  'noLoading: "' + noLoading + '"',
+	  'callback: "' + callback + '"',
+	  'callbackParameters: "' + callbackParameters + '"');
+	
+	var control = tagUtilGetControl(renderId);
+	
+	if(overwrite || control.innerHTML.trim() == '') {
+		if(vertical != true) {
+			if(noLoading == null || !noLoading) {
+				control.innerHTML = "<div style=\"height: 29px; padding-top: 20px; vertical-align: middle; text-align: center;\"><img src=\"jar/mojito/utils/web/images/wait.gif\" /></div>";
+			}
+		} else {
+			if(noLoading == null || !noLoading) {
+				utilShowProcesando(renderId);
+			}
+		}
+		
+		var xmlhttp;
+
+		if (window.XMLHttpRequest) {
+			// code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlhttp = new XMLHttpRequest();
+		} else {
+			// code for IE6, IE5
+			xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+		}
+
+		xmlhttp.onreadystatechange = function() {
+			if(xmlhttp.readyState == 4) {
+				utilLog.log(utilLogDoAjaxDirect, log_Debug,
+						  'loading content...',
+						  'url: ' + url,
+						  'control.innerHTML (500 characters): ' + control.innerHTML.replace(/\s\s/g, " ").substring(0, 500),
+						  'xmlhttp.responseText (500 characters): ' + xmlhttp.responseText.replace(/\s\s/g, " ").substring(0, 500));
+				
+				control.innerHTML = xmlhttp.responseText;
+				
+				utilLog.log(utilLogDoAjaxDirect, log_Info,
+						  'content loaded...',
+						  'url: ' + url,
+						  'control.innerHTML (500 characters): ' + control.innerHTML.replace(/\s\s/g, " ").substring(0, 500));
+				
+				var scripts = control.getElementsByTagName("script");
+				for (var i = 0; i < scripts.length; ++i) {
+					var script = scripts[i];
+					window.eval(script.innerHTML);
+				}
+				
+				// Fernando (2022-08-20): acá se buscaba el innerPrefix por medio de esta instrucción:
+				// var urlAux = utilGetInnerPrefix(url);
+				// pero fallaba con saleRecord.jsp en Barrel que se mostraba como modal en
+				// modo add y luego pasaba a edit.
+				// Por eso busqué en utilAjaxPost y vi que usaba la estrategia de buscar el
+				// form, la probé y funcionó por eso la dejé como estrategia principal y en
+				// el caso de no encontrarse el form dejé la estrategia que estaba al inicio.
+				var forms = $('[data-control="form"]', control);
+				if(forms.length > 0) {
+					urlAux = utilGetInnerInfo(forms.get(0)).innerPrefix;
+				} else {
+					urlAux = utilGetInnerPrefix(url);
+				}
+				
+				utilLog.log(utilLogAjaxPost, log_Info, 
+						  'Llamada al reload con innerId = "' + urlAux + '" (obtenido desde la URL de una sección).');
+				reloadReload(urlAux);
+				
+				if(callback != null) {
+					if(callbackParameters == null || callbackParameters.length == 0) {
+						callback();
+					}
+					if(callbackParameters != null) {
+						if(callbackParameters.length == 1) {
+							callback(callbackParameters[0]);
+						}
+						if(callbackParameters.length == 2) {
+							callback(callbackParameters[0], callbackParameters[1]);
+						}
+					}
+				}
+				
+				if(control.onAjaxLoad != null) {
+					control.onAjaxLoad();
+				}
+				
+				utilOcultarProcesando(noLoading);
+			}
+		}
+		
+		xmlhttp.open("GET", url, true);
+		xmlhttp.send();
+	} else {
+		utilLog.log(utilLogDoAjaxDirect, log_Info,
+				  'No loading. Overwrite disabled and control with content...',
+				  'control.innerHTML.trim() (500 characters): ' + utilLog.innerHtml(control));
+		
+		if(swap) {
+			control.innerHTML = '';
+		}
+	}
+}
+
+// IMPORTANTE: esta función es gemela a MojitoRender.getInnerPrefix.
+function utilGetInnerPrefix(url) {
+	var result = null;
+	if(url != null) {
+		var urlParts = url.split('?');
+		result = urlParts[0];
+		if(urlParts.length > 1) {
+			var queryString = decodeURIComponent(urlParts[1]);
+			
+			// Fernando (2021-10-05): agrego el "+" que aparece cuando hay un espacio
+			// en los valores que se pasan por querystring. Este espacio la función gemela
+			// MojitoRender.getInnerPrefix lo hace desaparecer, al parecer, en el decode.
+			// No sé por qué el decodeURIComponent no.
+			result = result + queryString.replace(/_jx=1/g, '').replace(/_mdl=1/g, '').
+			  replace(/\s/g, '').replace(/\?/g, '').replace(/=/g, '').
+			  replace(/&/g, '').replace(/\./g, '').replace(/\,/g, '').
+			  replace(/:/g, '').replace(/\//g, '').replace(/\+/g, '');
+		}
+	}
+	return result;
+}
+
+function utilGetWindowHeight() {
+	var windowHeight = 0;
+	
+	if (typeof(window.innerHeight) == 'number') {
+		windowHeight = window.innerHeight + window.pageYOffset;
+	}
+	else {
+		if (document.body && document.body.clientHeight) {
+			windowHeight = document.body.clientHeight + document.body.scrollTop;
+		}
+	}
+	
+	return windowHeight;
+}
+
+function utilSetFooter(footerId) {
+	var windowHeight = utilGetWindowHeight();
+	
+	if (windowHeight > 0) {
+		var footerElement = document.getElementById(footerId);
+		var footerHeight  = footerElement.offsetHeight;
+
+		footerElement.style.top = (windowHeight - footerHeight) + 'px';
+	}
+}
+
+function utilStickToFooter(footerId) {
+	utilSetFooter(footerId);
+	/*
+	var bodies = document.getElementsByTagName('body');
+	alert(bodies);
+	alert(bodies.length);
+	bodies[0].onload = function() {
+		utilSetFooter(footerId);
+	}
+	*/
+	window.onload = function() {
+		utilSetFooter(footerId);
+	}
+	window.onresize = function() {
+		utilSetFooter(footerId);
+	}
+	window.onscroll = function() {
+		utilSetFooter(footerId);
+	}
+}
+
+function utilShowProcesando(renderId) {
+	// horizontalNew
+	if(reloadIsLayoutHorizontalNew()) {
+		if($('.mojito-preloader-div') != null) {
+			utilProcesando = true;
+			utilLog.log(utilLogProcesando, log_Trace, 'utilProcesando = true (' + (renderId != null ? renderId : 'null') + ')');
+			
+			setTimeout(
+				function() {
+					if (utilProcesando) {
+						tagUtilFaviconLoading();
+						
+						if(renderId == null || renderId == tagModalDivId) {
+							$('.mojito-preloader-div').show();
+						} else {
+							var control = tagUtilGetControl(renderId);
+							control.innerHTML =
+								  '<div class="mojito-preloader-scene-div mojito-preloader-scene-ajax-div">' +
+									'  <svg version="1.1" id="L7" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve"  width="100px">' +
+									' <path fill="#498D52" d="M31.6,3.5C5.9,13.6-6.6,42.7,3.5,68.4c10.1,25.7,39.2,38.3,64.9,28.1l-3.1-7.9c-21.3,8.4-45.4-2-53.8-23.3' +
+									'	  c-8.4-21.3,2-45.4,23.3-53.8L31.6,3.5z">' +
+									'	      <animateTransform ' +
+									'	         attributeName="transform" ' +
+									'	         attributeType="XML" ' +
+									'	         type="rotate"' +
+									'	         dur="2s" ' +
+									'	         from="0 50 50"' +
+									'	         to="360 50 50" ' +
+									'	         repeatCount="indefinite" />' +
+									'	  </path>' +
+									'	 <path fill="#C3EAC8" d="M42.3,39.6c5.7-4.3,13.9-3.1,18.1,2.7c4.3,5.7,3.1,13.9-2.7,18.1l4.1,5.5c8.8-6.5,10.6-19,4.1-27.7' +
+									'	  c-6.5-8.8-19-10.6-27.7-4.1L42.3,39.6z">' +
+									'	      <animateTransform ' +
+									'	         attributeName="transform" ' +
+									'	         attributeType="XML" ' +
+									'	         type="rotate"' +
+									'	         dur="1s" ' +
+									'	         from="0 50 50"' +
+									'	         to="-360 50 50" ' +
+									'	         repeatCount="indefinite" />' +
+									'	  </path>' +
+									'	 <path fill="#71D97F" d="M82,35.7C74.1,18,53.4,10.1,35.7,18S10.1,46.6,18,64.3l7.6-3.4c-6-13.5,0-29.3,13.5-35.3s29.3,0,35.3,13.5' +
+									'	  L82,35.7z">' +
+									'	      <animateTransform ' +
+									'	         attributeName="transform" ' +
+									'	         attributeType="XML" ' +
+									'	         type="rotate"' +
+									'	         dur="2s" ' +
+									'	         from="0 50 50"' +
+									'	         to="360 50 50" ' +
+									'	         repeatCount="indefinite" />' +
+									'	  </path>' +
+									'	</svg>' +
+						          '</div>';
+						}
+					}
+				}, 250) ;
+		}
+	}
+	
+	// horizontal
+	if(reloadIsLayoutHorizontal()) {
+		var processingDiv = document.getElementById('processingDiv');
+		if(processingDiv != null) {
+			var processingDivMessage = document.getElementById('processingDivMessage');
+			
+			if(processingDiv != null && processingDivMessage != null) {
+				processingDiv.style.display = 'block';
+				processingDivMessage.style.display = 'block';
+			}
+		}
+	}
+	
+	// vertical
+	if(reloadIsLayoutVertical()) {
+		if($('.mojito-preloader-div') != null) {
+			// var procesandoKey = new Date().getTime();
+			// utilProcesando.push(procesandoKey);
+			utilProcesando = true;
+			utilLog.log(utilLogProcesando, log_Trace, 'utilProcesando = true (' + (renderId != null ? renderId : 'null') + ')');
+			
+			setTimeout(
+				function() {
+					if (utilProcesando) {
+						// utilPreviousIcon = document.icon;
+						// document.icon = '/mojito/utils/web/images/loading.ico';
+						
+						if(renderId == null || renderId == tagModalDivId) {
+							$('.mojito-preloader-div').show();
+						} else {
+							var control = tagUtilGetControl(renderId);
+							control.innerHTML =
+								  '<div class="mojito-preloader-scene-div mojito-preloader-scene-ajax-div">' +
+									'  <svg version="1.1" id="L7" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve"  width="100px">' +
+									' <path fill="#498D52" d="M31.6,3.5C5.9,13.6-6.6,42.7,3.5,68.4c10.1,25.7,39.2,38.3,64.9,28.1l-3.1-7.9c-21.3,8.4-45.4-2-53.8-23.3' +
+									'	  c-8.4-21.3,2-45.4,23.3-53.8L31.6,3.5z">' +
+									'	      <animateTransform ' +
+									'	         attributeName="transform" ' +
+									'	         attributeType="XML" ' +
+									'	         type="rotate"' +
+									'	         dur="2s" ' +
+									'	         from="0 50 50"' +
+									'	         to="360 50 50" ' +
+									'	         repeatCount="indefinite" />' +
+									'	  </path>' +
+									'	 <path fill="#C3EAC8" d="M42.3,39.6c5.7-4.3,13.9-3.1,18.1,2.7c4.3,5.7,3.1,13.9-2.7,18.1l4.1,5.5c8.8-6.5,10.6-19,4.1-27.7' +
+									'	  c-6.5-8.8-19-10.6-27.7-4.1L42.3,39.6z">' +
+									'	      <animateTransform ' +
+									'	         attributeName="transform" ' +
+									'	         attributeType="XML" ' +
+									'	         type="rotate"' +
+									'	         dur="1s" ' +
+									'	         from="0 50 50"' +
+									'	         to="-360 50 50" ' +
+									'	         repeatCount="indefinite" />' +
+									'	  </path>' +
+									'	 <path fill="#71D97F" d="M82,35.7C74.1,18,53.4,10.1,35.7,18S10.1,46.6,18,64.3l7.6-3.4c-6-13.5,0-29.3,13.5-35.3s29.3,0,35.3,13.5' +
+									'	  L82,35.7z">' +
+									'	      <animateTransform ' +
+									'	         attributeName="transform" ' +
+									'	         attributeType="XML" ' +
+									'	         type="rotate"' +
+									'	         dur="2s" ' +
+									'	         from="0 50 50"' +
+									'	         to="360 50 50" ' +
+									'	         repeatCount="indefinite" />' +
+									'	  </path>' +
+									'	</svg>' +
+						          '</div>';
+						}
+					}
+				}, 250) ;
+		}
+	}
+	
+    return true;
+}
+
+/**
+ * Oculta el mensaje de que el sistema está procesando.
+ * @param noLoading Marca de control para indicar si se pidió mostrar el cartel o no.
+ * @param callerId Elemento llamador. En el caso que sea un botón y que esté inactivo, se lo reactiva.
+ */
+function utilOcultarProcesando(noLoading, callerId) {
+	if(noLoading == null || !noLoading) {
+		utilLog.log(utilLogProcesando, log_Trace, 'utilProcesando = false');
+		
+		// horizontal
+		utilProcesando = false;
+		var processingDiv = document.getElementById('processingDiv');
+		if(processingDiv != null) {
+			if(processingDiv != null) {
+				processingDiv.style.display = 'none';
+			}
+			
+			var processingDivMessage = document.getElementById('processingDivMessage');
+			if(processingDivMessage != null) {
+				processingDivMessage.style.display = 'none';
+			}
+		}
+		
+		// vertical
+		if(reloadIsLayoutNew()) {
+			if($('.mojito-preloader-div') != null) {
+				$('.mojito-preloader-div').hide();
+			}
+			
+			tagUtilFaviconUnloading();
+		}
+	}
+	
+	if(callerId != null) {
+		var control = tagUtilGetControlMojito(null, callerId);		
+		if(control != null && $(control).attr('data-control') == 'button' && $(control).attr('disabled') == 'true') {
+			$(control).attr('disabled', 'false');
+		}
+	}
+}
+
+/**
+ * Devuelve el valor de un parámetro del request a través de su nombre.
+ * @param name Nombre del parámetro del que se quiere obtener el valor.
+ * @returns El valor del parámetro pedido.
+ */
+function utilGetParameter(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+    var result = results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    
+    return result;
+}
+
+function utilGetParameters(parameterPrefix) {
+	parameterPrefix = parameterPrefix.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regex = new RegExp("[\\?&]" + parameterPrefix + "\\.(.+)=([^&#]*)","g");
+    var result = [];
+    while ((tmpResult = regex.exec(location.search)) !== null)
+    {
+      result.push(decodeURIComponent(tmpResult[1].replace(/\+/g, " ")));
+      result.push(decodeURIComponent(tmpResult[2].replace(/\+/g, " ")));
+    }
+    
+    //results = regex.exec(location.search);
+    //var result = results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    
+    return result;
+}
+
+function utilAddEventListener(element, event, handler){
+    if(element.addEventListener) {
+    	//element.addEventListener(event, handler);
+    	$(element).bind(event, handler);
+    }
+    else {
+        element.attachEvent('on' + event, handler);
+    }
+}
+
+function utilLogout() {
+	// El logout hay que hacerlo con un form porque lo requiere el chequeo de csrf. El link solo no funciona.
+	var formLogout = document.createElement("form");
+	formLogout.setAttribute("method", "post");
+	formLogout.setAttribute("action", "logout.htm");
+	
+	var hiddenCsrf = document.createElement("input");
+    hiddenCsrf.setAttribute("type","hidden");
+    // hiddenCsrf.setAttribute("name","${_csrf.parameterName}");
+    // hiddenCsrf.setAttribute("value","${_csrf.token}");
+    // Fernando (2020-04-18): no sé por qué no funcionaba con .head en el main de MJT que tiene de dashboard unos botones.
+    var csrf = document.querySelector("meta[name=_csrf]").content;
+    // var csrf = document.head.querySelector("meta[name=_csrf]").content;
+    hiddenCsrf.setAttribute("name","_csrf");
+    hiddenCsrf.setAttribute("value",csrf);
+    formLogout.appendChild(hiddenCsrf);
+    
+	var hiddenFromUser = document.createElement("input");
+	hiddenFromUser.setAttribute("type","hidden");
+	hiddenFromUser.setAttribute("name","fromUser");
+	hiddenFromUser.setAttribute("value","1");
+    formLogout.appendChild(hiddenFromUser);
+    
+    
+    document.body.appendChild(formLogout);
+    formLogout.submit();
+}
+
+function utilEscapeId(elementId){
+	return elementId.replace( /(:|\.|\[|\]|,|=)/g, "\\$1" );
+}
+
+var firefoxSkip = false;
+
+function utilCheckSession(xmlDoc, renderId) {
+	if(!utilIsFirefox() || firefoxSkip) {
+		// console.log('Check session...');
+		// Fernando (2016-11-14): no cambiar de "nOK" porque cuando no hay sesión no puede devolver "OK".
+		var result = "nOK";
+		var resultNode = null;
+		if(xmlDoc.getElementsByTagName("result").length > 0) {
+			resultNode = xmlDoc.getElementsByTagName("result")[0];
+			result = resultNode.childNodes[0].nodeValue.trim();
+		}
+		
+		if(result != "OK") {
+			// Gaston (2018-01-09): agrego la dirección del actual y después del logout vuelvo a redireccionar para mantener la página.
+			var currentUrl = window.location;
+			utilLogout();
+			// window.location.replace(currentUrl);
+			// window.location.reload();
+		}
+	} else {
+		// console.log('Skip Firefox...');
+		firefoxSkip = true;
+	}
+}
+
+function utilIsFirefox() {
+	var result = false;
+	if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1){
+		result = true;
+	}
+	return result;
+}
+
+function utilRandom(size) {
+	var result = "";
+	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+	for (var i = 0; i < size; i++) {
+		result += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+
+	return result;
+}
+
+function utilRemoveUrlParameter(url, parameter) {
+	var result = url;
+	var urlparts = url.split('?');   
+	if (urlparts.length >= 2) {
+    	var prefix = encodeURIComponent(parameter) + '=';
+    	var pars = urlparts[1].split(/[&;]/g);
+
+        for (var i = pars.length - 1; i > 0; i--) {    
+            if (pars[i].lastIndexOf(prefix, 0) !== -1) {  
+                pars.splice(i, 1);
+            }
+        }
+
+        result = urlparts[0] + (pars.length > 0 ? '?' + pars.join('&') : '');
+    }
+	return result;
+}
+
+function utilIsMobileOrTablet() {
+	return reloadIsLayoutMobile();
+}
+
+function utilDoNothing(controlOrId){
+	
+	var innerInfo = utilGetInnerInfo(controlOrId!==undefined?controlOrId:this);
+	utilSetMethodToCall(innerInfo.methodName, 'doNothing', true, innerInfo.innerUrl, innerInfo.innerId, false);
+	
+//	utilSetMethodToCall('methodName', 'doNothing', true);
+}
+
+function utilCopyToClipboard(str) {
+	   // Create new element
+	   var el = document.createElement('textarea');
+	   // Replace 'non-break space' character (appears with &nbsp; and it's not readable for SQL clients for example).
+	   // En un editor hexa este valor se ve como C2 A0.
+	   var strAux = str.replaceAll('\u00A0', ' ');
+	   // Set value (string to be copied)
+	   el.value = strAux;
+	   // Set non-editable to avoid focus and move outside of view
+	   el.setAttribute('readonly', '');
+	   el.style = {position: 'absolute', left: '-9999px'};
+	   document.body.appendChild(el);
+	   // Select text inside element
+	   el.select();
+	   // Copy text to clipboard
+	   document.execCommand('copy');
+	   // Remove temporary element
+	   document.body.removeChild(el);
+}
+
+function utilGetInnerInfo(controlOrId){
+  var methodName= 'methodName';
+	  
+  var formControl = jqSelectId(controlOrId).closest('[data-form-innerurl]');
+  
+  var innerurl = $(formControl).attr('data-form-innerurl');
+  var innerid = $(formControl).attr('id'); // id del form
+  var innerPrefix = null;
+  
+  if(innerid !== undefined){
+	  var rerenderArray = innerid.split('/');
+	  if(rerenderArray.length > 1) {
+		  methodName = rerenderArray[0] + '/methodName';
+		  innerPrefix = rerenderArray[0];
+	  }
+  } else {
+	  innerid = '';
+	  innerurl = '';
+  }
+  
+  return {
+	  innerUrl: innerurl,
+	  innerId: innerid,
+	  methodName: methodName,
+	  innerPrefix: innerPrefix,
+	  rootControl: formControl,
+	  getId: function(id) {
+		  var result = id;
+		  if(this.innerPrefix != null && this.innerPrefix.trim() != '') {
+			  result = this.innerPrefix + '/' + result;
+		  }
+		  return result;
+	  },
+	  getIdSub: function(id, subId) {
+		  var result;
+		  if(id != null) {
+			  result = id;
+			  if(!id.startsWith(this.innerPrefix)) {
+				  result = this.getId(id);
+			  }
+			  result += ':' + subId;
+		  } else {
+			  result = this.getId(subId);
+		  }
+		  return result;
+	  },
+	  getNoInnerPrefix: function(id) {
+		  var result = id;
+		  if(result != null && result.startsWith(this.innerPrefix + '/')) {
+			  result = result.substring(this.innerPrefix.length + 1);
+		  }
+		  return result;
+	  },
+	  up: function() {
+		  var result = this;
+		  if(stringUtilNotEmpty(this.innerId)) {
+			  var form = jqSelectId(this.innerId);
+			  var parent = $(form).parent().get(0);
+			  /*
+			  var modalDiv = $(form).closest('div#mojito-modal-div');
+			  if(modalDiv.length > 0) {
+				  parent = $(modalDiv).attr('caller');
+			  }
+			  */
+			  result = utilGetInnerInfo(parent);
+		  }
+		  return result;
+	  }
+  };
+}
+
+function utilOpenNewWindow(){
+	var url = 'main.htm?_nhid='+utilRandom(8);
+	window.open(url, '_blank');
+	return false;
+}
+
+/**
+ * Ejecuta las acciones asociadas a un control.
+ * @param source Control del que se ejecutarán las acciones asociadas. Estas acciones se toman del atributo data-actions.
+ * @param response Json con los datos que vienen del manager para la ejecución de las acciones.
+ * @param needsResult Indica si las acciones necesitan que haya un resultado para ser ejecutadas. Esto viene en true cuando
+ * se llama después de procesar un request o de cerrar un modal porque en ese caso sí o sí debe devolverse un resultado que
+ * indique si una acción debe ejecutarse o no. En el caso de llamarse por la acción directa sobre un control este parámetro
+ * no viene informado porque deben ejecutarse, justamente, las action que no tienen result.
+ * No confundir con acciones enviadas desde el manager (ManagerActions). Las manager actions sí se ejecutan haya o no
+ * resultado. Este parámetro solo se usa para evitar ejecutar en el rerender acciones del control que se ejecutan cuando se
+ * acciona sobre el control.
+ */
+function utilMode4Process(source, response, dataActions, needsResult) {
+	
+	utilLog.log(utilLogMode4, log_Info,
+			  'Llamada a modo 4',
+			  'source: ' + logDescription(source),
+			  'response: ' + logDescription(response));
+	
+	var actionsJson = dataActions;
+	if(mString.isEmpty(actionsJson)) {
+		actionsJson = $(source).attr('data-actions');
+	}
+	
+	var mHandler = $(source).prop('mHandler');
+	var actions = null;
+	if(stringUtilNotEmpty(actionsJson)) {
+		actions = mMojito.tagMode4(actionsJson);
+		// actions = JSON.parse(actionsJson);
+	}
+	
+	if(actions != null) {
+		utilLog.log(utilLogMode4, log_Debug,
+				  'Acciones encontradas',
+				  'actions: ' + logDescription(actions));
+		
+		actions.array.forEach(function(action) {
+			utilLog.log(utilLogMode4, log_Trace,
+					  'Procesando action',
+					  'action: ' + logDescription(action));
+			
+			var process = mBool.isFalse(needsResult, true);
+			
+			var responseAux = response;
+			if(responseAux == null && action.response != null) {
+				// var actionResponse = mMojito.tagMode4(action.response);
+				// responseAux = actionResponse;
+				responseAux = JSON.parse(action.response);
+			}
+			var responseResult = responseAux != null ? responseAux.result : '';
+			
+			if(stringUtilNotEmpty(action.result)) {
+				utilLog.log(utilLogMode4, log_Trace, 'Analizando ' + logDescription(action.result));
+				
+				var result = '';
+				var token = '';
+				var responseResults = responseResult.split(',');
+				for(var i = 0; i < action.result.length; i++) {
+					var character = action.result[i];
+					if(character == '!' || character == '|' || character == '&' || character == '(' || character == ')') {
+						if(token.trim() != '') {
+							if(responseResults.includes(token.trim())) {
+								result += '\'true\'';
+							} else {
+								result += '\'false\'';
+							}
+						}
+						result += character;
+						token = '';
+					} else {
+						token += character;
+					}
+				}
+				
+				if(token.trim() != '') {
+					if(responseResults.includes(token.trim())) {
+						result += '\'true\'';
+					} else {
+						result += '\'false\'';
+					}
+				}
+				
+				utilLog.log(utilLogMode4, log_Trace, 'Analizando ' + logDescription(result));
+				var rp = new rpReversePolish(null, result, 'boolean');
+				process = rp.execute();
+				utilLog.log(utilLogMode4, log_Trace, 'Resultado del análisis: ' + logDescription(process));
+			} else {
+				utilLog.log(utilLogMode4, log_Trace, 'action.result is empty. This action will be not processed.');
+			}
+			
+			if(process) {
+				if(action.parameters != null) {
+					if(responseAux != null) {
+						for(var i = 0; i < action.parameters.length; i++) {
+							utilLog.log(utilLogMode4, log_Debug, 'Valor del parámetro antes de resolver las propiedades json: ' + logDescription(action.parameters[i].value));
+							var parameterValue = stringUtilResolveJson(action.parameters[i].value, responseAux, mHandler);
+							action.parameters[i].value = parameterValue;
+							utilLog.log(utilLogMode4, log_Info, 'Valor del parámetro después de resolver las propiedades json: ' + logDescription(parameterValue));
+						}
+					} else {
+						for(var i = 0; i < action.parameters.length; i++) {
+							utilLog.log(utilLogMode4, log_Debug, 'Valor del parámetro antes de resolver las propiedades de página: ' + logDescription(action.parameters[i].value));
+							var parameterValue = stringUtilResolve(action.parameters[i].value, mHandler != null ? mHandler.root : null);
+							action.parameters[i].value = parameterValue;
+							utilLog.log(utilLogMode4, log_Info, 'Valor del parámetro después de resolver las propiedades de página: ' + logDescription(parameterValue));
+						}
+					}
+				}
+				
+				var target = action.target;
+				if(stringUtilNotEmpty(target)) {
+					utilLog.log(utilLogMode4, log_Info, 'Buscando el target ' + logDescription(target) + '.');
+					
+					var innerInfo = utilGetInnerInfo(source);
+					utilLog.log(utilLogMode4, log_Info, 'Contexto del target: ' + logDescription(innerInfo.innerPrefix) + '.');
+					
+					var mTarget = null;
+					if(target != 'self' && !mString.startsWith(target, '^.')) {
+						while(target.startsWith('^')) {
+							innerInfo = innerInfo.up();
+							target = target.substring(1);
+						}
+						
+						var targetId = innerInfo.getId(target);
+						utilLog.log(utilLogMode4, log_Debug, 'Buscando el control: ' + logDescription(targetId) + '.');
+						mTarget = tagUtilGetControlMojito(targetId);
+						
+						if(mTarget != null) {
+							utilLog.log(utilLogMode4, log_Info, 'Target encontrado: ' + logDescription(targetId) + '.');
+						} else {
+							utilLog.log(utilLogMode4, log_Error, 'No se encontró el target: ' + logDescription(targetId) + '.');
+						}
+					}
+					if(target == 'self') {
+						mTarget = source;
+					}
+					if(mString.startsWith(target, '^.')) {
+						var targetAux = target.substring(2);
+						var parents = $(source).parents('[data-control="' + targetAux + '"]');
+						if(parents.length > 0) {
+							mTarget = parents.get(0);
+						} else {
+							utilLog.log(utilLogMode4, log_Error, 'No se encontró el target. Iniciaba con "^." así que se buscó a padres del tipo indicado: ' + logDescription(target) + '.');
+						}
+					}
+					
+					// var functionPointer = $(mTarget).prop('mHandler')[action.method];
+					var actionMethod = action.method;
+					utilLog.log(utilLogMode4, log_Debug, 'Se procede a buscar el método: ' + logDescription(actionMethod) + '.');
+					
+					if($(mTarget).prop('mHandler') == null) {
+						utilLog.log(utilLogMode4, log_Error, 'No se encontró el mHandler de ' + logDescription(mTarget) + ' (si es una página Ajax cheque el atributo inner del form).');
+						// alert('No mHandler for ' + action.target + '.');
+					}
+					
+					if($(mTarget).prop('mHandler')[actionMethod] == null) {
+						utilLog.log(utilLogMode4, log_Debug, 'No se encontró el método ' + logDescription(actionMethod) + '.');
+						var prefix = $(mTarget).prop('mHandler').prefix;
+						utilLog.log(utilLogMode4, log_Debug, 'Se va a buscar el método ' + logDescription(actionMethod) + ' con el prefijo ' + logDescription(prefix) + '.');
+						if(stringUtilNotEmpty(prefix)) {
+							actionMethod = prefix + stringUtilFirstCapital(actionMethod); 
+						}
+					}
+					
+					if($(mTarget).prop('mHandler')[actionMethod] == null) {
+						utilLog.log(utilLogMode4, log_Error, 'Can\'t find method ' + logDescription(actionMethod) + ' in handler with prefix ' + logDescription(prefix) + '.');
+					}
+					
+					if(action.parameters == null) {
+						action.parameters = [];
+					}
+					
+					if(action.parameters != null) {
+						utilLog.log(utilLogMode4, log_Trace, 'Acción con ' + logDescription(action.parameters.length) + ' parámetros.');
+						
+						var parameterNames = utilGetParamNames($(mTarget).prop('mHandler')[actionMethod]);
+						var parameterValues = [];
+						
+						utilLog.log(utilLogMode4, log_Trace, 'Método con ' + logDescription(parameterNames.length) + ' parámetros.');
+						
+						for(var i = 0; i < parameterNames.length; i++) {
+							var parameterValue = null;
+							if(parameterNames[i] != 'mTarget') {
+								for(var j = 0; j < action.parameters.length; j++) {
+									if(action.parameters[j].name == parameterNames[i]) {
+										parameterValue = action.parameters[j].value;
+									}
+								}
+							} else {
+								parameterValue = $(source).get(0);
+							}
+							parameterValues.push(parameterValue);
+						}
+						
+						if(parameterValues.length == 0) {
+							$(mTarget).prop('mHandler')[actionMethod]();
+						}
+						if(parameterValues.length == 1) {
+							$(mTarget).prop('mHandler')[actionMethod](parameterValues[0]);
+						}
+						if(parameterValues.length == 2) {
+							$(mTarget).prop('mHandler')[actionMethod](parameterValues[0], parameterValues[1]);
+						}
+						if(parameterValues.length == 3) {
+							$(mTarget).prop('mHandler')[actionMethod](parameterValues[0], parameterValues[1], parameterValues[2]);
+						}
+						if(parameterValues.length == 4) {
+							$(mTarget).prop('mHandler')[actionMethod](parameterValues[0], parameterValues[1], parameterValues[2], parameterValues[3]);
+						}
+						if(parameterValues.length == 5) {
+							$(mTarget).prop('mHandler')[actionMethod](parameterValues[0], parameterValues[1], parameterValues[2], parameterValues[3], parameterValues[4]);
+						}
+						if(parameterValues.length == 6) {
+							$(mTarget).prop('mHandler')[actionMethod](parameterValues[0], parameterValues[1], parameterValues[2], parameterValues[3], parameterValues[4], parameterValues[5]);
+						}
+						if(parameterValues.length == 7) {
+							$(mTarget).prop('mHandler')[actionMethod](parameterValues[0], parameterValues[1], parameterValues[2], parameterValues[3], parameterValues[4], parameterValues[5], parameterValues[6]);
+						}
+						if(parameterValues.length > 7){
+							console.log('se recibio un metodo con mas de 7 parametros, supera el limite permitido de 7');
+						}
+					/*
+					} else {
+						utilLog.log(utilLogMode4, log_Trace, 'Acción sin parámetros.');
+						if($(mTarget).prop('mHandler')[actionMethod] != null) {
+							utilLog.log(utilLogMode4, log_Debug, 'Se llama a la acción ' + logDescription(actionMethod) + ' a través del mHandler.');
+							$(mTarget).prop('mHandler')[actionMethod]();
+						} else {
+							utilLog.log(utilLogMode4, log_Error, 'No se encontró el método ' + logDescription(actionMethod) + ' en el mHandler.');
+						}
+					*/
+					}
+				} else {
+					var parameterNames = utilGetParamNames(window[action.method]);
+					var parameterValues = [];
+					
+					for(var i = 0; i < parameterNames.length; i++) {
+						var parameterValue = null;
+						if(parameterNames[i] != 'mTarget') {
+							for(var j = 0; j < action.parameters.length; j++) {
+								if(action.parameters[j].name == parameterNames[i]) {
+									parameterValue = action.parameters[j].value;
+								}
+							}
+						} else {
+							parameterValue = $(source).get(0);
+						}
+						parameterValues.push(parameterValue);
+					}
+					
+					if(parameterValues.length == 1) {
+						window[action.method](parameterValues[0]);
+					}
+					if(parameterValues.length == 2) {
+						window[action.method](parameterValues[0], parameterValues[1]);
+					}
+					if(parameterValues.length == 3) {
+						window[action.method](parameterValues[0], parameterValues[1], parameterValues[2]);
+					}
+					if(parameterValues.length == 4) {
+						window[action.method](parameterValues[0], parameterValues[1], parameterValues[2], parameterValues[3]);
+					}
+				}
+			}
+		});
+	} else {
+		utilLog.log(utilLogMode4, log_Info, 
+				  'El source no tiene acciones. No se hace nada.',
+				  'source: ' + logDescription(source));
+	}
+}
+
+function utilMode4Call(target, method, value) {
+	var actionMethod = method;
+	if($(target).prop('mHandler')[actionMethod] == null) {
+		var prefix = $(target).prop('mHandler').prefix;
+		if(stringUtilNotEmpty(prefix)) {
+			actionMethod = prefix + stringUtilFirstCapital(actionMethod); 
+		}
+	}
+	$(target).prop('mHandler')[actionMethod](value);
+}
+
+function utilGetParamNames(func) {
+	var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+	var ARGUMENT_NAMES = /([^\s,]+)/g;
+	var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+	var result = fnStr.slice(fnStr.indexOf('(')+1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+	if(result === null)
+		result = [];
+	return result;
+}
+
+function utilSetCaller(caller) {
+	$(caller).attr('disabled', 'true');
+	// Fernando (2022-02-17): lo resuelve el button.js. Tratar de que siga siendo así.
+	// Este método no tiene nada que ver con desactivar el botón.
+	// setTimeout(function() { $(caller).removeAttr('disabled') }, 2000);
+	
+	var idVirtual = mMojito.tagGetIdVirtual(caller);
+	var tagMojito = $(caller).closest('[data-control]');
+	
+	utilCaller = {
+		tag: caller,
+		idVirtual: idVirtual,
+		
+		formId: utilGetInnerInfo(caller).getId('form'),
+		dataActions: $(tagMojito).attr('data-actions'),
+		
+		getTagMode4() {
+			var result = $(this.tag).closest('[data-control]');
+			return result;
+		}
+	}
+}
+
+function utilAddParameter(url, paramName, paramValue){
+	var result = utilRemoveUrlParameter(url, paramName);
+	result = result +(result.indexOf('?') == -1 ? '?' : '&') + paramName +'=' + paramValue;
+	return result;
+}
+
+function utilSetCookie(cname, cvalue, exdays) {
+	const d = new Date();
+	d.setTime(d.getTime() + (exdays*24*60*60*1000));
+	document.cookie = cname + "=" + cvalue + ";expires="+ d.toUTCString() + "";
+}
+
+function utilGetCookie(cname) {
+	let result = '';
+	let name = cname + "=";
+	let decodedCookie = decodeURIComponent(document.cookie);
+	let cookies = decodedCookie.split(';');
+	for(let i = 0; i < cookies.length; i++) {
+		let cookie = cookies[i];
+		while (cookie.charAt(0) == ' ') {
+			cookie = cookie.substring(1);
+		}
+		if (cookie.indexOf(name) == 0) {
+			result = cookie.substring(name.length, cookie.length);
+		}
+	}
+	return result;
+}
+
+// ************************************** //
+// Comienza acá la nueva clase mUtilClass //
+// ************************************** //
+
+class mUtilClass {
+	call(funcName, ...funcParameters) {
+		if(window[funcName] != null) {
+			if(funcParameters != null) {
+				if(funcParameters.length == 0) {
+					window[funcName]();
+				}
+				if(funcParameters.length == 1) {
+					window[funcName](funcParameters[0]);
+				}
+				if(funcParameters.length == 2) {
+					window[funcName](funcParameters[0], funcParameters[1]);
+				}
+				if(funcParameters.length == 3) {
+					window[funcName](funcParameters[0], funcParameters[1], funcParameters[2]);
+				}
+			} else {
+				window[funcName]();
+			}
+		}
+	}
+	
+	isFunction(func) {
+		return typeof func === 'function';		
+	}
+}
+
+var mUtil = new mUtilClass();

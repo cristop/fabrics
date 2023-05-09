@@ -1,0 +1,307 @@
+var kanbanWorking = false;
+var kanbanMoving = false;
+
+$(function() {
+	if ($('.mojito-kanban-cardList').length > 0) {
+		$('.mojito-kanban-cardList').sortable({
+			connectWith: '.mojito-kanban-cardList',
+			placeholder: 'mojito-kanban-drop',
+			over: function( event, ui ) {
+				$(this).css({'background-color':'#EEE'});
+			},
+			out: function( event, ui ) {
+				$(this).css({'background-color':'initial'});
+			},
+			start: function(event, ui ){
+	            ui.placeholder.height(ui.helper.outerHeight());
+	            kanbanMoving = true;
+			},
+			handle: '.mojito-kanban-movable',
+			stop: function( event, ui ) {
+				var cardId = $(ui.item[0]).attr('data-cardid');
+				var newColumn = $(ui.item[0]).closest('.mojito-kanban-column').attr('data-columnid');
+				var newCardOrder = $(ui.item[0]).index()+1;
+				var kanbanDiv = $(ui.item[0]).closest('.mojito-kanban');
+				var lastRefresh = kanbanDiv.attr('data-lastrefresh');
+				var kanbanName = kanbanDiv.attr('data-kanban');
+				var kanbanCardUrl = encodeURIComponent(kanbanDiv.attr('data-cardurl'));
+				var kanbanContentUrl = encodeURIComponent(kanbanDiv.attr('data-contenturl'));
+				
+				var kanbanSelectedViewCombo = $(this).closest('div.mojito-kanban').siblings('div.mojito-kanban-views-div').children('select');
+				var kanbanView = '';
+				if($(kanbanSelectedViewCombo).length == 1) {
+					kanbanView = $(kanbanSelectedViewCombo).val();
+				}
+
+				utilAjaxPost('kanban/moveCard?idCard='+cardId+'&idColumn='+newColumn+'&order='+newCardOrder+'&lastRefresh='+lastRefresh+'&kanbanBoard='+kanbanName+'&cardUrl='+kanbanCardUrl+'&contentUrl='+kanbanContentUrl+'&kanbanView='+kanbanView, null, null, kanbanUtilRefreshCallback,['move', this]);
+			}
+		}).disableSelection();
+		/*
+		.draggable({
+			  axis: "x",
+			  scroll: true,
+			})
+		*/
+
+		$('.add-button').click(function() {
+			var txtNewItem = $('#new_text').val();
+			var txtNewUser = $('#new_user').val();
+			$('div.column-kanban').first().find('ul').append('<li class="card"><span class="user">'+txtNewUser+'</span>'+txtNewItem+'<a href="#" class="close">X</a></li>');
+			$('#new_text').val('');
+			$('#new_user').val('');
+		});
+
+		/*
+		$('body').on('click', '.mojito-kanban-cardDelete', function() {
+			if (confirm("Are you Sure?")) {
+				var cardId = $(this).parent().attr('data-cardId');
+				utilAjaxPost('kanban/removeCard?idCard='+cardId);
+				
+				$(this).parent().remove();
+				
+			}
+			return false;
+	    });
+	    */
+	}
+ });
+
+function kanbanUtilRefresh(kanbanName, kanbanSelectedViewComboId){
+	
+	setInterval(function(){
+		if (!kanbanWorking && !kanbanMoving){
+			kanbanWorking = true;
+			
+			var kanbanDiv = $('[data-kanban="'+kanbanName+'"]');
+			
+			var lastRefresh = kanbanDiv.attr('data-lastrefresh');
+			var kanbanCardUrl = encodeURIComponent(kanbanDiv.attr('data-cardurl'));
+			var kanbanContentUrl = encodeURIComponent(kanbanDiv.attr('data-contenturl'));
+			
+			var kanbanSelectedViewCombo = tagUtilGetControl(kanbanSelectedViewComboId);
+			var kanbanView = '';
+			if(kanbanSelectedViewCombo != null && kanbanSelectedViewCombo.value != null && kanbanSelectedViewCombo.value.trim() != '') {
+				kanbanView = kanbanSelectedViewCombo.value;
+			}
+			
+			utilAjaxPost('kanban/news?kanbanBoard='+kanbanName+'&lastRefresh='+lastRefresh+'&cardUrl='+kanbanCardUrl+'&contentUrl='+kanbanContentUrl+'&kanbanView='+kanbanView, null, null, kanbanUtilRefreshCallback,['refresh'], null, true);
+		}
+	}, 5000);
+}
+
+function kanbanUtilRefreshCallback(data, action, sortable) {
+	
+	var boardInfo = JSON.parse(data);
+	
+	if(boardInfo.errorMessage == null) {
+		$('[data-kanban="'+boardInfo.kanbanBoard+'"]').attr('data-lastrefresh', boardInfo.lastRefresh);
+	
+		$('.mojito-kanban-card').attr('data-delete', 1);
+		if(boardInfo.cardsAll.length > 0){
+			for(i in boardInfo.cardsAll) {
+				var card = boardInfo.cardsAll[i];
+				$('[data-cardid="'+card+'"]').removeAttr('data-delete');
+			}
+		}
+		$('[data-delete=1]').remove();
+	
+		if(boardInfo.cards.length > 0){
+			for(i in boardInfo.cards) {
+				var card = boardInfo.cards[i];
+				
+				if(!card.removed) {
+					var cardElement = $('[data-cardid="' + card.idCard + '"]');
+					if(cardElement.length){
+						if(card.refreshPosition != null && card.refreshPosition) {
+							cardElement.attr('data-cardorder', card.order);
+							if(cardElement.attr('data-cardcolumnid') != card.idColumn) {
+								cardElement.attr('data-cardcolumnid', card.idColumn);
+								$('[data-columnid="' + card.idColumn + '"]').find('.mojito-kanban-cardList').append(cardElement);
+							}
+						}
+						if(card.refreshData != null && card.refreshData) {
+							utilDoAjaxDirect(card.cardDetail + '&_noActivity=1', 'cardDetail' + card.idCard, false, true, true);
+							
+							var spanTitle = $('#cardDetail'+card.idCard).parent().children('span');
+							var aDelete = $('#cardDetail'+card.idCard).parent().find('a.mojito-kanban-cardDelete');
+							
+							$('#cardDetail'+card.idCard).parent().attr('class', 'mojito-kanban-card' + (card.stateUiClass != null ? ' ' + card.stateUiClass : ''));
+							if(card.stateUiClass != null && card.stateUiClass.trim() != '') {
+								spanTitle.attr('style', 'color: white !important;');
+								aDelete.attr('style', 'color: #eee;');
+							} else {
+								spanTitle.attr('style', 'color: inherit;');
+								aDelete.attr('style', 'color: inherit;');
+							}
+							
+							if(card.canUpdate == null || card.canUpdate) {
+								$(spanTitle).addClass('mojito-kanban-movable');
+								$(spanTitle).removeClass('mojito-kanban-disabled');
+								$(aDelete).show();
+							} else {
+								$(spanTitle).addClass('mojito-kanban-disabled');
+								$(spanTitle).removeClass('mojito-kanban-movable');
+								$(aDelete).hide();
+							}
+						}
+					} else {
+						kanbanUtilCreateCard(card.idCard,card.order,card.idColumn,card.title,card.stateUiClass,card.onClick,card.cardDetail,card.contentDetail,null,card.canUpdate);
+					}
+				} else {
+					$('[data-cardid="'+card.idCard+'"]').remove();
+				}
+			}
+			
+			kanbanUtilSort();
+		}
+		
+		if(boardInfo.columns.length > 0){
+			for(i in boardInfo.columns) {
+				var column = boardInfo.columns[i];
+				$('[data-columnid="' + column.id + '"] h2').html(column.nameNew);
+			}
+		}
+	} else {
+		mMojito.tagM('messageList').meslShowError(boardInfo.errorMessage, 3);
+		$(sortable).sortable('cancel');
+	}
+	
+	if (action == 'refresh'){
+		kanbanWorking = false;
+	}
+	
+	if(action =='move') {
+		kanbanMoving = false;
+	}
+}
+
+function kanbanUtilSort() {
+	$('.mojito-kanban-column').each(function( index ) {
+		
+		var column = $(this).find('ul.mojito-kanban-cardList');
+		var cardsSorted = $(column).children('li.mojito-kanban-card').sort(function (a, b){
+			var aOrder = parseInt($(a).attr('data-cardorder'));
+			var bOrder = parseInt($(b).attr('data-cardorder'));
+			
+			return (bOrder < aOrder) ? 1 : -1;    
+		});
+		
+		$(cardsSorted).appendTo($(column));
+		
+		/*
+		var column = $(this).find('ul.mojito-kanban-cardList');
+		$(this).find('ul.mojito-kanban-cardList li.mojito-kanban-card').sort(function (a, b){
+			return ($(b).attr('data-cardorder')) < ($(a).attr('data-cardorder')) ? 1 : -1;    
+		});
+		*/
+	});
+}
+
+function kanbanUtilCreateCard(id, order, columnId, title, stateUiClass, onClick, cardDetail, contentDetail, deleteCard, canUpdate){
+	var li = document.createElement('li');
+	li.setAttribute('class', 'mojito-kanban-card' + (stateUiClass != null ? ' ' + stateUiClass : ''));
+	li.setAttribute('data-cardid', id);
+	li.setAttribute('data-cardorder', order);
+	li.setAttribute('data-cardcolumnid', columnId);
+	
+	var spanTitle = document.createElement('span');
+	spanTitle.setAttribute('onclick',onClick);
+	if(canUpdate == null || canUpdate) {
+		spanTitle.setAttribute('class', 'mojito-kanban-cardTitle mojito-kanban-movable ui-sortable-handle');
+	} else {
+		spanTitle.setAttribute('class', 'mojito-kanban-cardTitle mojito-kanban-disabled ui-sortable-handle');
+	}
+	if(stateUiClass != null && stateUiClass.trim() != '') {
+		spanTitle.setAttribute('style', 'color: white !important;');
+	}
+	
+	var spanTitleInner = document.createElement('span');
+	spanTitleInner.innerHTML = title;
+	
+	var divContent = document.createElement('div');
+	divContent.setAttribute('class', 'mojito-kanban-cardDetail');
+	divContent.setAttribute('id', 'cardDetail'+id);
+	divContent.setAttribute('data-card',cardDetail);
+	divContent.setAttribute('data-content',contentDetail);
+	
+	var aDelete = null;
+	aDelete = document.createElement('a');
+	aDelete.setAttribute('href','#');
+	aDelete.setAttribute('class','mojito-kanban-cardDelete');
+	aDelete.setAttribute('onclick','kanbanUtilBorrarCard('+id+');');
+	if(stateUiClass != null && stateUiClass.trim() != '') {
+		if(deleteCard != null && deleteCard && (canUpdate == null || canUpdate)) {
+			aDelete.setAttribute('style', 'color: #eee;');
+		} else {
+			aDelete.setAttribute('style', 'color: #eee; display: none;');
+		}
+	}
+	
+	var iDelete = document.createElement('i');
+	iDelete.setAttribute('class', 'fa fa-times-circle');
+
+	$(spanTitle).append(spanTitleInner);
+	$(li).append(spanTitle);
+	$(li).append(divContent);
+	if(deleteCard != null && deleteCard) {
+		$(aDelete).append(iDelete);
+		$(li).append(aDelete);
+	}
+	
+	$('[data-columnid="'+columnId+'"] ul').append(li);
+	utilDoAjaxDirect(cardDetail + '&_noActivity=1', 'cardDetail' + id, false, false, true);
+}
+
+function kanbanUtilBorrarCard(cardId) {
+	vxConfirm('Are you sure?', kanbanUtilBorrarCardCallback, this, cardId);
+	return false;
+}
+
+function kanbanUtilBorrarCardCallback(card, cardId) {
+	utilAjaxPost('kanban/removeCard?idCard='+cardId);
+	$(card).parent().remove();
+}
+
+/*
+customElements.define('kanban-card', class extends HTMLElement {
+	connectedCallback(){
+		var cardId = $(this).attr('cardId');
+		var cardOrder = $(this).attr('cardOrder');
+		var columnId = $(this).attr('columnId');
+		var cardTitle = $(this).attr('cardTitle');
+		var onClick = $(this).attr('onClick');
+		var cardDetail = $(this).attr('cardDetail');
+		var contentDetail = $(this).attr('contentDetail');
+		
+		var li = document.createElement('li');
+		li.setAttribute('class', 'mojito-kanban-card');
+		
+		var spanTitle = document.createElement('span');
+		spanTitle.setAttribute('class', 'mojito-kanban-cardTitle ui-sortable-handle');
+
+		var divContent = document.createElement('div');
+		divContent.setAttribute('class', 'mojito-kanban-cardDetail');
+		
+		$(li).append(spanTitle);
+		$(li).append(divContent);
+
+		if(cardId !== undefined){
+			li.setAttribute('data-cardid', cardId);
+			li.setAttribute('data-cardorder', cardOrder);
+			li.setAttribute('data-cardcolumnid', columnId);
+			
+			spanTitle.setAttribute('onclick',onClick);
+			spanTitle.innerHTML = cardTitle;
+			
+			divContent.setAttribute('id', 'cardDetail'+cardId);
+			divContent.setAttribute('data-card',cardDetail);
+			divContent.setAttribute('data-content',contentDetail);
+		}
+		
+		this.innerHTML = $(li)[0].outerHTML;
+		if(cardId !== undefined){
+			utilDoAjaxDirect(cardDetail,'cardDetail'+cardId, false, false, true);
+		}
+	}
+});
+*/

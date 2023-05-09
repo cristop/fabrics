@@ -1,0 +1,434 @@
+// IMPORTANTE: si cambian estas descripciones modificarlas en todos los tipos de dato (bool, float, int, string, date y object).
+// translate(value, defaultValue, tryFlag): loQueSea (esperando formato de programación) a este tipo de dato. Si value está vacío se devuelve null (o defaultValue).
+// translateLocale(value, defaultValue, tryFlag): loQueSea (esperando formato según configuración regional) a este tipo de dato
+// format: este tipo de dato a String según la configuración regional. En el caso de float se usa separador de miles. En el caso de int, no.
+// toString: este tipo de dato a String en modo programación. En ningún caso se usa separador de miles.
+// is[Type]: chequea si una variable es del tipo de dato de la utilería. Cuidado porque para float-int existe isNumber porque Javascript no diferencia
+// entre entero y punto flotante. Y el isFloat da true si el número tiene decimales.
+
+class mStringClass {
+
+	
+	
+	/**
+	 * Concatena ignorando los valores vacíos (null, cadena vacía o n espacios).
+	 */
+	concatNotEmpty(...values) {
+		var result = '';
+		var valuesArray = mObject.toArray(values);
+		for(var i = 0; i < valuesArray.length; i++) {
+			var value = valuesArray[i];
+			if(mString.isNotEmpty(value)) {
+				result += value;
+			}
+		}
+		return result;
+	}
+	
+	count(value, pattern) {
+		var result = 0;
+	    if (pattern != null && pattern.length > 0) {
+		    var pos = 0;
+		    while (pos >= 0) {
+		        pos = value.indexOf(pattern, pos);
+		        if (pos >= 0) {
+		            result += 1;
+		            pos += pattern.length;
+		        }
+		    }
+	    }
+	    return result;
+	}
+	
+	convEmpty(...params) {
+		var result = this.firstNotEmpty(...params);
+		return result;
+	}
+	
+	// No probado.
+	endsWith(value, values) {
+		var result = false;
+		if(value != null) {
+			for(var i = 1; i < arguments.length; i++) {
+				result = result || value.endsWith(arguments[i]);
+			}
+		} else {
+			for(var i = 1; i < arguments.length; i++) {
+				result = result || arguments[i] == null;
+			}
+		}
+		return result;
+	}
+	
+	equals(value1, value2) {
+		var result = false;
+		if(value1 != null && value2 != null) {
+			result = (value1.toUpperCase() === value2.toUpperCase());
+		} else {
+			result = (value1 == null && value2 == null);
+		}
+		return result;
+	}
+	
+	extractEnd(value, ...values) {
+		var result = value;
+		if(mString.isNotEmpty(result)) {
+			var extracted = false;
+			for(var i = 0; i < values.length; i++) {
+				if(!extracted && result.endsWith(values[i])) {
+					result = result.substring(0, result.length - values[i].length);
+					extracted = true;
+				}
+			}
+		}
+		return result;
+	}
+	
+	extractStart(value, ...values) {
+		var result = value;
+		if(mString.isNotEmpty(result)) {
+			var extracted = false;
+			for(var i = 0; i < values.length; i++) {
+				if(!extracted && result.startsWith(values[i])) {
+					result = result.substring(values[i].length);
+					extracted = true;
+				}
+			}
+		}
+		return result;
+	}
+	
+	firstCapital(value) {
+		var result = value;
+		if(value != null) {
+			result = value.charAt(0).toUpperCase() + value.slice(1)
+		}
+		return result;
+	}
+	
+	firstNotEmpty(...params) {
+		var result = null;
+		if(params != null) {
+			for(var i = 0; i < params.length; i++) {
+				if(result == null && mString.isNotEmpty(params[i])) {
+					result = params[i];
+				}
+			}
+		}
+		return result;
+	}
+	
+	firstUpper(value) {
+		var result = '';
+		if(mString.isNotEmpty(value)) {
+			result = value.charAt(0).toUpperCase() + value.slice(1);
+		}
+		return result;
+	}
+	
+	hash(str, seed = 0) {
+	    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+	    for (let i = 0, ch; i < str.length; i++) {
+	        ch = str.charCodeAt(i);
+	        h1 = Math.imul(h1 ^ ch, 2654435761);
+	        h2 = Math.imul(h2 ^ ch, 1597334677);
+	    }
+	    h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+	    h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+	    return 4294967296 * (2097151 & h2) + (h1>>>0);
+	}
+
+	in(value, ...inValues) {
+		var result = false;
+		if(inValues != null) {
+			if(value != null) {
+				for(var i = 0; i < inValues.length; i++) {
+					result = result || mString.equals(value, inValues[i]);
+				}
+			} else {
+				for(var i = 0; i < inValues.length; i++) {
+					result = result || inValues[i] == null;
+				}
+			}
+		}
+		return result;
+	}
+
+	indexOf(value, search) {
+		var result = -1;
+		if(value != null && search != null) {
+			result = value.toUpperCase().indexOf(search.toUpperCase());
+		}
+		return result;
+	}
+	
+	isEmpty(value) {
+		var result = value == null || (mString.trim(value) == "");
+		return result;
+	}
+	
+	isMail(value) {
+		var result = false;
+		if(value != null) {
+	    	const regEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	    	result = regEx.test(value.toLowerCase());
+		} else {
+			result = true;
+		}
+	    return result;
+	}
+
+	isNotEmpty(value) {
+		var result = value != null && (mString.trim(value) != "");
+		return result;
+	}
+
+	isString(value) {
+		var result = (typeof value === 'string' || value instanceof String);
+		return result;
+	}
+
+	left(value, size) {
+		var result = value;
+		if(mString.isNotEmpty(value) && value.length > size) {
+			result = result.substring(0, size);
+		}
+		return result;
+	}
+
+	length(value) {
+		var result = 0;
+		if(value != null) {
+			result = value.length;
+		}
+		return result;
+	}
+	
+	nextLetter(letter) {
+		var result = 'a';
+		if(letter != null) {
+			var letters = 'abcdefghijklmnopqrstuvwxyz';
+			var indexOf = letters.indexOf(letter);
+			result = letters.substring(indexOf + 1, indexOf + 2);
+		}
+		return result;
+	}
+	
+	padLeft(value, size, character) {
+		var result = null;
+		var valueString = mObject.format(value);
+		if(mString.isNotEmpty(valueString)) {
+			if(valueString.length <= size) {
+				result = Array(size - valueString.length + 1).join(character || ' ') + valueString;
+			} else {
+				result = valueString.substring(valueString.length - size);
+			}
+		} else {
+			result = mString.repeat(character, size);
+		}
+		return result;
+	}
+
+	padRight(value, size, character) {
+		var result = null;
+		if(mString.isNotEmpty(value)) {
+			if(value.length <= size) {
+				result = value + Array(size - value.length + 1).join(character || ' ');
+			} else {
+				result = value.substring(0, size);
+			}
+		} else {
+			result = mString.repeat(character, size);
+		}
+		return result;
+	}
+
+	//Pasa 'objeto.propiedad' a 'objetoPropiedad'.
+	pointCase(value) {
+		var result = '';
+		if(value != null) {
+			var characters = value.split('');
+			var point = false;
+			for(var i = 0; i < characters.length; i++) {
+				var character = characters[i];
+				if(character != '.') {
+					if(!point) {
+						result += character;
+					} else {
+						result += character.toUpperCase();
+						point = false;
+					}
+				} else {
+					point = true;
+				}
+			}
+		}
+		return result;
+	}
+	
+	random(size) {
+		var result = "";
+		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+		for (var i = 0; i < size; i++) {
+			result += possible.charAt(Math.floor(Math.random() * possible.length));
+		}
+
+		return result;
+	}
+
+	repeat(pattern, repetitions) {
+		var result = '';
+		var patternAux = pattern != null ? pattern : ' ';
+		if(repetitions != null) {
+			for(var i = 0; i < repetitions; i++) {
+				result += patternAux;
+			}
+		}
+		return result;
+	}
+	
+	replaceLast(value, pattern, replace) {
+		var result = value;
+		if(value != null && pattern != null && replace != null) {
+			var pos = value.lastIndexOf(pattern);
+			result = value.substring(0, pos) + replace + value.substring(pos + 1);
+		}
+		return result;
+	}
+
+	startsWith(value, values) {
+		var result = false;
+		if(value != null) {
+			for(var i = 1; i < arguments.length; i++) {
+				result = result || value.startsWith(arguments[i]);
+			}
+		} else {
+			for(var i = 1; i < arguments.length; i++) {
+				result = result || arguments[i] == null;
+			}
+		}
+		return result;
+	}
+	
+	stripAll(value, stripValues) {
+		var result = '';
+		
+		if(stripValues != null) {
+			var array = null;
+			if(mString.isString(stripValues)) {
+				array = stripValues.split('');
+			} else {
+				if(Array.isArray(stripValues)) {
+					array = stripValues;
+				}
+			}
+			
+			if(array != null) {
+				result = value;
+				for(let substring of array) {
+					result = result.replaceAll(substring, '');
+				}
+			} else {
+				throw 'Se intentó quitar subcadenas de una cadena pero las subcadenas no son un string (en cuyo caso se quitan los caracteres que lo componen), ni un array (en cuyo caso se quitan los elementos que lo componen).';
+			}
+		}
+		
+		return result;
+	}
+	
+	toUpperCase(value) {
+		var result = null;
+		if(value != null) {
+			result = value.toUpperCase();
+		}
+		return result;
+	}
+
+	trim(value) {
+		var result = '';
+		if(value != null) {
+			result = value.replace(/^\s*/, "").replace(/\s*$/, "");
+		}
+		return result;
+	}
+}
+
+class mParser {
+	constructor(start, end, resolver) {
+		this.start = start;
+		this.end = end;
+		this.resolver = resolver;
+	}
+	
+	parse(value) {
+		var result = '';
+		if (mString.isNotEmpty(value)) {
+			var escape = false;
+			var onParse = -1;
+			for (var i = 0; i < value.length; i++) {
+				var processed = false;
+				if (!processed && !escape && value[i] == '\\') {
+					escape = true;
+					processed = true;
+				}
+				if (!processed && value.substring(i, i + this.start.length) == this.start) {
+					if(!escape) {
+						if (onParse == -1) {
+							onParse = i;
+							processed = true;
+						} else {
+							throw 'Wrong start string found at position ' + i + '!';
+						}
+					} else {
+						result += this.start;
+						i += this.start.length - 1;
+						escape = false;
+						processed = true;
+					}
+				}
+				if (!processed && value.substring(i, i + this.end.length) == this.end) {
+					if(!escape) {
+						if (onParse >= 0) {
+							var valueToParse = value.substring(onParse + 1, i);
+							var valueParsed = this.resolver(valueToParse);
+							
+							if(valueParsed != null) {
+								result += valueParsed;
+							} else {
+								result += '';
+							}
+							
+							onParse = -1;
+							processed = true;
+						} else {
+							throw 'Wrong end string found at position ' + i + '!';
+						}
+					} else {
+						result += this.end;
+						i += this.end.length - 1;
+						escape = false;
+						processed = true;
+					}
+				}
+				if(!processed) {
+					if(!escape) {
+						if(onParse == -1) {
+							result += value[i];
+						}
+					} else {
+						if(value[i] == '\\') {
+							result += value[i];
+							escape = false;
+						} else {
+							throw 'Wrong escape character found at position ' + i + '!';
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
+}
+
+var mString = new mStringClass();

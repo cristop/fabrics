@@ -1,0 +1,17 @@
+function accoReload(innerPrefix) {
+	reloadCheck('actionContainer', innerPrefix, function(input) {
+		new accoActionContainer(input);
+	});
+}
+
+function accoActionContainer(input) {
+	var self = this;
+	
+	this.root = tagUtilGetControl(input);
+	this.root.mHandler = this;
+	this.prefix = 'acco';
+}
+
+accoActionContainer.prototype.accoOnLoad = function() {
+	utilMode4Process(this.root);
+}

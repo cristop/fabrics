@@ -1,0 +1,270 @@
+class mLoaderClass {
+	constructor() {
+		this.reloadEvent = new Event('load');
+	}
+	
+	add(func) {
+		this.addEventListener('load', func, false);
+	}
+	
+	dispatch() {
+		this.dispatchEvent(this.reloadEvent);
+	}
+}
+var mLoader = new mLoaderClass();
+
+function reloadReload(inner) {
+	reloadNavigatorWhich();
+	
+	reloadError(document);
+	
+	mUtil.call('inenReload', inner);
+	mUtil.call('inteReload', inner);
+	mUtil.call('innuReload', inner);
+	mUtil.call('indaReload', inner);
+	mUtil.call('inboReload', inner);
+	mUtil.call('infiReload', inner);
+	mUtil.call('inseReload', inner);
+	mUtil.call('listReload', inner);
+	mUtil.call('lcdaReload', inner);
+	mUtil.call('lchiReload', inner);
+	mUtil.call('lcacReload', inner);
+	mUtil.call('hiddReload', inner);
+	mUtil.call('coanReload', inner);
+	mUtil.call('treeReload', inner);
+	mUtil.call('retaReload', inner);
+	mUtil.call('qtabReload', inner);
+	mUtil.call('meslReload', inner);
+	mUtil.call('caleReload', inner);
+	mUtil.call('sectReload', inner);
+	mUtil.call('tab_Reload', inner); // tab_Reload tiene que estar antes de tablReload porque tablReload lo llama.
+	mUtil.call('tablReload', inner);
+	mUtil.call('bellReload', inner);
+	mUtil.call('upldReload', inner);
+	mUtil.call('buttReload', inner);
+	mUtil.call('but2Reload', inner);
+	mUtil.call('butsReload', inner);
+	mUtil.call('accoReload', inner);
+	mUtil.call('noteReload', inner);
+	mUtil.call('docsReload', inner);
+	mUtil.call('formReload', inner);
+	mUtil.call('langReload', inner);
+	mUtil.call('mapuReload', inner);
+	mUtil.call('map_Reload', inner);
+	if(reloadIsLayoutNew()) {
+		mUtil.call('sboxReload', inner);
+		mUtil.call('ihtmReload', inner);
+		mUtil.call('indoReload', inner);
+	}
+	if(reloadIsLayoutHorizontalNew()) {
+		mUtil.call('chatReload', inner);
+		mUtil.call('neonReload', inner);
+	}
+	
+	// Afters
+	mUtil.call('bellReloadAfter', inner);
+	
+	// Fernando (2021-03-23): se ejecutan después de los reloads para que puedan encontrar a los mHandlers.
+	numberFormula(inner, mGlobal.decimalComma);
+	tagUtilListColumnNumber(inner);
+	
+	mUtil.call('graphicsUtilReload', inner)
+	
+	utilDownload(inner);
+	if(mGlobal.uniqueClass) {
+		$( "[id*='/']" ).addClass(function( index ) {
+			return  "unique-" + $( this ).attr("id").split('/')[1];    	  
+		});
+	}
+	
+	// Métodos que se llaman en el caso de existir para hacer cualquier recarga necesaria.
+	// Se recomienda registrar eventos con objeto mMojito que ya se encarga de revisar si
+	// el evento está o no cargado.
+	mUtil.call('customReloadGeneral', inner);
+	mUtil.call('customReload', inner);
+	
+	reloadOnLoad('actionContainer', inner);
+	reloadOnLoad('inputEntity', inner);
+}
+
+function reloadError(doc) {
+	var error = $('error#errorTag', doc);
+	if(error.length > 0) {
+		if(reloadErrorHandlerInProgress == null) {
+			reloadErrorHandlerInProgress = true;
+			var nhid = mMojito.navGetUrlParameter('_nhid');
+			window.location.href = mGlobal.errorPage + (mString.isNotEmpty(nhid) ? '?_nhid=' + nhid : '');
+		}
+	}
+}
+
+function reloadIsSpanish() {
+	var result = true;
+	if(stringUtilNotEmpty(mGlobal.language) && mGlobal.language != 'es') {
+		result = false;
+	}
+	return result;
+}
+
+function reloadIsEnglish() {
+	var result = false;
+	if(mGlobal.language == 'en') {
+		result = true;
+	}
+	return result;
+}
+
+function reloadIsLayoutNew() {
+	var result = false;
+	if(mGlobal.layout == 'vertical' || mGlobal.layout == 'horizontalNew') {
+		result = true;
+	}
+	return result;
+}
+
+function reloadIsLayoutHorizontal() {
+	var result = false;
+	if(mGlobal.layout == 'horizontal') {
+		result = true;
+	}
+	return result;
+}
+
+function reloadIsLayoutHorizontalNew() {
+	var result = false;
+	if(mGlobal.layout == 'horizontalNew') {
+		result = true;
+	}
+	return result;
+}
+
+function reloadIsLayoutVertical() {
+	var result = false;
+	if(reloadLayout == 'vertical') {
+		result = true;
+	}
+	return result;
+}
+
+function reloadIsLayoutMobile() {
+	var result = false;
+	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
+		 result = true;
+	}
+	return result;
+}
+
+
+function reloadCheck(dataControl, innerPrefix, initFunction) {
+	utilLog.log(utilLogReload, log_Debug, 
+			'Reloading...', 'innerPrefix = ' + logDescription(innerPrefix) + ', dataControl = ' + logDescription(dataControl));
+	
+	$("[data-control=" + dataControl + "]").each(
+		function() {
+			var controlOk = $(this).attr("data-control-OK");
+			if(controlOk == null) {
+				var withInnerPrefix = (innerPrefix != null && innerPrefix != '');
+				// El id de los controles tiene que formarse llamando al getTagNameSimple
+				// para que se agrege el innerPrefix si corresponde. 
+		    	//var formulaControlId = utilGetInnerInfo(this).innerId;
+				var formulaControlId = $(this).attr('id');
+				
+				utilLog.log(utilLogReload, log_Trace, 
+						'Finded control "' + (formulaControlId != null ? formulaControlId : '(null)') + '"...');
+
+				// Fernando (2020-03-25): agrego que si el id es nulo que procese, porque en el caso del
+				// columnAction no hay id, así que se controla que esté cargado con el data-control-OK.
+				if(formulaControlId == null || (!withInnerPrefix && formulaControlId.indexOf('/') < 0) || (withInnerPrefix && formulaControlId.startsWith(innerPrefix + '/'))) {
+					initFunction(this);
+					$(this).attr("data-control-OK", true);
+					
+					utilLog.log(utilLogReload, log_Info, 
+							'Control "' + (formulaControlId != null ? formulaControlId : '(null)') + '" (data-control="' + dataControl + '") loaded...');
+				} else {
+					if(withInnerPrefix) {
+						utilLog.log(utilLogReload, log_Trace, 
+								'Control "' + formulaControlId + '" ignored to load because has prefix...');
+					} else {
+						utilLog.log(utilLogReload, log_Trace, 
+								'Control "' + formulaControlId + '" ignored to load because has no prefix or incorrect one...');
+					}
+				}
+			}
+		}
+	);
+}
+
+function reloadOnLoad(dataControl, innerPrefix) {
+	$("[data-control=" + dataControl + "]").each(
+		function() {
+			var controlOnLoadOk = $(this).attr("data-control-onload-OK");
+			if(controlOnLoadOk == null) {
+				var withInnerPrefix = (innerPrefix != null && innerPrefix != '');
+				// El id de los controles tiene que formarse llamando al getTagNameSimple
+				// para que se agrege el innerPrefix si corresponde. 
+		    	//var formulaControlId = utilGetInnerInfo(this).innerId;
+				var formulaControlId = $(this).attr('id');
+				
+				// Fernando (2020-03-25): agrego que si el id es nulo que procese, porque en el caso del
+				// columnAction no hay id, así que se controla que esté cargado con el data-control-OK.
+				if(formulaControlId == null || (!withInnerPrefix && formulaControlId.indexOf('/') < 0) || (withInnerPrefix && formulaControlId.startsWith(innerPrefix + '/'))) {
+					var mHandler = $(this).prop('mHandler');
+					if(mHandler != null) {
+						var prefix = null;
+						if(mHandler.prefix != null) {
+							prefix = mHandler.prefix;
+						}
+						if(stringUtilNotEmpty(prefix)) {
+							var onLoadMethod = prefix + 'OnLoad';
+							if(mHandler[onLoadMethod] != null) {
+								mHandler[onLoadMethod]();
+							}
+						}
+					}
+					$(this).attr("data-control-onload-OK", true);
+				}
+			}
+		}
+	);
+}
+
+// window.innerDocClick detecta si el click fue dentro de la ventana de la aplicación.
+// Faltaría encontrar un evento que se ejecute antes de que la página navegue a otra
+// dirección y con eso se podría evitar que los usuarios usen el back del brower.
+// Ya probé hashchange, popstate que no andan para nada.
+// Y probé beforeunload que anda pero no puedo detener el evento ni elegir un mensaje custom para mostrar.
+$(document).on('mouseover', function() {
+    window.innerDocClick = true;
+});
+$(document).on('mouseleave', function() {
+    window.innerDocClick = false;
+});
+function reloadBackAlert() {
+    if (!window.innerDocClick) {
+        if(reloadIsLayoutNew()) {
+        	if(mGlobal.decimalComma) {
+        		vxAlert('Use el botón de volver de la aplicación.');
+        	} else {
+        		vxAlert('Use back button from application.');
+        	}
+        } else {
+        	alert('Use el botón de volver de la aplicación.');
+        }
+    }
+}
+
+function reloadNavigatorWhich() {
+	var navigatorName = navigator.userAgent.toLowerCase();
+	if(navigatorName.indexOf('chrome') > -1 && mGlobal.navigator == '(unknown)') {
+		mGlobal.navigator = "chrome";
+	}	
+	if(navigatorName.indexOf('firefox') > -1 && mGlobal.navigator == '(unknown)') {
+		mGlobal.navigator = "firefox";
+	}	
+	if(navigatorName.indexOf('opera') && mGlobal.navigator == '(unknown)') {
+		mGlobal.navigator = "opera";
+	}	
+	if(navigatorName.indexOf("msie") && mGlobal.navigator == '(unknown)') {
+		mGlobal.navigator = "MSIE";
+	}
+}

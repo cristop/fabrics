@@ -1,0 +1,164 @@
+function upldReload(innerPrefix) {
+	reloadCheck('upload', innerPrefix, function(divOrInput) {
+		new upldUpload(divOrInput);
+	});
+}
+
+function upldUpload(divOrInput){
+	
+	window.addEventListener("dragover",function(e){
+		  e = e || event;
+		  e.preventDefault();
+		},false);
+		window.addEventListener("drop",function(e){
+		  e = e || event;
+		  e.preventDefault();
+		},false);
+	
+	var self = this;
+	
+	this.root = $(divOrInput);
+	
+	if(reloadIsLayoutNew()) {
+		this.input = $('input[type="file"]', this.root);
+		this.list = $('ul[id$="-names"]', this.root);
+		
+		$(this.input).get(0).ondrop = function(evt) {
+		  // No funciona en IE.
+		  $(self.input).next().get(0).style.backgroundColor = $(self.input).prop('backgroundColorPrevious');
+		  $(self.input).get(0).files = evt.dataTransfer.files;
+		  $(self.input).trigger('change');
+		  evt.preventDefault();
+		};
+		$(this.input).get(0).ondragenter = function(evt) {
+		  $(self.input).prop('backgroundColorPrevious', $(self.input).next().get(0).style.backgroundColor);
+		  $(self.input).next().get(0).style.backgroundColor = 'green';
+		};
+		$(this.input).get(0).ondragleave = function(evt) {
+		  $(self.input).next().get(0).style.backgroundColor = $(self.input).prop('backgroundColorPrevious');
+		};
+	}
+	if(reloadIsLayoutHorizontal()) {
+		// No se necesita script para este layout.
+		this.input = this.root;
+	}
+
+	if (window.File && window.FileReader && window.FormData && this.list != null) {
+		
+		$(this.input).on('change', async function (e) {
+			utilShowProcesando();
+			var preloader = $(".mojito-preloader-scene-div");
+			var divPreloader = preloader.parent().html();
+			if (reloadIsLayoutVertical()) {
+				if (preloader.length > 0) {
+					preloader.css("text-align", "center")
+					 preloader.children().replaceWith(
+							 "<svg  style=\" width:400px; height:200px; background: none; \" >" +
+							  "<text  x=\"45\" y=\"45\" font-family=\"Hind\"   font-size=\"20px\" style=\"white-space: pre-wrap; display: flex; whith: 400\" fill=\"#8d8d8d\"  > " + 
+							    "Images processed " +
+							    "<animate attributeName=\"opacity\" values=\"0;1;0\" dur=\"1.8s\" repeatCount=\"indefinite\"></animate> " +
+							  "</text>" +
+							    "<text  x=\"9\" y=\"75\" font-family=\"Hind\"   font-size=\"20px\" style=\"white-space: pre-wrap; display: flex; whith: 400\" fill=\"#8d8d8d\"  >" +
+							    "please press the upload button to " +
+							    "<animate attributeName=\"opacity\" values=\"0;1;0\" dur=\"1.8s\" repeatCount=\"indefinite\"></animate> " +
+							  "</text>" +
+							    "<text  x=\"9\" y=\"105\" font-family=\"Hind\"   font-size=\"20px\" style=\"white-space: pre-wrap; display: flex; whith: 400\" fill=\"#8d8d8d\"  >" +
+							    "finish with the \"Upload\" button" +
+							    "<animate attributeName=\"opacity\" values=\"0;1;0\" dur=\"1.8s\" repeatCount=\"indefinite\"></animate>" +
+							  "</text>" +
+							"</svg>"
+							 );
+				}
+			}
+			$(self.list).empty();
+			if (!(window.navigator.appVersion.includes('Mobile') && window.navigator.appVersion.includes('Safari'))) {
+				var newFileList = new ClipboardEvent('').clipboardData || new DataTransfer();
+				for (var i = 0; i < e.target.files.length; i++) {
+					if(e.target.files[i].name.split('.')[1].toUpperCase() === 'HEIC'){
+						let type = e.target.files[i].type;
+						let file  = e.target.files[i];
+						let blob = new Blob([e.target.files[i]],{type: type});
+						let  result = await heic2any({blob, toType: "image/jpeg", quality: 0.75});
+						e.target.files[i];
+						let name = e.target.files[i].name.split('.')[0] + '.' + result.type.split('/')[1];
+						var fileAns = blobToFile(result, name);
+						newFileList.items.add(fileAns);
+					} else {
+						newFileList.items.add(e.target.files[i]);
+					}
+				}
+				e.target.files =  newFileList.files;
+			}
+			for(var i = 0; i < e.target.files.length; i++){
+		
+				var li = document.createElement('li');
+				var fileSize = e.target.files[i].size;
+				var fileSizeUnit = 'bytes';
+				if (fileSize > 1024) {
+					fileSize /= 1024;
+					fileSizeUnit = 'KB';
+				}
+				if (fileSize > 1024) {
+					fileSize /= 1024;
+					fileSizeUnit = 'MB';
+				}
+				if (fileSize > 1024) {
+					fileSize /= 1024;
+					fileSizeUnit = 'GB';
+				}
+				
+				li.innerHTML = e.target.files[i].name + ' (' + fileSize.toFixed(1) + ' ' + fileSizeUnit + ')';
+				
+				// $(li).attr('data-file', e.target.files[i]); // pone solo el texto
+				$(li).attr('data-file-name', e.target.files[i].name);
+				$(li).attr('data-file-size', fileSize.toFixed(1) + ' ' + fileSizeUnit);
+				
+				var hidden = document.createElement('input');
+				hidden.type = 'hidden';
+				
+				// var innerInfo = utilGetInnerInfo(this);
+				hidden.name = e.target.name + '.filename';
+				
+				hidden.value = e.target.files[i].name;
+				
+				$(self.list).append(li);
+				li.append(hidden);
+				
+				$(li).on('click', function() {
+					var fileName = $(this).attr('data-file-name');
+					
+					vxPrompt('New filename', fileName, self.changeName, fileName, $(this));
+				});
+			}
+			if (reloadIsLayoutVertical()) {
+				if (preloader.length > 0) {
+					preloader.replaceWith(divPreloader);
+				}
+			}
+			utilOcultarProcesando();
+		});
+		
+	}
+}
+
+upldUpload.prototype.changeName = function(value, li) {
+	var fileName = $(li).attr('data-file-name');
+	var fileSize = $(li).attr('data-file-size');
+	
+	var fileNameArray = fileName.split('.');
+	var valueArray = value.split('.');
+	if(fileNameArray[fileNameArray.length - 1] != valueArray[valueArray.length - 1]) {
+		value += '.' + fileNameArray[fileNameArray.length - 1];
+	}
+	
+	var $input = $(li).find('input');
+	$input.val(value);
+	
+	$(li).text(value + ' (' + fileSize + ')');
+	$(li).append($input);
+}
+
+function blobToFile(theBlob, fileName){
+    return new File([theBlob], fileName);
+}
+

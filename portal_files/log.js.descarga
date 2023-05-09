@@ -1,0 +1,232 @@
+var log_Trace = 1;
+var log_Debug = 2;
+var log_Info = 3;
+var log_Warn = 4;
+var log_Error = 5;
+var log_Fatal = 6;
+var log_Off = 7; // no usar en los scripts
+
+// log.js (excepción en el nombre porque si pongo log_Log la clase deja de ser válida)
+var log_Log2 = new log_Log('log.js');
+var log_Log2Log = 'log';
+
+// bell.js
+var bellLog = new log_Log('bell.js');
+var bellLogBell = 'bell';
+
+// entity.js
+var entiLog = new log_Log('entity.js');
+var entiLogEntity = 'entity';
+
+// events.js
+var evenLog = new log_Log('events.js');
+var evenLogEvents = 'events';
+
+// mojito.js
+var mojiLog = new log_Log('mojito.js');
+var mojiLogSession = 'session';
+
+// render.js
+var rendLog = new log_Log('render.js');
+var rendLogSessionState = 'sessionState';
+
+// reversePolish.js
+var repoLog = new log_Log('reversePolish.js');
+var repoLogReversePolish = 'reversePolish';
+
+// trash.js
+var trshLog = new log_Log('trash.js');
+var trshLogTrash = 'trash';
+
+// util.js
+var utilLog = new log_Log('util.js');
+var utilLogAjaxPost = 'ajaxPost';
+var utilLogDoAjaxDirect = 'doAjaxDirect';
+var utilLogMode4 = 'mode4';
+var utilLogProcesando = 'procesando';
+var utilLogProcessCombo = 'processCombo';
+var utilLogReload = 'reload';
+var utilLogSetMethodToCall = 'setMethodToCall';
+
+var log_Loggers = [
+	{ "name": bellLogBell, "level": log_Error },
+	{ "name": entiLogEntity, "level": log_Warn }, // log_Warn
+	{ "name": evenLogEvents, "level": log_Error },
+	{ "name": mojiLogSession, "level": log_Error },
+	{ "name": repoLogReversePolish, "level": log_Error },
+	{ "name": rendLogSessionState, "level": log_Error },
+	{ "name": trshLogTrash, "level": log_Trace }, // log_Trace
+	{ "name": utilLogAjaxPost, "level": log_Warn }, // log_Warn 
+	{ "name": utilLogMode4, "level": log_Warn },
+	{ "name": utilLogProcessCombo, "level": log_Error },
+	{ "name": utilLogReload, "level": log_Error },
+	{ "name": utilLogSetMethodToCall, "level": log_Error }
+];
+
+function log_Log(script) {
+	this.script = script;
+}
+
+log_Log.prototype.log = function(logger, loggingLevel, log1, log2, log3, log4, log5, log6, log7, log8, log9, log10, log11, log12, log13, log14, log15) {
+	this.logInner(logger, loggingLevel, false, log1, log2, log3, log4, log5, log6, log7, log8, log9, log10, log11, log12, log13, log14, log15);
+}
+
+log_Log.prototype.logInner = function(logger, loggingLevel, noLog, log1, log2, log3, log4, log5, log6, log7, log8, log9, log10, log11, log12, log13, log14, log15) {
+
+	if(noLog == null || !noLog) {
+		log_Log2.logInner(log_Log2Log, log_Info, true, 'logger: ' + logger, 'loggingLevel: ' + loggingLevel, 'log lines: ' +
+		  ((log1 != null ? 1 : 0) + (log2 != null ? 1 : 0) + (log3 != null ? 1 : 0) + (log4 != null ? 1 : 0) + (log5 != null ? 1 : 0) +
+		  (log6 != null ? 1 : 0) + (log7 != null ? 1 : 0) + (log8 != null ? 1 : 0) + (log9 != null ? 1 : 0) + (log10 != null ? 1 : 0) +
+		  (log11 != null ? 1 : 0) + (log12 != null ? 1 : 0) + (log13 != null ? 1 : 0) + (log14 != null ? 1 : 0) + (log15 != null ? 1 : 0)));
+	}
+	
+	if(this.isActive(logger, loggingLevel, noLog)) {
+		var log = this.getLevelDescription(loggingLevel) + ': ' + log1 +
+		  (log2 != null ? '\n' + log2 : '') +
+		  (log3 != null ? '\n' + log3 : '') +
+		  (log4 != null ? '\n' + log4 : '') +
+		  (log5 != null ? '\n' + log5 : '') +
+		  (log6 != null ? '\n' + log6 : '') +
+		  (log7 != null ? '\n' + log7 : '') +
+		  (log8 != null ? '\n' + log8 : '') +
+		  (log9 != null ? '\n' + log9 : '') +
+		  (log10 != null ? '\n' + log10 : '') +
+		  (log11 != null ? '\n' + log11 : '') +
+		  (log12 != null ? '\n' + log12 : '') +
+		  (log13 != null ? '\n' + log13 : '') +
+		  (log14 != null ? '\n' + log14 : '') +
+		  (log15 != null ? '\n' + log15 : '');
+		
+		var header = this.script;
+		var callerName = null;
+		if(arguments['callee'] != null) {
+			if(mString.isNotEmpty(arguments.callee.caller.caller.name)) {
+				header += ' - ' + arguments.callee.caller.caller.name;
+			} else {
+				if(arguments.callee.caller.caller.caller != null && mString.isNotEmpty(arguments.callee.caller.caller.caller.name)) {
+					header += ' - ' + arguments.callee.caller.caller.caller.name;
+				}
+			}
+		}
+		console.log(header, '\n' + log);
+	}
+}
+
+log_Log.prototype.getLevelDescription = function(level) {
+	var result = null;
+	switch(level) {
+	case log_Trace:
+		result = 'TRACE';
+		break;
+	case log_Debug:
+		result = 'DEBUG';
+		break;
+	case log_Info:
+		result = 'INFO';
+		break;
+	case log_Warn:
+		result = 'WARN';
+		break;
+	case log_Error:
+		result = 'ERROR';
+		break;
+	case log_Fatal:
+		result = 'FATAL';
+		break;
+	}
+	return result;
+}
+
+log_Log.prototype.isActive = function(logger, level, noLog) {
+	var result = false;
+	for(var i = 0; i < log_Loggers.length; i++) {
+		var log_Logger = log_Loggers[i];
+		
+		if(noLog == null || !noLog) {
+			log_Log2.logInner(log_Log2Log, log_Debug, true, 'checking fit...', 'log_Logger.name: ' + log_Logger.name, 'log_Logger.level: ' + log_Logger.level);
+		}
+		
+		if(logger == log_Logger.name) {
+			if(noLog == null || !noLog) {
+				log_Log2.logInner(log_Log2Log, log_Trace, true, 'logger ok...');
+			}
+			
+			if(level >= log_Logger.level) {
+				if(noLog == null || !noLog) {
+					log_Log2.logInner(log_Log2Log, log_Trace, true, 'level ok...');
+				}
+				result = true;
+			} else {
+				if(noLog == null || !noLog) {
+					log_Log2.logInner(log_Log2Log, log_Trace, true, 'level nok...');
+				}
+			}
+		} else {
+			if(noLog == null || !noLog) {
+				log_Log2.logInner(log_Log2Log, log_Trace, true, 'logger nok...');
+			}
+		}
+	}
+	if(noLog == null || !noLog) {
+		log_Log2.logInner(log_Log2Log, log_Debug, true, 'returning ' + result + '...');
+	}
+	return result;
+}
+
+log_Log.prototype.innerHtml = function(controlOrId, length) {
+	var result = '(no control)';
+	var control = tagUtilGetControl(controlOrId);
+	if(control != null) {
+		result = control.innerHTML.replace(/\s\s/g, " ").substring(0, (length == null ? 500 : length));
+	}
+	return result;
+}
+
+function logDescription(value) {
+	var result = null;
+	if(value != null) {
+		if (value instanceof jQuery){
+			if($(value).length == 0) {
+				result = '[jQuery.empty]';
+			}
+			if($(value).length == 1) {
+				result = '[jQuery.' + logDescription($(value).get(0)) + ']';
+			}
+			if($(value).length > 1) {
+				result = '[jQuery(' + $(value).length + ')]';
+			}
+		} else {
+			if(logIsElement(value)) {
+				if(stringUtilNotEmpty(value.id)) {
+					result = value.id;
+				} else {
+					if(stringUtilNotEmpty(value.name)) {
+						result = value.name;
+					} else {
+						result = value.tagName;
+					}
+				}
+			} else {
+				if(value instanceof XMLDocument) {
+					result = new XMLSerializer().serializeToString(value.documentElement);
+				} else {
+					try {
+						result = JSON.stringify(value);
+					} catch(error) {
+						debugger;
+					}
+				}
+			}
+		}
+	} else {
+		result = '[null]';
+	}
+	return result;
+}
+
+function logIsElement(value){
+	  return (
+	    typeof HTMLElement === "object" ? value instanceof HTMLElement : //DOM2
+	    	value && typeof value === "object" && value !== null && value.nodeType === 1 && typeof value.nodeName==="string"
+	);
+}
