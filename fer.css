@@ -1,8 +1,11 @@
 #elements div[class*="col-sm"]{
     text-align: center;
 }
+#elements .row .column1 .col-sm-3{
+    padding-bottom: 20px;
+}
 #elements .label-bar.gallery{
-    line-height: 18px;
+    line-height: 1.39;
 }
 #elements .btn.second{
     background-color: white;
@@ -11,11 +14,12 @@
 #elements .btn.btn-dark, .btn.second{
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 10px;
     border: 1.5px solid #000000;
     border-radius: 5px;
     justify-content: center;
-    padding: 8px;
+    min-width: 194px;
+    padding: 4px 10px;
     text-transform: capitalize;
     font-size: 16px;
     font-weight: 500;
@@ -29,4 +33,16 @@
     background-color: white;
     color: black!important;
     border: 1px solid;
+}
+
+@media screen and (max-width: 1199px){
+    #elements .row .column1 .col-lg-4{
+        padding-bottom: 20px;
+    }
+}
+
+@media screen and (max-width: 760px){
+    #elements .row .column1 .col-sm-3{
+        text-align: left;
+    }
 }
